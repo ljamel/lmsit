@@ -1,0 +1,31 @@
+@model CrudDemo.Models.Lesson
+
+@{
+    ViewData["Title"] = "Create Lesson";
+}
+
+<h1>Create Lesson</h1>
+
+<form asp-action="CreateLesson" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="ModuleId" value="@ViewBag.ModuleId" />
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Video file (mp4/webm/ogg/mp3)</label>
+        <input type="file" name="videoFile" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderIndex"></label>
+        <input asp-for="OrderIndex" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Create Lesson</button>
+    <a class="btn btn-secondary" href="javascript:history.back()">Back</a>
+</form>

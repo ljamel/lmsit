@@ -1,0 +1,213 @@
+@model CrudDemo.Models.Course
+
+@{
+    ViewData["Title"] = "Éditer le Cours: " + Model.Title;
+}
+
+<div class="container-fluid mt-4">
+    <a asp-action="Index" class="btn btn-secondary mb-3">← Retour</a>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations du Cours</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Titre</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Sauvegarder
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modules Section -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Modules</h5>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addModule()">
+                            <i class="fas fa-plus"></i> Ajouter Module
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" id="modulesList">
+                    @foreach (var module in Model.Modules.OrderBy(m => m.OrderIndex))
+                    {
+                        <div class="module-item card mb-3">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>@module.Title</strong>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addLesson(@module.Id)">
+                                        <i class="fas fa-plus"></i> Ajouter Leçon
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                @foreach (var lesson in module.Lessons.OrderBy(l => l.OrderIndex))
+                                {
+                                    <div class="lesson-item mb-3 p-2 border rounded">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6>@lesson.Title</h6>
+                                                <p class="small mb-2">@lesson.Description</p>
+                                                @if (!string.IsNullOrEmpty(lesson.VideoPath))
+                                                {
+                                                    <div class="mb-2">
+                                                        <small class="badge bg-success"><i class="fas fa-check"></i> Vidéo uploadée</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="mb-2">
+                                                        <small class="badge bg-warning"><i class="fas fa-warning"></i> Pas de vidéo</small>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="uploadVideo(@lesson.Id)">
+                                            <i class="fas fa-video"></i> Upload Vidéo
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Modules:</strong> <span class="badge bg-primary">@Model.Modules.Count</span></p>
+                    <p><strong>Leçons:</strong> <span class="badge bg-info">@Model.Modules.Sum(m => m.Lessons.Count)</span></p>
+                    <p><strong>Créé le:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Video Upload -->
+<div class="modal fade" id="videoUploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Vidéo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="videoFile" class="form-control" accept="video/*">
+                <small class="text-muted">Formats supportés: MP4, AVI, MOV, MKV, WebM</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="uploadBtn">Uploader</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        let currentLessonId = 0;
+
+        function addModule() {
+            const title = prompt('Titre du module:');
+            if (!title) return;
+
+            fetch('/AdminCourses/CreateModule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `courseId=@Model.Id&title=${encodeURIComponent(title)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            });
+        }
+
+        function addLesson(moduleId) {
+            const title = prompt('Titre de la leçon:');
+            if (!title) return;
+            
+            const description = prompt('Description de la leçon:');
+            if (!description) return;
+
+            fetch('/AdminCourses/CreateLesson', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `moduleId=${moduleId}&title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            });
+        }
+
+        function uploadVideo(lessonId) {
+            currentLessonId = lessonId;
+            const modal = new bootstrap.Modal(document.getElementById('videoUploadModal'));
+            modal.show();
+        }
+
+        document.getElementById('uploadBtn').addEventListener('click', function() {
+            const file = document.getElementById('videoFile').files[0];
+            if (!file) {
+                alert('Veuillez sélectionner une vidéo');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('lessonId', currentLessonId);
+            formData.append('video', file);
+
+            fetch('/AdminCourses/UploadVideo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Vidéo uploadée avec succès');
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            });
+        });
+    </script>
+}

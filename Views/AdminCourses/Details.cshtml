@@ -1,0 +1,43 @@
+@model CrudDemo.Models.Course
+
+@{
+    ViewData["Title"] = "Course Details";
+}
+
+<h1>@Model.Title</h1>
+<p>@Model.Description</p>
+
+<p>
+    <a class="btn btn-sm btn-primary" href="/AdminCourses/CreateModule?courseId=@Model.Id">Add Module</a>
+    <a class="btn btn-sm btn-secondary" href="/AdminCourses">Back</a>
+</p>
+
+<h3>Modules</h3>
+@if (Model.Modules == null || !Model.Modules.Any())
+{
+    <p>No modules yet.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var m in Model.Modules.OrderBy(m => m.OrderIndex))
+        {
+            <li class="list-group-item">
+                <strong>@m.Title</strong>
+                <p>@m.Description</p>
+                <p>
+                    <a class="btn btn-sm btn-outline-primary" href="/AdminCourses/CreateLesson?moduleId=@m.Id">Add Lesson</a>
+                </p>
+                @if (m.Lessons != null && m.Lessons.Any())
+                {
+                    <ul>
+                        @foreach (var l in m.Lessons.OrderBy(l => l.OrderIndex))
+                        {
+                            <li>@l.Title - @l.VideoFileName</li>
+                        }
+                    </ul>
+                }
+            </li>
+        }
+    </ul>
+}

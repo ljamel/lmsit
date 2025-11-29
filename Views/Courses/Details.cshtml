@@ -1,0 +1,69 @@
+@model CrudDemo.Models.Course
+
+@{
+    ViewData["Title"] = "Détails du Cours";
+}
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Retour</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h1>@Model.Title</h1>
+            <p class="text-muted">Créé par: @Model.CreatedBy</p>
+            <p>@Model.Description</p>
+        </div>
+    </div>
+
+    <h3>Modules</h3>
+    @if (Model.Modules == null || !Model.Modules.Any())
+    {
+        <div class="alert alert-info">
+            <p>Aucun module dans ce cours pour le moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var module in Model.Modules.OrderBy(m => m.OrderIndex))
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">@module.Title</h5>
+                            @if (!string.IsNullOrEmpty(module.Description))
+                            {
+                                <p class="mb-2 text-muted">@module.Description</p>
+                            }
+                            
+                            @if (module.Lessons != null && module.Lessons.Any())
+                            {
+                                <small><i class="fas fa-video"></i> @module.Lessons.Count leçon(s)</small>
+                                <ul class="list-unstyled ms-3 mt-2">
+                                    @foreach (var lesson in module.Lessons.OrderBy(l => l.OrderIndex))
+                                    {
+                                        <li class="mb-2">
+                                            <a asp-action="Lesson" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-play-circle"></i> @lesson.Title
+                                            </a>
+                                            @if (!string.IsNullOrEmpty(lesson.VideoFileName))
+                                            {
+                                                <small class="text-muted d-block">(@lesson.VideoFileName)</small>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <small class="text-muted">Aucune leçon dans ce module.</small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

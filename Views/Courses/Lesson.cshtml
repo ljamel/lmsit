@@ -1,0 +1,102 @@
+@model CrudDemo.Models.Lesson
+
+@{
+    ViewData["Title"] = "Leçon: " + Model.Title;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="mb-3">
+                <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Retour au cours
+                </a>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1>@Model.Title</h1>
+                    <p class="text-muted">Module: @Model.Module.Title</p>
+                    <p>@Model.Description</p>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.VideoPath))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Vidéo</h5>
+                    </div>
+                    <div class="card-body">
+                        <video width="100%" height="auto" controls style="max-height: 500px;">
+                            <source src="@Model.VideoPath" type="video/mp4">
+                            Votre navigateur ne supporte pas la vidéo HTML5.
+                        </video>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Quizzes != null && Model.Quizzes.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quiz</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var quiz in Model.Quizzes)
+                        {
+                            <div class="mb-4 p-3 border rounded">
+                                <h6>@quiz.Question</h6>
+                                @if (!string.IsNullOrEmpty(quiz.Description))
+                                {
+                                    <small class="text-muted">@quiz.Description</small>
+                                }
+                                <div class="mt-3">
+                                    @if (quiz.Options != null && quiz.Options.Any())
+                                    {
+                                        <form asp-action="SubmitQuizAnswer" method="post" class="d-inline">
+                                            <input type="hidden" name="quizId" value="@quiz.Id" />
+                                            @foreach (var option in quiz.Options)
+                                            {
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="radio" name="optionId" id="option_@option.Id" value="@option.Id" />
+                                                    <label class="form-check-label" for="option_@option.Id">
+                                                        @option.Text
+                                                    </label>
+                                                </div>
+                                            }
+                                            <button type="submit" class="btn btn-sm btn-primary">Soumettre</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <p class="text-center mt-4">
+                            <a asp-action="QuizResults" asp-route-lessonId="@Model.Id" class="btn btn-sm btn-info">
+                                <i class="fas fa-chart-bar"></i> Voir mes résultats
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5 class="mb-0">Progression</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Cours:</strong><br><a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId">@Model.Module.Course.Title</a></p>
+                    <p><strong>Module:</strong><br>@Model.Module.Title</p>
+                    <p><strong>Leçon:</strong><br>@Model.Title</p>
+                    <hr>
+                    <p class="small text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Complétez les exercices et les quiz pour progresser dans votre apprentissage.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

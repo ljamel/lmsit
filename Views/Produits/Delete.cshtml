@@ -1,0 +1,35 @@
+@model CrudDemo.Models.Produit
+
+@{
+    ViewData["Title"] = "Supprimer Produit";
+}
+
+<div class="container mt-4">
+    <h1>@ViewData["Title"]</h1>
+
+    <h3>Êtes-vous sûr de vouloir supprimer ce produit?</h3>
+    <div>
+        <h4>Produit</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Nom)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Nom)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Prix)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Prix)
+            </dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Supprimer</button> |
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
