@@ -13,6 +13,14 @@
       "PackagePath": "staticwebassets/favicon.ico"
     },
     {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/indexfr.html",
+      "PackagePath": "staticwebassets/indexfr.html"
+    },
+    {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/js/site.js",
       "PackagePath": "staticwebassets/js/site.js"
     },
@@ -243,6 +251,14 @@
     {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/lib/jquery/dist/jquery.min.map",
       "PackagePath": "staticwebassets/lib/jquery/dist/jquery.min.map"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/templatemo-electric-scripts.js",
+      "PackagePath": "staticwebassets/templatemo-electric-scripts.js"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/templatemo-electric-xtra.css",
+      "PackagePath": "staticwebassets/templatemo-electric-xtra.css"
     },
     {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/6b4adc4629c84f33a41efd79ba5c751f.mp4",

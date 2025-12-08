@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INGENIUS - Formation Cybersécurité</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="templatemo-electric-xtra.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Grid Background -->
+    <div class="grid-bg"></div>
+    <div class="gradient-overlay"></div>
+    <div class="scanlines"></div>
+
+    <!-- Animated Shapes -->
+    <div class="shapes-container">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-triangle"></div>
+        <div class="shape shape-square"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div id="particles"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#home" class="logo-link">
+                <svg class="logo-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF5E00;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#00B2FF;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="20,2 38,14 38,26 20,38 2,26 2,14" fill="none" stroke="url(#logoGradient)" stroke-width="2"/>
+                    <polygon points="20,8 32,16 32,24 20,32 8,24 8,16" fill="url(#logoGradient)" opacity="0.3"/>
+                    <circle cx="20" cy="20" r="3" fill="url(#logoGradient)"/>
+                </svg>
+                <span class="logo-text">INGENIUS</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="nav-link">Accueil</a></li>
+                <li><a href="#features" class="nav-link">Compétences</a></li>
+                <li><a href="#about" class="nav-link">À propos</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="text-rotator">
+                <div class="text-set active">
+                    <h1 class="glitch-text" data-text="DEVENEZ EXPERT CYBER">Maîtrisez l'art du hacking</h1>
+                    <p class="subtitle">Vous avez déjà essayé d'apprendre le hacking mais vous vous êtes perdu</p>
+                </div>
+                <div class="text-set">
+                    <h1 class="glitch-text" data-text="PROTÉGEZ LES ENTREPRISES">MONTÉ EN COMPÉTENCE</h1>
+                    <p class="subtitle">Nos cours bien structuré offre un chemin clair vers la montée compétence.</p>
+                </div>
+                <div class="text-set">
+                    <h1 class="glitch-text" data-text="HACKING ÉTHIQUE">PLONGE DANS L'ACTION AVEC DES EXERCICES PRATIQUES</h1>
+                    <p class="subtitle">Une immersion dans les fondamentaux du hacking pour vous mettre dans la peau d'un hacker.</p>
+                </div>
+            </div>
+        </div>
+        <div class="cta-container">
+            <a href="#features" class="cta-button cta-primary">Commencer la formation</a>
+            <a href="#about" class="cta-button cta-secondary">En savoir plus</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2 class="section-title">Compétences enseignées - Parcours</h2>
+        <div class="features-container">
+            <div class="feature-tabs">
+                <div class="tab-item active" data-tab="performance"><span class="tab-icon">⚡</span><span>Module 1 — Introduction & fondamentaux</span></div>
+                <div class="tab-item" data-tab="security"><span class="tab-icon"></span><span>Sécurité</span></div>
+                <div class="tab-item" data-tab="network"><span class="tab-icon"></span><span>Pentest</span></div>
+                <div class="tab-item" data-tab="analytics"><span class="tab-icon"></span><span>Analyse</span></div>
+                <div class="tab-item" data-tab="integration"><span class="tab-icon"></span><span>Certifications</span></div>
+            </div>
+
+            <div class="feature-content">
+                <div class="content-panel active" id="performance">
+                    <h3>Maîtrise des systèmes</h3>
+                    <p>Apprenez l’administration Windows & Linux : gestion réseau, services, sécurité et bonnes pratiques professionnelles.</p>
+                    <ul class="feature-list">
+                        <li>Termes et techniques du hacking (glossaire, méthodologies)</li>
+                        <li>TP cracké un fichier protéger par mot de passe</li>
+                        <li>Comprendre les failles (SQLi, XSS, RCE, CSRF, etc.)</li>
+                        <li>Administration Linux & Windows</li>
+                        <li>Virtualisation & Cloud</li>
+                        <li>Gestion Active Directory</li>
+                        <li>Analyse réseau avancée</li>
+                    </ul>
+                </div>
+
+                <div class="content-panel" id="security">
+                    <h3>Cybersécurité essentielle</h3>
+                    <p>Les bases indispensables pour hacker des infrastructures et détecter les attaques.</p>
+                    <ul class="feature-list">
+                        <li>Chiffrement & authentification</li>
+                        <li>Les outils indispensables (Nmap, Metasploit, Hydra, Burp, wfuzz, sqlmap…)</li>
+                        <li>Scripting pour le développement de payload et l'automatisation</li>
+                        <li>Gestion des vulnérabilités CVEs</li>
+                    </ul>
+                </div>
+
+                <div class="content-panel" id="network">
+                    <h3>Pentest & Hacking éthique</h3>
+                    <p>Apprenez les techniques utilisées par les testeurs d’intrusion professionnels.</p>
+                    <ul class="feature-list">
+                        <li>Reconnaissance & scans</li>
+                        <li>Exploitation de vulnérabilités</li>
+                        <li>Privilege escalation</li>
+                        <li>Rédaction de rapports pro</li>
+                    </ul>
+                </div>
+
+                <div class="content-panel" id="analytics">
+                    <h3>Analyse & Forensic</h3>
+                    <p>Devenez capable d’analyser un incident et de retracer les actions de l’attaquant.</p>
+                    <ul class="feature-list">
+                        <li>Logs & SIEM</li>
+                        <li>Analyse mémoire</li>
+                        <li>OSINT avancé</li>
+                        <li>Reverse engineering (base)</li>
+                    </ul>
+                </div>
+
+                <div class="content-panel" id="integration">
+                    <h3>Préparation Certifications</h3>
+                    <p>Accompagnement pour les plus importantes certifications cybersécurité.</p>
+                    <ul class="feature-list">
+                        <li>CEH</li>
+                        <li>Security+</li>
+                        <li>ISO 27001</li>
+                        <li>+ Bonus : conseils carrière</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <h2 class="section-title">Témoignages</h2>
+        <div class="testimonial-container">
+            <div class="testimonial-item">
+                <p>"Cette formation m'a permis de passer de débutant à un niveau professionnel. Les labs et exercices sont très réalistes !"</p>
+                <h4>— Julien R., Analyste sécurité</h4>
+            </div>
+            <div class="testimonial-item">
+                <p>"Les formateurs sont experts et très pédagogues. J'ai décroché mon premier emploi en cybersécurité grâce à Cyber Master."</p>
+                <h4>— Amélie D., Pentesteuse junior</h4>
+            </div>
+            <div class="testimonial-item">
+                <p>"Le contenu est clair, structuré et les certifications proposées donnent un vrai avantage sur le marché du travail."</p>
+                <h4>— Marc L., Consultant sécurité</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <h2 class="section-title">À propos de la formation</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <h2>Une formation complète et professionnelle</h2>
+                <p>CYBER MASTER est une formation conçue pour débutants et intermédiaires souhaitant apprendre la cybersécurité de manière structurée, efficace et orientée métier.</p>
+                <p>Vous serez accompagné pas-à-pas dans votre montée en compétence grâce à des cours vidéo, exercices pratiques, labs, challenges et quiz d’évaluation.</p>
+                <p>Notre objectif : faire de vous un professionnel capable de défendre, analyser et sécuriser une infrastructure informatique complète.</p>
+            </div>
+            <div class="about-visual"><div class="about-graphic"></div></div>
+        </div>
+
+        <div class="about-content" style="margin-top: 80px;">
+            <div class="about-visual">
+                <div class="about-graphic-alt">
+                    <div class="hexagon"></div><div class="hexagon"></div><div class="hexagon"></div>
+                </div>
+            </div>
+            <div class="about-text">
+                <h2>Construire une carrière durable</h2>
+                <p>Le marché de la cybersécurité explose et les entreprises recherchent des profils capables de comprendre les enjeux modernes.</p>
+                <p>Nous vous formons aux outils, méthodologies et technologies réellement utilisées sur le terrain.</p>
+                <p>Rejoignez la nouvelle génération d'experts capables d’agir concrètement face aux cybermenaces.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <h2 class="section-title">Contact</h2>
+        <div class="contact-container">
+            <div class="contact-form">
+                <form id="contactForm">
+                    <div class="form-group"><label for="name">Nom</label><input type="text" id="name" name="name" required></div>
+                    <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" required></div>
+                    <div class="form-group"><label for="subject">Sujet</label><input type="text" id="subject" name="subject" required></div>
+                    <div class="form-group"><label for="message">Message</label><textarea id="message" name="message" required></textarea></div>
+                    <button type="submit" class="submit-btn">Envoyer</button>
+                </form>
+            </div>
+
+            <div class="contact-info">
+                <h3>Nous contacter</h3>
+                <div class="info-item"><div class="info-icon">📧</div><div class="info-details"><h4>Email</h4><p>contact@cybermaster.fr</p></div></div>
+                <div class="info-item"><div class="info-icon">📱</div><div class="info-details"><h4>Téléphone</h4><p>+33 6 00 00 00 00</p></div></div>
+                <div class="info-item"><div class="info-icon">📍</div><div class="info-details"><h4>Localisation</h4><p>Paris, France</p></div></div>
+                <div class="map-container">
+                    <div class="map-placeholder"><p>Carte interactive</p><p style="font-size: 0.9rem; margin-top: 10px;">Paris, France</p></div>
+                    <div class="map-overlay"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#privacy">Politique de confidentialité</a>
+                <a href="#terms">Conditions d'utilisation</a>
+                <a href="#careers">Recrutement</a>
+            </div>
+            <p class="copyright">© 2025 INGENIUS. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+<script src="templatemo-electric-scripts.js"></script>
+</body>
+</html>
