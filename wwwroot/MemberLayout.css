@@ -1,112 +1,62 @@
-/* _content/CrudDemo/Views/Shared/_Layout.cshtml.rz.scp.css */
-/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
-
-a.navbar-brand[b-ma71s9jtmr] {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
-}
-
-a[b-ma71s9jtmr] {
-  color: #0077cc;
-}
-
-.btn-primary[b-ma71s9jtmr] {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.nav-pills .nav-link.active[b-ma71s9jtmr], .nav-pills .show > .nav-link[b-ma71s9jtmr] {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.border-top[b-ma71s9jtmr] {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom[b-ma71s9jtmr] {
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.box-shadow[b-ma71s9jtmr] {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-
-button.accept-policy[b-ma71s9jtmr] {
-  font-size: 1rem;
-  line-height: inherit;
-}
-
-.footer[b-ma71s9jtmr] {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
-}
-/* _content/CrudDemo/Views/Shared/_MemberLayout.cshtml.rz.scp.css */
 /* ------------------------------------------------------
    GLOBAL
 ------------------------------------------------------ */
-body[b-wpd79miz6k] {
+body {
     background: #f7f8fa;
     font-family: "Inter", sans-serif;
     color: #333;
 }
 
 /* container principal */
-.container.mt-4[b-wpd79miz6k] {
+.container.mt-4 {
     padding: 20px 40px;
 }
 
 /* ------------------------------------------------------
    TITRE PAGE ("Mes Cours")
 ------------------------------------------------------ */
-.container.mt-4 h1[b-wpd79miz6k] {
+.container.mt-4 h1 {
     font-size: 28px;
     font-weight: 700;
     color: #1f2d3d;
 }
 
-.container .text-muted[b-wpd79miz6k] {
+.container .text-muted {
     font-size: 15px;
 }
 
 /* ------------------------------------------------------
    SIDEBAR (capture : bleu clair, texte sombre)
 ------------------------------------------------------ */
-.sidebar[b-wpd79miz6k] {
+.sidebar {
     background: #dbe7f3 !important;
     padding: 25px 20px;
     width: 260px;
 }
 
-.sidebar h4[b-wpd79miz6k],
-.sidebar h5[b-wpd79miz6k] {
+.sidebar h4,
+.sidebar h5 {
     font-weight: 700;
     color: #1c2b36;
 }
 
-.sidebar ul li[b-wpd79miz6k] {
+.sidebar ul li {
     margin-bottom: 8px;
 }
 
-.sidebar ul li a[b-wpd79miz6k] {
+.sidebar ul li a {
     color: #3b4b5c;
     text-decoration: none;
 }
 
-.sidebar ul li a:hover[b-wpd79miz6k] {
+.sidebar ul li a:hover {
     color: #1c2b36;
 }
 
 /* ------------------------------------------------------
    HEADER TOP (capture : bleu foncé)
 ------------------------------------------------------ */
-.header-member[b-wpd79miz6k] {
+.header-member {
     background: #1f3460;
     color: white;
     padding: 30px 40px;
@@ -115,31 +65,31 @@ body[b-wpd79miz6k] {
     justify-content: space-between;
 }
 
-.header-member .user-info[b-wpd79miz6k] {
+.header-member .user-info {
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-.header-member img[b-wpd79miz6k] {
+.header-member img {
     width: 70px;
     height: 70px;
     border-radius: 50%;
     background: #fff;
 }
 
-.header-member h2[b-wpd79miz6k] {
+.header-member h2 {
     margin: 0;
     font-size: 26px;
     font-weight: 700;
 }
 
-.header-member small[b-wpd79miz6k] {
+.header-member small {
     opacity: 0.85;
 }
 
 /* bouton “Resume Course” */
-.header-member .btn[b-wpd79miz6k] {
+.header-member .btn {
     padding: 10px 24px;
     background: white;
     color: #1f3460;
@@ -148,27 +98,27 @@ body[b-wpd79miz6k] {
     border: none;
 }
 
-.header-member .btn:hover[b-wpd79miz6k] {
+.header-member .btn:hover {
     opacity: 0.9;
 }
 
 /* ------------------------------------------------------
    NAV TABS (Dashboard / Categories / Annonces)
 ------------------------------------------------------ */
-.nav-tabs[b-wpd79miz6k] {
+.nav-tabs {
     border-bottom: none;
     margin-top: 15px;
     margin-bottom: 25px;
 }
 
-.nav-tabs .nav-link[b-wpd79miz6k] {
+.nav-tabs .nav-link {
     font-weight: 600;
     color: #566b84;
     padding: 10px 22px;
     border-radius: 8px;
 }
 
-.nav-tabs .nav-link.active[b-wpd79miz6k] {
+.nav-tabs .nav-link.active {
     background: #ffffff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     color: #1c2b36;
@@ -177,7 +127,7 @@ body[b-wpd79miz6k] {
 /* ------------------------------------------------------
    CARTE CENTRALE (vidéo + texte)
 ------------------------------------------------------ */
-.card[b-wpd79miz6k] {
+.card {
     border: none;
     border-radius: 14px;
     background: #ffffff;
@@ -186,15 +136,15 @@ body[b-wpd79miz6k] {
     transition: transform 0.15s ease;
 }
 
-.card:hover[b-wpd79miz6k] {
+.card:hover {
     transform: translateY(-3px);
 }
 
-.card-body[b-wpd79miz6k] {
+.card-body {
     padding: 0 !important;
 }
 
-.card-text[b-wpd79miz6k] {
+.card-text {
     color: #444;
     font-size: 16px;
 }
@@ -202,19 +152,19 @@ body[b-wpd79miz6k] {
 /* ------------------------------------------------------
    BADGES (à droite)
 ------------------------------------------------------ */
-.badge-box[b-wpd79miz6k] {
+.badge-box {
     background: white;
     padding: 20px;
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.badge-box img[b-wpd79miz6k] {
+.badge-box img {
     width: 85px;
     height: 85px;
 }
 
-.badge-box .badge-name[b-wpd79miz6k] {
+.badge-box .badge-name {
     font-size: 14px;
     font-weight: 600;
     color: #1c2b36;
@@ -224,7 +174,7 @@ body[b-wpd79miz6k] {
 /* ------------------------------------------------------
    BOUTONS
 ------------------------------------------------------ */
-.btn-primary[b-wpd79miz6k] {
+.btn-primary {
     background: #4c6ef5;
     border-color: #4c6ef5;
     padding: 10px 14px;
@@ -232,18 +182,18 @@ body[b-wpd79miz6k] {
     border-radius: 8px;
 }
 
-.btn-primary:hover[b-wpd79miz6k] {
+.btn-primary:hover {
     background: #3b5bdb;
 }
 
 /* ------------------------------------------------------
    GRID
 ------------------------------------------------------ */
-.col-md-6[b-wpd79miz6k], .col-lg-4[b-wpd79miz6k] {
+.col-md-6, .col-lg-4 {
     display: flex;
 }
 
-.card.h-100[b-wpd79miz6k] {
+.card.h-100 {
     display: flex;
     flex-direction: column;
 }

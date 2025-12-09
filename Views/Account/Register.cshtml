@@ -9,38 +9,28 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4>@ViewData["Title"]</h4>
+                <h4>@ViewData["Title"]</h4>
                 </div>
-                <div class="card-body">
+                <div class="contact-form">
                     <form asp-action="Register" method="post">
                         <div asp-validation-summary="All" class="text-danger"></div>
-                        
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label">Email</label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="form-group">
+                            <label for="name">Email</label><input asp-for="Email" class="form-control" id="email" name="email" required="">
                         </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label">Mot de passe</label>
-                            <input asp-for="Password" class="form-control" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="form-group">
+                            <label for="Password">Mot de passe</label><input asp-for="Password" class="form-control" id="password" name="Password" required="">
                         </div>
-
-                        <div class="mb-3">
-                            <label asp-for="ConfirmPassword" class="form-label">Confirmer le mot de passe</label>
-                            <input asp-for="ConfirmPassword" class="form-control" />
-                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        <div class="form-group">
+                            <label for="ConfirmPassword">Confirmer le mot de passe</label><input asp-for="ConfirmPassword" class="form-control" required="">
                         </div>
-
-                        <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+                        <button type="submit" class="submit-btn">Se connecter</button>
                     </form>
                 </div>
-                <div class="card-footer">
-                    <p class="text-center mb-0">
-                        Vous avez déjà un compte? <a asp-action="Login">Se connecter</a>
-                    </p>
-                </div>
+            </div>
+            <div class="card-footer">
+                <p class="text-center mb-0">
+                    Vous avez déjà un compte? <a asp-action="Login">Se connecter</a>
+                </p>
             </div>
         </div>
     </div>

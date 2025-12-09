@@ -58,6 +58,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5Db3Vyc2VzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/AdminCourses/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5Db3Vyc2VzL19WaWV3U3RhcnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Courses/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cnNlcy9EZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -72,6 +76,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Courses/QuizResults.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cnNlcy9RdWl6UmVzdWx0cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Courses/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cnNlcy9fVmlld1N0YXJ0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Home/Index.cshtml]
@@ -106,6 +114,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Shared/_MemberLayout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19NZW1iZXJMYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -117,7 +133,3 @@ build_metadata.AdditionalFiles.CssScope =
 [/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
-
-[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Shared/_Layout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-ma71s9jtmr

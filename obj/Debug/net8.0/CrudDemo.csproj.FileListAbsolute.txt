@@ -213,9 +213,7 @@
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.CrudDemo.props
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.CrudDemo.props
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/staticwebassets.pack.json
-/home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/scopedcss/bundle/CrudDemo.styles.css
-/home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/scopedcss/projectbundle/CrudDemo.bundle.scp.css
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/CrudDemo.csproj.Up2Date
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/CrudDemo.dll
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/refint/CrudDemo.dll

@@ -1,12 +1,8 @@
 {
   "Files": [
     {
-      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/scopedcss/projectbundle/CrudDemo.bundle.scp.css",
-      "PackagePath": "staticwebassets/CrudDemo.bundle.scp.css"
-    },
-    {
-      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/css/site.css",
-      "PackagePath": "staticwebassets/css/site.css"
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/MemberLayout.css",
+      "PackagePath": "staticwebassets/MemberLayout.css"
     },
     {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/favicon.ico",
