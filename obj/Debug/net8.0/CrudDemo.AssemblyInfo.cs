@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CrudDemo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+18f085bf51841930188384b6bdb580dcc74a74a4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dc500eddd97e8c76964b83e2efe391b999e447a8")]
 [assembly: System.Reflection.AssemblyProductAttribute("CrudDemo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CrudDemo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

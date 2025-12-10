@@ -5,195 +5,26 @@ body {
     background: #f7f8fa;
     font-family: "Inter", sans-serif;
     color: #333;
+    margin: 0px;
 }
 
-/* container principal */
+
 .container.mt-4 {
-    padding: 20px 40px;
+    margin-right: 10%;
 }
 
-/* ------------------------------------------------------
-   TITRE PAGE ("Mes Cours")
------------------------------------------------------- */
-.container.mt-4 h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1f2d3d;
+.member-container {
+    display: flex;
+    flex-wrap: wrap-reverse;
 }
 
-.container .text-muted {
-    font-size: 15px;
-}
-
-/* ------------------------------------------------------
-   SIDEBAR (capture : bleu clair, texte sombre)
------------------------------------------------------- */
-.sidebar {
-    background: #dbe7f3 !important;
-    padding: 25px 20px;
-    width: 260px;
-}
-
-.sidebar h4,
-.sidebar h5 {
-    font-weight: 700;
-    color: #1c2b36;
-}
-
-.sidebar ul li {
-    margin-bottom: 8px;
-}
-
-.sidebar ul li a {
-    color: #3b4b5c;
-    text-decoration: none;
-}
-
-.sidebar ul li a:hover {
-    color: #1c2b36;
-}
-
-/* ------------------------------------------------------
-   HEADER TOP (capture : bleu foncé)
------------------------------------------------------- */
-.header-member {
-    background: #1f3460;
+.menu-dashboard {
+    background-color: #434c5e;
     color: white;
-    padding: 30px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding: 4%;
 }
-
-.header-member .user-info {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.header-member img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: #fff;
-}
-
-.header-member h2 {
-    margin: 0;
-    font-size: 26px;
-    font-weight: 700;
-}
-
-.header-member small {
-    opacity: 0.85;
-}
-
-/* bouton “Resume Course” */
-.header-member .btn {
-    padding: 10px 24px;
-    background: white;
-    color: #1f3460;
-    border-radius: 6px;
-    font-weight: 600;
-    border: none;
-}
-
-.header-member .btn:hover {
-    opacity: 0.9;
-}
-
-/* ------------------------------------------------------
-   NAV TABS (Dashboard / Categories / Annonces)
------------------------------------------------------- */
-.nav-tabs {
-    border-bottom: none;
-    margin-top: 15px;
-    margin-bottom: 25px;
-}
-
-.nav-tabs .nav-link {
-    font-weight: 600;
-    color: #566b84;
-    padding: 10px 22px;
-    border-radius: 8px;
-}
-
-.nav-tabs .nav-link.active {
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    color: #1c2b36;
-}
-
-/* ------------------------------------------------------
-   CARTE CENTRALE (vidéo + texte)
------------------------------------------------------- */
-.card {
-    border: none;
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    padding: 20px;
-    transition: transform 0.15s ease;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-}
-
-.card-body {
-    padding: 0 !important;
-}
-
-.card-text {
-    color: #444;
-    font-size: 16px;
-}
-
-/* ------------------------------------------------------
-   BADGES (à droite)
------------------------------------------------------- */
-.badge-box {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.badge-box img {
-    width: 85px;
-    height: 85px;
-}
-
-.badge-box .badge-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1c2b36;
-    text-align: center;
-}
-
-/* ------------------------------------------------------
-   BOUTONS
------------------------------------------------------- */
-.btn-primary {
-    background: #4c6ef5;
-    border-color: #4c6ef5;
-    padding: 10px 14px;
-    font-weight: 600;
-    border-radius: 8px;
-}
-
-.btn-primary:hover {
-    background: #3b5bdb;
-}
-
-/* ------------------------------------------------------
-   GRID
------------------------------------------------------- */
-.col-md-6, .col-lg-4 {
-    display: flex;
-}
-
-.card.h-100 {
-    display: flex;
-    flex-direction: column;
+.menu-dashboard a {
+    text-decoration: none;
+    color: white;
+    text-transform: uppercase;
 }
