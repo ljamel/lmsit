@@ -24,11 +24,14 @@ namespace CrudDemo.Controllers
         public async Task<IActionResult> Index()
         {
             var courses = await _context.Courses
-                .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
+                .Include(c => c.Modules)
+                    .ThenInclude(m => m.Lessons)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
+
             return View(courses);
         }
+
 
         // View course details with modules and lessons
         public async Task<IActionResult> Details(int id)
@@ -40,6 +43,8 @@ namespace CrudDemo.Controllers
 
             if (course == null)
                 return NotFound();
+            
+            
 
             return View(course);
         }

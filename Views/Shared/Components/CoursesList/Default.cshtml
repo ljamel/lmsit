@@ -1,3 +1,4 @@
+@using NuGet.Versioning
 @model IEnumerable<CrudDemo.Models.Course>
 
 <div class="container mt-4 menu-dashboard">
@@ -13,10 +14,14 @@
     }
     else
     {
+
+
         <div class="row">
             @foreach (var course in Model)
             {
              
+
+
 
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm">
@@ -36,7 +41,7 @@
                                asp-controller="Courses"
                                asp-action="Details" 
                                asp-route-id="@course.Id">
-                                <i class="fas fa-eye"></i> Voir Détails
+                                <i class="fas fa-eye"></i> Voir Détails  ( @string.Join(", ", course.Modules.Select(m => m.Title)) )
                             </a>
                         </div>
                     </div>

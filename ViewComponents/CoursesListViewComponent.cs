@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using CrudDemo.Data;
 
 public class CoursesListViewComponent : ViewComponent
@@ -12,7 +13,10 @@ public class CoursesListViewComponent : ViewComponent
 
     public IViewComponentResult Invoke()
     {
-        var courses = _context.Courses.ToList();
+        var courses = _context.Courses
+            .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
+            .ToList();
+
         return View(courses);
     }
 }
