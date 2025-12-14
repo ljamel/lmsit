@@ -9,74 +9,386 @@
 }
 
 <div class="container mt-4">
-    <div class="mb-3">
-        <a asp-action="Lesson" asp-route-id="@lesson.Id" class="btn btn-secondary btn-sm">
+    <div class="mb-3 animated-section">
+        <a asp-action="Lesson" asp-route-id="@lesson.Id" class="btn btn-secondary btn-sm animated-btn">
             <i class="fas fa-arrow-left"></i> Retour à la leçon
         </a>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Résultats: @lesson.Title</h4>
+    <div class="card mb-4 animated-card results-card">
+        <div class="card-header @(percentage >= 70 ? "gradient-success" : percentage >= 50 ? "gradient-warning" : "gradient-danger")">
+            <h4 class="mb-0">
+                <i class="fas fa-chart-pie"></i> Résultats: @lesson.Title
+            </h4>
         </div>
         <div class="card-body">
             <div class="row text-center">
-                <div class="col-md-6">
-                    <h3>@percentage%</h3>
-                    <p>Score</p>
+                <div class="col-md-6 animated-score-box">
+                    <div class="score-circle @(percentage >= 70 ? "score-success" : percentage >= 50 ? "score-warning" : "score-danger")">
+                        <h2 class="score-percentage">@percentage%</h2>
+                        <p class="score-label">Score</p>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h3>@correctCount/@totalQuestions</h3>
-                    <p>Bonnes réponses</p>
+                <div class="col-md-6 animated-score-box">
+                    <div class="answers-box @(percentage >= 70 ? "answers-success" : percentage >= 50 ? "answers-warning" : "answers-danger")">
+                        <h2>@correctCount</h2>
+                        <p>sur @totalQuestions réponses</p>
+                        <small>Bonnes réponses</small>
+                    </div>
                 </div>
             </div>
-            <div class="progress mt-3" style="height: 25px;">
-                <div class="progress-bar @(percentage >= 70 ? "bg-success" : percentage >= 50 ? "bg-warning" : "bg-danger")" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100">
-                    @percentage%
+            <div class="progress mt-4" style="height: 30px; border-radius: 15px; overflow: hidden;">
+                <div class="progress-bar @(percentage >= 70 ? "bg-success" : percentage >= 50 ? "bg-warning" : "bg-danger") animated-progress-bar" 
+                     role="progressbar" 
+                     style="width: 0%; transition: width 1s cubic-bezier(0.23, 1, 0.320, 1);" 
+                     aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"
+                     onload="setTimeout(() => this.style.width = '@percentage%', 100)">
+                    <span class="progress-text">@percentage%</span>
                 </div>
             </div>
-            <p class="mt-3 text-muted">
+            <div class="mt-4 feedback-message animated-feedback">
                 @if (percentage >= 70)
                 {
-                    <span class="text-success"><i class="fas fa-check-circle"></i> Excellente performance!</span>
+                    <div class="alert alert-success animated-alert">
+                        <i class="fas fa-star"></i> Excellente performance! Vous maîtrisez bien ce sujet.
+                    </div>
                 }
                 else if (percentage >= 50)
                 {
-                    <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Vous pouvez faire mieux. Réessayez!</span>
+                    <div class="alert alert-warning animated-alert">
+                        <i class="fas fa-lightbulb"></i> Vous pouvez faire mieux. Révisez et réessayez!
+                    </div>
                 }
                 else
                 {
-                    <span class="text-danger"><i class="fas fa-times-circle"></i> Continuez à vous exercer pour améliorer votre score.</span>
+                    <div class="alert alert-danger animated-alert">
+                        <i class="fas fa-exclamation-circle"></i> Continuez à vous exercer pour améliorer votre score.
+                    </div>
                 }
-            </p>
+            </div>
         </div>
     </div>
 
-    <h4>Détails des réponses</h4>
-    <div class="list-group">
+    <h4 class="mb-3">
+        <i class="fas fa-list-check"></i> Détails des réponses
+    </h4>
+    <div class="results-list">
+        @{
+            int index = 0;
+        }
         @foreach (var result in Model)
         {
-            <div class="list-group-item">
+            <div class="result-item animated-result-item">
                 <div class="d-flex justify-content-between align-items-start">
-                    <div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-secondary me-2">Question @(index + 1)</span>
+                            <span class="badge @(result.IsCorrect ? "bg-success" : "bg-danger")">
+                                @(result.IsCorrect ? "✓ Correcte" : "✗ Incorrecte")
+                            </span>
+                        </div>
                         <h6 class="mb-1">@result.Quiz.Question</h6>
-                        <small class="text-muted">
-                            Réponse: <strong>@(result.IsCorrect ? "✓ Correcte" : "✗ Incorrecte")</strong>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-clock"></i> @result.AttemptedAt.ToString("dd/MM/yyyy HH:mm")
                         </small>
-                        <br>
-                        <small class="text-muted">@result.AttemptedAt.ToString("dd/MM/yyyy HH:mm")</small>
                     </div>
-                    <span class="badge @(result.IsCorrect ? "bg-success" : "bg-danger")">
-                        @(result.IsCorrect ? "✓" : "✗")
-                    </span>
+                    <div class="result-icon ms-3">
+                        @if (result.IsCorrect)
+                        {
+                            <i class="fas fa-check-circle" style="font-size: 2em; color: #00cc00;"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-times-circle" style="font-size: 2em; color: #ff3333;"></i>
+                        }
+                    </div>
                 </div>
             </div>
+            index++;
         }
     </div>
 
-    <div class="mt-4">
-        <a asp-controller="Courses" asp-action="Index" class="btn btn-primary">
+    <div class="mt-5 text-center animated-section">
+        <a asp-action="Lesson" asp-route-id="@lesson.Id" class="btn btn-secondary btn-lg animated-btn me-2">
+            <i class="fas fa-redo"></i> Réessayer
+        </a>
+        <a asp-controller="Courses" asp-action="Index" class="btn btn-primary btn-lg animated-btn">
             <i class="fas fa-book"></i> Retour aux Cours
         </a>
+    </div>
+</div>
+
+<style>
+    .animated-section {
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .animated-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .results-card {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-card:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .gradient-success {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+        color: white;
+    }
+
+    .gradient-warning {
+        background: linear-gradient(135deg, #fa7e1e 0%, #ffa500 100%);
+        color: white;
+    }
+
+    .gradient-danger {
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        color: white;
+    }
+
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .score-success {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+        color: white;
+    }
+
+    .score-warning {
+        background: linear-gradient(135deg, #fa7e1e 0%, #ffa500 100%);
+        color: white;
+    }
+
+    .score-danger {
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        color: white;
+    }
+
+    .score-percentage {
+        margin: 0;
+        font-weight: 700;
+        font-size: 3em;
+        animation: countUp 1s ease-out;
+    }
+
+    .score-label {
+        margin: 0;
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+
+    .answers-box {
+        padding: 2rem;
+        border-radius: 12px;
+        color: white;
+        animation: slideInRight 0.6s ease-out 0.2s both;
+    }
+
+    .answers-success {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+    }
+
+    .answers-warning {
+        background: linear-gradient(135deg, #fa7e1e 0%, #ffa500 100%);
+    }
+
+    .answers-danger {
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    }
+
+    .answers-box h2 {
+        margin: 0.5rem 0;
+        font-size: 2.5em;
+        font-weight: 700;
+    }
+
+    .answers-box p {
+        margin: 0.5rem 0;
+        font-size: 1.1em;
+    }
+
+    .answers-box small {
+        display: block;
+        opacity: 0.9;
+    }
+
+    .animated-score-box {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .animated-progress-bar {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+        animation: slideInLeft 1s ease-out;
+    }
+
+    .progress-text {
+        color: white;
+        font-weight: bold;
+        line-height: 30px;
+        display: inline-block;
+    }
+
+    .feedback-message {
+        animation: slideUp 0.6s ease-out 0.4s both;
+    }
+
+    .animated-alert {
+        border: none;
+        border-radius: 8px;
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .result-item {
+        border: 2px solid #f0f0f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.5s ease-out;
+    }
+
+    .result-item:hover {
+        border-color: #667eea;
+        background-color: #f8f9ff;
+        transform: translateX(5px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+    }
+
+    .result-icon {
+        animation: slideInRight 0.5s ease-out;
+    }
+
+    .animated-result-item {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+
+    .animated-btn:hover {
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes countUp {
+        from {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.8;
+        }
+    }
+</style>
+
+<script>
+    // Animate progress bar on page load
+    window.addEventListener('load', function() {
+        const progressBar = document.querySelector('.animated-progress-bar');
+        if (progressBar) {
+            const targetWidth = progressBar.getAttribute('aria-valuenow');
+            setTimeout(() => {
+                progressBar.style.width = targetWidth + '%';
+            }, 100);
+        }
+    });
+</script>
     </div>
 </div>

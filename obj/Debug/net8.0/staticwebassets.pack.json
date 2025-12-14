@@ -257,12 +257,36 @@
       "PackagePath": "staticwebassets/templatemo-electric-xtra.css"
     },
     {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/2b5bb16f431e43bb966ec06249b2f330.mp3",
+      "PackagePath": "staticwebassets/videos/2b5bb16f431e43bb966ec06249b2f330.mp3"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/475da613cab94931b95633a582997478.mp4",
+      "PackagePath": "staticwebassets/videos/475da613cab94931b95633a582997478.mp4"
+    },
+    {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/6b4adc4629c84f33a41efd79ba5c751f.mp4",
       "PackagePath": "staticwebassets/videos/6b4adc4629c84f33a41efd79ba5c751f.mp4"
     },
     {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/b0186f64d6384a7182a02506a4b7e09e.mp4",
+      "PackagePath": "staticwebassets/videos/b0186f64d6384a7182a02506a4b7e09e.mp4"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/cda7d5975c3a43ba849f554ddb0fffc1.mp4",
+      "PackagePath": "staticwebassets/videos/cda7d5975c3a43ba849f554ddb0fffc1.mp4"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/e0f99e0ec6cc48ffaa8a6f290eb19479.mp4",
+      "PackagePath": "staticwebassets/videos/e0f99e0ec6cc48ffaa8a6f290eb19479.mp4"
+    },
+    {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/f6b37a1cbc624d0e920d35ab3c8ddb6b.mp4",
       "PackagePath": "staticwebassets/videos/f6b37a1cbc624d0e920d35ab3c8ddb6b.mp4"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/fc38055a2bbf4548953410eeb9bd7c4a.mp4",
+      "PackagePath": "staticwebassets/videos/fc38055a2bbf4548953410eeb9bd7c4a.mp4"
     },
     {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.CrudDemo.Microsoft.AspNetCore.StaticWebAssets.props",

@@ -54,7 +54,7 @@ namespace CrudDemo.Controllers
         {
             var course = await _context.Courses
                 .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
-                    .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
+                .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
                 .FirstOrDefaultAsync(c => c.Id == id);
             if (course == null) return NotFound();
             return View(course);
@@ -68,61 +68,100 @@ namespace CrudDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateModule([Bind("CourseId,Title,Description,OrderIndex")] Module module)
+        public async Task<IActionResult> CreateModule(Module module)
         {
-            if (!ModelState.IsValid) return View(module);
+            if (!ModelState.IsValid)
+                return View(module);
+
             _context.Modules.Add(module);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Details), new { id = module.CourseId });
         }
 
-        public IActionResult CreateLesson(int moduleId)
+        // -----------------------------
+        // CREATE LESSON
+        // -----------------------------
+        public async Task<IActionResult> CreateLesson(int moduleId)
         {
+            var module = await _context.Modules
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == moduleId);
+
+            if (module == null)
+                return NotFound("Module introuvable.");
+
             ViewBag.ModuleId = moduleId;
+            ViewBag.CourseId = module.CourseId;
+
             return View();
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateLesson([Bind("ModuleId,Title,Description,OrderIndex")] Lesson lesson, IFormFile videoFile)
+public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile)
+{
+    // Vérification module valide
+    var module = await _context.Modules
+        .AsNoTracking()
+        .FirstOrDefaultAsync(m => m.Id == lesson.ModuleId);
+
+    if (module == null)
+    {
+        ModelState.AddModelError("", "Module introuvable.");
+        // On renvoie le ModuleId pour que la vue ait le hidden correct
+        ViewBag.ModuleId = lesson.ModuleId;
+        return View(lesson);
+    }
+
+    if (!ModelState.IsValid)
+    {
+        ViewBag.ModuleId = lesson.ModuleId;
+        return View(lesson);
+    }
+
+    // Upload vidéo
+    if (videoFile != null && videoFile.Length > 0)
+    {
+        var allowed = new[] { ".mp4", ".webm", ".ogg", ".mp3" };
+        var ext = Path.GetExtension(videoFile.FileName).ToLowerInvariant();
+
+        if (!allowed.Contains(ext))
         {
-            if (!ModelState.IsValid) return View(lesson);
-
-            if (videoFile != null && videoFile.Length > 0)
-            {
-                var allowed = new[] { ".mp4", ".webm", ".ogg", ".mp3" };
-                var ext = Path.GetExtension(videoFile.FileName).ToLowerInvariant();
-                if (!allowed.Contains(ext))
-                {
-                    ModelState.AddModelError("videoFile", "Only MP4/WebM/OGG/MP3 files are allowed.");
-                    return View(lesson);
-                }
-
-                const long maxBytes = 200L * 1024L * 1024L; // 200 MB
-                if (videoFile.Length > maxBytes)
-                {
-                    ModelState.AddModelError("videoFile", "File too large (max 200 MB).");
-                    return View(lesson);
-                }
-
-                var videosPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "videos");
-                if (!Directory.Exists(videosPath)) Directory.CreateDirectory(videosPath);
-                var fileName = Guid.NewGuid().ToString("N") + ext;
-                var savePath = Path.Combine(videosPath, fileName);
-                using (var stream = System.IO.File.Create(savePath))
-                {
-                    await videoFile.CopyToAsync(stream);
-                }
-
-                lesson.VideoFileName = videoFile.FileName;
-                lesson.VideoPath = "/videos/" + fileName;
-            }
-
-            _context.Lessons.Add(lesson);
-            await _context.SaveChangesAsync();
-            // redirect back to course details
-            var module = await _context.Modules.FindAsync(lesson.ModuleId);
-            return RedirectToAction(nameof(Details), new { id = module?.CourseId });
+            ModelState.AddModelError("videoFile", "Formats autorisés : MP4 / WebM / OGG / MP3");
+            ViewBag.ModuleId = lesson.ModuleId;
+            return View(lesson);
         }
+
+        if (videoFile.Length > 200L * 1024 * 1024)
+        {
+            ModelState.AddModelError("videoFile", "Fichier trop volumineux (max 200 MB).");
+            ViewBag.ModuleId = lesson.ModuleId;
+            return View(lesson);
+        }
+
+        var videosPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "videos");
+        Directory.CreateDirectory(videosPath);
+
+        var fileName = Guid.NewGuid().ToString("N") + ext;
+        var savePath = Path.Combine(videosPath, fileName);
+
+        await using (var stream = new FileStream(savePath, FileMode.Create))
+        {
+            await videoFile.CopyToAsync(stream);
+        }
+
+        lesson.VideoFileName = videoFile.FileName;
+        lesson.VideoPath = "/videos/" + fileName;
+    }
+
+    _context.Lessons.Add(lesson);
+    await _context.SaveChangesAsync();
+
+    // Redirection vers le détail du cours
+    return RedirectToAction(nameof(Details), new { id = module.CourseId });
+}
+
     }
 }

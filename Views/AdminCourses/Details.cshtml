@@ -1,43 +1,274 @@
 @model CrudDemo.Models.Course
 
 @{
-    ViewData["Title"] = "Course Details";
+    ViewData["Title"] = "Détails du Cours - Admin";
 }
 
-<h1>@Model.Title</h1>
-<p>@Model.Description</p>
-
-<p>
-    <a class="btn btn-sm btn-primary" href="/AdminCourses/CreateModule?courseId=@Model.Id">Add Module</a>
-    <a class="btn btn-sm btn-secondary" href="/AdminCourses">Back</a>
-</p>
-
-<h3>Modules</h3>
-@if (Model.Modules == null || !Model.Modules.Any())
-{
-    <p>No modules yet.</p>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var m in Model.Modules.OrderBy(m => m.OrderIndex))
-        {
-            <li class="list-group-item">
-                <strong>@m.Title</strong>
-                <p>@m.Description</p>
-                <p>
-                    <a class="btn btn-sm btn-outline-primary" href="/AdminCourses/CreateLesson?moduleId=@m.Id">Add Lesson</a>
+<div class="admin-courses-container">
+    <div class="animated-section mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="animated-title">
+                    <i class="fas fa-book"></i> @Model.Title
+                </h1>
+                <p class="text-muted animated-description">
+                    <i class="fas fa-user-circle"></i> Créé par: <strong>@Model.CreatedBy</strong>
                 </p>
-                @if (m.Lessons != null && m.Lessons.Any())
-                {
-                    <ul>
-                        @foreach (var l in m.Lessons.OrderBy(l => l.OrderIndex))
+            </div>
+            <div>
+                <a class="btn btn-primary btn-lg animated-btn" 
+                   href="/AdminCourses/CreateModule?courseId=@Model.Id">
+                    <i class="fas fa-plus"></i> Ajouter Module
+                </a>
+                <a class="btn btn-secondary btn-lg animated-btn" href="/AdminCourses">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="card animated-card mb-4">
+            <div class="card-body">
+                <p>@Model.Description</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mb-4">
+        <i class="fas fa-cubes"></i> Modules et Leçons
+    </h3>
+
+    @if (Model.Modules == null || !Model.Modules.Any())
+    {
+        <div class="alert alert-info animated-alert">
+            <i class="fas fa-info-circle"></i> Aucun module pour le moment. Créez-en un!
+        </div>
+    }
+    else
+    {
+        <div class="modules-list">
+            @foreach (var m in Model.Modules.OrderBy(m => m.OrderIndex))
+            {
+                <div class="card module-card animated-card mb-3">
+                    <div class="card-header gradient-module-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">
+                                    <i class="fas fa-layer-group"></i> @m.Title
+                                </h5>
+                                @if (!string.IsNullOrEmpty(m.Description))
+                                {
+                                    <small class="text-muted">@m.Description</small>
+                                }
+                            </div>
+                            <a class="btn btn-sm btn-outline-light animated-btn" 
+                               href="/AdminCourses/CreateLesson?moduleId=@m.Id">
+                                <i class="fas fa-plus-circle"></i> Ajouter Leçon
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        @if (m.Lessons == null || !m.Lessons.Any())
                         {
-                            <li>@l.Title - @l.VideoFileName</li>
+                            <p class="text-muted"><em>Aucune leçon dans ce module</em></p>
                         }
-                    </ul>
-                }
-            </li>
+                        else
+                        {
+                            <div class="lessons-list">
+                                @foreach (var l in m.Lessons.OrderBy(l => l.OrderIndex))
+                                {
+                                    <div class="lesson-item animated-lesson">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">
+                                                    <i class="fas fa-video"></i> @l.Title
+                                                </h6>
+                                                <small class="text-muted d-block mb-2">@l.Description</small>
+                                                @if (!string.IsNullOrEmpty(l.VideoFileName))
+                                                {
+                                                    <span class="badge bg-success mb-2">
+                                                        <i class="fas fa-film"></i> Vidéo: @l.VideoFileName
+                                                    </span>
+                                                }
+
+                                                <!-- Quiz Section -->
+                                                @if (l.Quizzes != null && l.Quizzes.Any())
+                                                {
+                                                    <div class="quiz-section mt-2">
+                                                        <h6 class="mb-2">
+                                                            <i class="fas fa-question-circle"></i> Quiz (@l.Quizzes.Count)
+                                                        </h6>
+                                                        <ul class="list-unstyled ms-3">
+                                                            @foreach (var quiz in l.Quizzes)
+                                                            {
+                                                                <li class="mb-2 quiz-item animated-quiz">
+                                                                    <span class="badge bg-info">@quiz.Question</span>
+                                                                    <span class="badge bg-secondary">@quiz.Options.Count options</span>
+                                                                    <span class="badge bg-warning">@quiz.Points pts</span>
+                                                                    <a class="btn btn-xs btn-sm btn-outline-primary ms-2" 
+                                                                       href="/AdminCourses/EditQuiz?quizId=@quiz.Id">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted d-block">Aucun quiz</small>
+                                                }
+                                            </div>
+                                            <div class="btn-group-vertical ms-2" role="group">
+                                                <a class="btn btn-sm btn-outline-primary animated-btn" 
+                                                   href="/AdminCourses/CreateQuiz?lessonId=@l.Id" 
+                                                   title="Ajouter un quiz">
+                                                    <i class="fas fa-plus"></i> Quiz
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .admin-courses-container {
+        padding: 20px 0;
+    }
+
+    .animated-title {
+        color: #667eea;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .animated-description {
+        animation: slideDown 0.6s ease-out 0.1s both;
+    }
+
+    .animated-section {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .animated-card {
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .animated-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        border-color: #667eea;
+    }
+
+    .module-card {
+        border-left: 5px solid #667eea;
+    }
+
+    .gradient-module-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .lesson-item {
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        animation: slideInLeft 0.4s ease-out;
+        transition: all 0.3s ease;
+    }
+
+    .lesson-item:hover {
+        background-color: #f8f9fa;
+        border-color: #667eea;
+    }
+
+    .quiz-section {
+        background-color: #f0f4ff;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .quiz-item {
+        animation: fadeIn 0.5s ease-out;
+        transition: all 0.3s ease;
+    }
+
+    .quiz-item:hover {
+        transform: translateX(5px);
+    }
+
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+
+    .animated-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .animated-alert {
+        animation: slideUp 0.4s ease-out;
+        border-radius: 8px;
+        border: 1px solid #d3e5ff;
+        background-color: #e7f3ff;
+    }
+
+    .lessons-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
         }
-    </ul>
-}
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+

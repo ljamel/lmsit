@@ -7,72 +7,99 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-lg-8">
-            <div class="mb-3">
-                <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId" class="btn btn-secondary btn-sm">
+            <div class="mb-3 animated-section">
+                <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId" class="btn btn-secondary btn-sm animated-btn">
                     <i class="fas fa-arrow-left"></i> Retour au cours
                 </a>
             </div>
 
-            <div class="card mb-4">
+            <div class="card mb-4 animated-card">
+                <div class="card-header gradient-header-primary">
+                    <h1 class="animated-title mb-0">
+                        <i class="fas fa-book-open"></i> @Model.Title
+                    </h1>
+                </div>
                 <div class="card-body">
-                    <h1>@Model.Title</h1>
-                    <p class="text-muted">Module: @Model.Module.Title</p>
-                    <p>@Model.Description</p>
+                    <p class="text-muted animated-description">
+                        <i class="fas fa-layer-group"></i> Module: <strong>@Model.Module.Title</strong>
+                    </p>
+                    <p class="animated-description">@Model.Description</p>
                 </div>
             </div>
 
             @if (!string.IsNullOrEmpty(Model.VideoPath))
             {
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Vidéo</h5>
+                <div class="card mb-4 animated-card">
+                    <div class="card-header gradient-header-secondary">
+                        <h5 class="mb-0">
+                            <i class="fas fa-film"></i> Vidéo
+                        </h5>
                     </div>
-                    <div class="card-body">
-                        <video width="100%" height="auto" controls style="max-height: 500px;">
-                            <source src="@Model.VideoPath" type="video/mp4">
-                            Votre navigateur ne supporte pas la vidéo HTML5.
-                        </video>
+                    <div class="card-body video-container">
+                        <div class="video-wrapper animated-video">
+                            <video width="100%" height="auto" controls style="max-height: 500px; border-radius: 8px;">
+                                <source src="@Model.VideoPath" type="video/mp4">
+                                Votre navigateur ne supporte pas la vidéo HTML5.
+                            </video>
+                        </div>
                     </div>
                 </div>
             }
 
             @if (Model.Quizzes != null && Model.Quizzes.Any())
             {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Quiz</h5>
+                <div class="card animated-card">
+                    <div class="card-header gradient-header-quiz">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle"></i> Quiz (@Model.Quizzes.Count)
+                        </h5>
                     </div>
                     <div class="card-body">
                         @foreach (var quiz in Model.Quizzes)
                         {
-                            <div class="mb-4 p-3 border rounded">
-                                <h6>@quiz.Question</h6>
-                                @if (!string.IsNullOrEmpty(quiz.Description))
-                                {
-                                    <small class="text-muted">@quiz.Description</small>
-                                }
+                            <div class="mb-4 quiz-item animated-quiz-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-question"></i> @quiz.Question
+                                        </h6>
+                                        @if (!string.IsNullOrEmpty(quiz.Description))
+                                        {
+                                            <small class="text-muted d-block mb-2">@quiz.Description</small>
+                                        }
+                                    </div>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-star"></i> @quiz.Points pts
+                                    </span>
+                                </div>
                                 <div class="mt-3">
                                     @if (quiz.Options != null && quiz.Options.Any())
                                     {
                                         <form asp-action="SubmitQuizAnswer" method="post" class="d-inline">
                                             <input type="hidden" name="quizId" value="@quiz.Id" />
-                                            @foreach (var option in quiz.Options)
-                                            {
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="radio" name="optionId" id="option_@option.Id" value="@option.Id" />
-                                                    <label class="form-check-label" for="option_@option.Id">
-                                                        @option.Text
-                                                    </label>
-                                                </div>
-                                            }
-                                            <button type="submit" class="btn btn-sm btn-primary">Soumettre</button>
+                                            <div class="options-list">
+                                                @foreach (var option in quiz.Options)
+                                                {
+                                                    <div class="form-check mb-3 animated-option-item">
+                                                        <input class="form-check-input quiz-radio" type="radio" 
+                                                               name="optionId" id="option_@option.Id" 
+                                                               value="@option.Id" />
+                                                        <label class="form-check-label" for="option_@option.Id">
+                                                            <span class="option-text">@option.Text</span>
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <button type="submit" class="btn btn-success animated-btn">
+                                                <i class="fas fa-check"></i> Soumettre
+                                            </button>
                                         </form>
                                     }
                                 </div>
                             </div>
                         }
                         <p class="text-center mt-4">
-                            <a asp-action="QuizResults" asp-route-lessonId="@Model.Id" class="btn btn-sm btn-info">
+                            <a asp-action="QuizResults" asp-route-lessonId="@Model.Id" class="btn btn-info animated-btn">
                                 <i class="fas fa-chart-bar"></i> Voir mes résultats
                             </a>
                         </p>
@@ -82,21 +109,223 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card sticky-top" style="top: 20px;">
-                <div class="card-header">
-                    <h5 class="mb-0">Progression</h5>
+            <div class="card sticky-top animated-card" style="top: 20px;">
+                <div class="card-header gradient-header-progress">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tachometer-alt"></i> Progression
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Cours:</strong><br><a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId">@Model.Module.Course.Title</a></p>
-                    <p><strong>Module:</strong><br>@Model.Module.Title</p>
-                    <p><strong>Leçon:</strong><br>@Model.Title</p>
+                    <div class="progress-item mb-3 animated-progress">
+                        <h6 class="mb-2">
+                            <i class="fas fa-book-bookmark"></i> Cours
+                        </h6>
+                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId"
+                           class="badge bg-primary text-white" style="text-decoration: none;">
+                            @Model.Module.Course.Title
+                        </a>
+                    </div>
+                    <div class="progress-item mb-3 animated-progress">
+                        <h6 class="mb-2">
+                            <i class="fas fa-layer-group"></i> Module
+                        </h6>
+                        <p class="badge bg-secondary text-white mb-0">@Model.Module.Title</p>
+                    </div>
+                    <div class="progress-item mb-3 animated-progress">
+                        <h6 class="mb-2">
+                            <i class="fas fa-video"></i> Leçon
+                        </h6>
+                        <p class="badge bg-info text-white mb-0">@Model.Title</p>
+                    </div>
                     <hr>
-                    <p class="small text-muted">
-                        <i class="fas fa-info-circle"></i>
+                    <p class="small text-muted animated-tip">
+                        <i class="fas fa-lightbulb"></i>
                         Complétez les exercices et les quiz pour progresser dans votre apprentissage.
                     </p>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<style>
+    .animated-section {
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .animated-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .animated-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .gradient-header-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .gradient-header-secondary {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+        color: white;
+        border: none;
+    }
+
+    .gradient-header-quiz {
+        background: linear-gradient(135deg, #fa7e1e 0%, #ffa500 100%);
+        color: white;
+        border: none;
+    }
+
+    .gradient-header-progress {
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        color: white;
+        border: none;
+    }
+
+    .animated-title {
+        animation: slideDown 0.6s ease-out 0.1s both;
+    }
+
+    .animated-description {
+        animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    .video-wrapper {
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    .animated-video {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .quiz-item {
+        border: 2px solid #f0f0f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.4s ease-out;
+    }
+
+    .quiz-item:hover {
+        border-color: #fa7e1e;
+        background-color: #fffaf5;
+        transform: translateX(5px);
+    }
+
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .animated-option-item {
+        animation: fadeIn 0.5s ease-out;
+        padding: 0;
+    }
+
+    .quiz-radio {
+        width: 1.3em;
+        height: 1.3em;
+        cursor: pointer;
+        accent-color: #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .quiz-radio:checked {
+        accent-color: #fa7e1e;
+    }
+
+    .option-text {
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .animated-quiz-item {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .progress-item {
+        animation: slideInLeft 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .progress-item:nth-child(1) { animation-delay: 0s; }
+    .progress-item:nth-child(2) { animation-delay: 0.1s; }
+    .progress-item:nth-child(3) { animation-delay: 0.2s; }
+
+    .animated-tip {
+        animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+
+    .animated-btn:hover {
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>    </div>
 </div>

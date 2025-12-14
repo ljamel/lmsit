@@ -1,0 +1,255 @@
+@model CrudDemo.Models.Quiz
+
+@{
+    ViewData["Title"] = "Éditer le Quiz";
+    var lesson = ViewBag.Lesson as CrudDemo.Models.Lesson;
+}
+
+<div class="container mt-4">
+    <div class="animated-section">
+        <div class="mb-4">
+            <a asp-action="Details" asp-route-id="@lesson?.Module?.CourseId" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+
+        <div class="card shadow-lg animated-card">
+            <div class="card-header gradient-header">
+                <h2 class="mb-0">
+                    <i class="fas fa-edit"></i> Éditer le Quiz
+                </h2>
+                <small class="text-muted">@lesson?.Title</small>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="EditQuiz" method="post" class="needs-validation">
+                    <input type="hidden" name="quizId" value="@Model.Id" />
+                    
+                    <div class="form-group mb-3">
+                        <label for="question" class="form-label">
+                            <i class="fas fa-edit"></i> Question
+                        </label>
+                        <textarea class="form-control animated-input" id="question" name="question" 
+                                  placeholder="Entrez votre question..." 
+                                  rows="3" required>@Model.Question</textarea>
+                        <small class="form-text text-muted">Maximum 500 caractères</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-file-alt"></i> Description (optionnel)
+                        </label>
+                        <textarea class="form-control animated-input" id="description" name="description" 
+                                  placeholder="Ajoutez une description ou une explication..." 
+                                  rows="2">@Model.Description</textarea>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="points" class="form-label">
+                            <i class="fas fa-star"></i> Points
+                        </label>
+                        <input type="number" class="form-control animated-input" id="points" 
+                               name="points" value="@Model.Points" min="1" max="100">
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">
+                        <i class="fas fa-list"></i> Options de Réponse
+                    </h5>
+
+                    <div id="optionsContainer">
+                        @if (Model.Options != null && Model.Options.Any())
+                        {
+                            int index = 0;
+                            @foreach (var option in Model.Options)
+                            {
+                                <div class="option-item mb-3 animated-option" data-option="@index">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control animated-input" 
+                                               name="optionTexts" value="@option.Text" required>
+                                        <div class="input-group-text">
+                                            <input type="checkbox" class="form-check-input" 
+                                                   name="optionCorrects" value="true" 
+                                                   @(option.IsCorrect ? "checked" : "") 
+                                                   aria-label="Correcte">
+                                            <label class="ms-2 mb-0">Correcte</label>
+                                        </div>
+                                        @if (index > 0)
+                                        {
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-option">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-option" 
+                                                    style="display:none;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                                index++;
+                            }
+                        }
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary mt-3" id="addOptionBtn">
+                        <i class="fas fa-plus"></i> Ajouter une Option
+                    </button>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg animated-btn">
+                            <i class="fas fa-save"></i> Mettre à Jour
+                        </button>
+                        
+                        <form asp-action="DeleteQuiz" method="post" style="display:inline;" 
+                              onsubmit="return confirm('Êtes-vous sûr?');">
+                            <input type="hidden" name="quizId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger btn-lg animated-btn">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </form>
+
+                        <a asp-action="Details" asp-route-id="@lesson?.Module?.CourseId" 
+                           class="btn btn-secondary btn-lg">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animated-section {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .animated-card {
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .animated-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .gradient-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .animated-input {
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 8px;
+        padding: 0.75rem;
+    }
+
+    .animated-input:focus {
+        border-color: #f5576c;
+        box-shadow: 0 0 0 0.2rem rgba(245, 87, 108, 0.25);
+        outline: none;
+    }
+
+    .animated-option {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        animation: slideInLeft 0.4s ease-out forwards;
+    }
+
+    .animated-option:hover {
+        transform: translateX(5px);
+    }
+
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+
+    .animated-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+
+<script>
+    let optionCount = @(Model.Options?.Count() ?? 0);
+
+    document.getElementById('addOptionBtn').addEventListener('click', function () {
+        const container = document.getElementById('optionsContainer');
+        const newOption = document.createElement('div');
+        newOption.className = 'option-item mb-3 animated-option';
+        newOption.innerHTML = `
+            <div class="input-group">
+                <input type="text" class="form-control animated-input" 
+                       name="optionTexts" placeholder="Option ${optionCount + 1}">
+                <div class="input-group-text">
+                    <input type="checkbox" class="form-check-input" 
+                           name="optionCorrects" value="true" aria-label="Correcte">
+                    <label class="ms-2 mb-0">Correcte</label>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm remove-option">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newOption);
+        optionCount++;
+
+        // Attach remove handler
+        newOption.querySelector('.remove-option').addEventListener('click', removeOption);
+    });
+
+    function removeOption(e) {
+        e.preventDefault();
+        const optionItem = e.target.closest('.option-item');
+        optionItem.style.animation = 'slideOut 0.3s ease-out forwards';
+        setTimeout(() => optionItem.remove(), 300);
+    }
+
+    // Attach remove handlers to existing options
+    document.querySelectorAll('.remove-option').forEach(btn => {
+        btn.addEventListener('click', removeOption);
+    });
+
+    // Add slide-out animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @@keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
