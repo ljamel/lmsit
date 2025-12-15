@@ -1,0 +1,228 @@
+@model CrudDemo.Models.Lesson
+
+@{
+    ViewData["Title"] = "Éditer la Leçon";
+}
+
+<!-- Include Quill stylesheet -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <div class="animated-section">
+        <div class="mb-4">
+            <a asp-action="Details" asp-route-id="@ViewBag.CourseId" class="btn btn-secondary btn-sm animated-btn">
+                <i class="fas fa-arrow-left"></i> Retour au Cours
+            </a>
+        </div>
+
+        <div class="card shadow-lg animated-card">
+            <div class="card-header gradient-header-lesson-edit">
+                <h2 class="mb-0">
+                    <i class="fas fa-edit"></i> Éditer la Leçon
+                </h2>
+                <small>@Model.Title</small>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="EditLesson" method="post" enctype="multipart/form-data" id="lessonForm">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ModuleId" />
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Title" class="form-label">
+                            <i class="fas fa-heading"></i> Titre de la Leçon
+                        </label>
+                        <input asp-for="Title" class="form-control animated-input" placeholder="Entrez le titre de la leçon" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-align-left"></i> Description
+                        </label>
+                        <!-- Quill Editor Container -->
+                        <div id="editor" style="height: 300px;"></div>
+                        <!-- Hidden field to store the HTML content -->
+                        <textarea asp-for="Description" id="descriptionInput" style="display:none;">@Html.Raw(Model.Description)</textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                        <small class="form-text text-muted">Utilisez l'éditeur pour formater votre description</small>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.VideoPath))
+                    {
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-film"></i> Vidéo actuelle: <strong>@Model.VideoFileName</strong>
+                            <br>
+                            <small>Téléchargez une nouvelle vidéo pour remplacer l'actuelle</small>
+                        </div>
+                    }
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-video"></i> Nouveau Fichier Vidéo (optionnel)
+                        </label>
+                        <input type="file" name="videoFile" class="form-control animated-input" accept="video/mp4,video/webm,video/ogg,audio/mp3" />
+                        <small class="form-text text-muted">Formats acceptés: MP4, WebM, OGG, MP3 (max 200MB)</small>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="OrderIndex" class="form-label">
+                            <i class="fas fa-sort-numeric-up"></i> Ordre d'Affichage
+                        </label>
+                        <input asp-for="OrderIndex" type="number" class="form-control animated-input" />
+                        <small class="form-text text-muted">Ordre de la leçon dans le module (0 = premier)</small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg animated-btn">
+                            <i class="fas fa-save"></i> Mettre à Jour
+                        </button>
+                        
+                        <button type="button" class="btn btn-danger btn-lg animated-btn" 
+                                onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cette leçon?')) document.getElementById('deleteForm').submit();">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+
+                        <a asp-action="Details" asp-route-id="@ViewBag.CourseId" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Delete Form -->
+                <form id="deleteForm" asp-action="DeleteLesson" method="post" style="display:none;">
+                    <input type="hidden" name="lessonId" value="@Model.Id" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include the Quill library -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<style>
+    .animated-section {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .animated-card {
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .animated-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .gradient-header-lesson-edit {
+        background: linear-gradient(135deg, #fa7e1e 0%, #ffa500 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .animated-input {
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 8px;
+        padding: 0.75rem;
+    }
+
+    .animated-input:focus {
+        border-color: #fa7e1e;
+        box-shadow: 0 0 0 0.2rem rgba(250, 126, 30, 0.25);
+        outline: none;
+    }
+
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+
+    .animated-btn:hover {
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(250, 126, 30, 0.3);
+    }
+
+    /* Quill Editor Styling */
+    #editor {
+        background-color: white;
+        border-radius: 8px;
+    }
+
+    .ql-toolbar {
+        border-radius: 8px 8px 0 0;
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0 !important;
+    }
+
+    .ql-container {
+        border-radius: 0 0 8px 8px;
+        border: 2px solid #e0e0e0 !important;
+        border-top: none !important;
+        font-size: 16px;
+    }
+
+    .ql-editor {
+        min-height: 250px;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Initialize Quill editor
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Rédigez la description de votre leçon ici...'
+    });
+
+    // Load existing content
+    var existingContent = document.getElementById('descriptionInput').value;
+    if (existingContent) {
+        quill.root.innerHTML = existingContent;
+    }
+
+    // Update hidden textarea on form submit
+    document.getElementById('lessonForm').addEventListener('submit', function(e) {
+        var html = quill.root.innerHTML;
+        document.getElementById('descriptionInput').value = html;
+    });
+
+    // Auto-save to hidden field on content change
+    quill.on('text-change', function() {
+        document.getElementById('descriptionInput').value = quill.root.innerHTML;
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

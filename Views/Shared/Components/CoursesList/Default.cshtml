@@ -1,7 +1,7 @@
 @using NuGet.Versioning
 @model IEnumerable<CrudDemo.Models.Course>
 
-<div class="container mt-4 menu-dashboard">
+<div class="menu-dashboard">
     <h1>Mes Cours</h1>
   
   
@@ -28,7 +28,7 @@
                             @{
                                 var module1 = module;
                             }
-                            <a class="btn btn-primary btn-sm w-100"
+                            <a 
                                 asp-controller="Courses"
                                 asp-action="Details"
                                 asp-route-id="@course.Id">
@@ -38,15 +38,23 @@
                             
                             @foreach (var m in course.Modules)
                             {
-                                <div>
-                                    <a
-                                        asp-controller="Courses"
-                                        asp-action="Lesson"
-                                        asp-route-id="@m.Id">
-                                        <i class="fas fa-eye"></i> @m.Title 
-                                        
-                                    </a>
-                                </div>
+
+                                
+                                @if (m.Lessons != null && m.Lessons.Any())
+                                {
+                                    <h4><i class="fas fa-video"></i> Sous module @m.Title</h4>
+                                    <ul class="list-unstyled ms-3 mt-2">
+                                        @foreach (var lesson in m.Lessons.OrderBy(l => l.OrderIndex))
+                                    {
+                                        <li class="mb-2">
+                                            <a asp-action="Lesson" asp-route-id="@lesson.Id">
+                                                <i class="fas fa-play-circle"></i> @lesson.Title
+                                            </a>
+                                        </li>
+                                     
+                                        }
+                                    </ul>
+                                }
                             }
 
 

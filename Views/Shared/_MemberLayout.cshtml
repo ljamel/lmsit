@@ -1,11 +1,12 @@
 <head>
     <link rel="stylesheet" href="~/MemberLayout.css?v=@DateTime.Now.Ticks" />
     <link rel="stylesheet" href="~/css/member-dashboard.css" />
-
 </head>
 
 <body>
     <div class="member-container">
         @RenderBody()
     </div>
+
+    @RenderSection("Scripts", required: false)
 </body>

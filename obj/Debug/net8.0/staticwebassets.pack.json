@@ -257,6 +257,10 @@
       "PackagePath": "staticwebassets/templatemo-electric-xtra.css"
     },
     {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/0b460fa38aba452cbb992f6ee707139c.mp3",
+      "PackagePath": "staticwebassets/videos/0b460fa38aba452cbb992f6ee707139c.mp3"
+    },
+    {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/2b5bb16f431e43bb966ec06249b2f330.mp3",
       "PackagePath": "staticwebassets/videos/2b5bb16f431e43bb966ec06249b2f330.mp3"
     },
@@ -269,12 +273,20 @@
       "PackagePath": "staticwebassets/videos/6b4adc4629c84f33a41efd79ba5c751f.mp4"
     },
     {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/77ec2d487a4e448587adca861ab9059d.mp3",
+      "PackagePath": "staticwebassets/videos/77ec2d487a4e448587adca861ab9059d.mp3"
+    },
+    {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/b0186f64d6384a7182a02506a4b7e09e.mp4",
       "PackagePath": "staticwebassets/videos/b0186f64d6384a7182a02506a4b7e09e.mp4"
     },
     {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/cda7d5975c3a43ba849f554ddb0fffc1.mp4",
       "PackagePath": "staticwebassets/videos/cda7d5975c3a43ba849f554ddb0fffc1.mp4"
+    },
+    {
+      "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/cf6ff226ef43472aac20450241cc243c.mp4",
+      "PackagePath": "staticwebassets/videos/cf6ff226ef43472aac20450241cc243c.mp4"
     },
     {
       "Id": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/wwwroot/videos/e0f99e0ec6cc48ffaa8a6f290eb19479.mp4",

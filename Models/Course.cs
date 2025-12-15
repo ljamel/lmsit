@@ -48,7 +48,7 @@ namespace CrudDemo.Models
 		public required string Description { get; set; }
 		public string? VideoFileName { get; set; }
 		public string? VideoPath { get; set; }
-		public int OrderIndex { get; set; }
+		public int OrderIndex { get; set; } = 1;
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 		[ForeignKey("ModuleId")]
 		public Module? Module { get; set; }

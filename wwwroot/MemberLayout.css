@@ -11,8 +11,8 @@ body {
 
 
 .container.mt-4 {
-    margin-right: 10%;
-    animation: fadeInContainer 0.6s ease-out;
+    margin-left: 10%;
+    margin-top: 2%;
 }
 
 .member-container {
@@ -25,15 +25,9 @@ body {
     background: linear-gradient(135deg, #434c5e 0%, #2c3142 100%);
     color: white;
     padding: 4%;
-    border-radius: 0 12px 12px 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.4s ease;
     animation: slideInLeft 0.5s ease-out;
-}
-
-.menu-dashboard:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transform: translateX(5px);
 }
 
 .menu-dashboard a {
@@ -41,18 +35,9 @@ body {
     color: white;
     text-transform: uppercase;
     display: block;
-    padding: 12px 16px;
     margin: 8px 0;
-    border-radius: 6px;
-    transition: all 0.3s ease;
     font-weight: 500;
     letter-spacing: 0.5px;
-}
-
-.menu-dashboard a:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transform: translateX(10px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 /* ========== CARDS ========== */
@@ -64,11 +49,6 @@ body {
     animation: slideUp 0.5s ease-out;
 }
 
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-}
 
 .card-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
