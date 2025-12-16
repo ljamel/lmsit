@@ -98,6 +98,34 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/Cancel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9DYW5jZWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/Checkout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9DaGVja291dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/MyPayments.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9NeVBheW1lbnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/SubscriptionCancel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9TdWJzY3JpcHRpb25DYW5jZWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/SubscriptionCheckout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9TdWJzY3JpcHRpb25DaGVja291dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/SubscriptionSuccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9TdWJzY3JpcHRpb25TdWNjZXNzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Payment/Success.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudC9TdWNjZXNzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/lamri/Desktop/lmsprogfacil/CrudDemo/Views/Produits/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZHVpdHMvQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

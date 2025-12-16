@@ -42,28 +42,28 @@
         </a>
         <ul class="nav-links" id="navLinks">
             <li>
-                <a href="#home" class="nav-link">Accueil</a>
+                <a href="/#home" class="nav-link">Accueil</a>
             </li>
             <li>
-                <a href="#features" class="nav-link">Compétences</a>
+                <a href="/#features" class="nav-link">Compétences</a>
             </li>
             <li>
-                <a href="#about" class="nav-link">À propos</a>
+                <a href="/#about" class="nav-link">POURQUOI</a>
             </li>
             <li>
-                <a href="#contact" class="nav-link">Contact</a>
+                <a href="/#contact" class="nav-link">Contact</a>
             </li>
 
             @if (User?.Identity?.IsAuthenticated ?? false)
             {
                 <li>
-                    <a asp-area="" asp-controller="Courses" asp-action="Index">Mes Cours</a>
+                    <a asp-area="" asp-controller="Courses" asp-action="Index">COURS</a>
                 </li>
             }
-            @if (User?.Identity?.IsAuthenticated ?? false && User.IsInRole("Admin"))
+            @if ((User?.Identity?.IsAuthenticated ?? false) && (User?.IsInRole("Admin") ?? false))
             {
                 <li>
-                    <a asp-area="" asp-controller="AdminCourses" asp-action="Index">Gérer les cours</a>
+                    <a asp-area="" asp-controller="AdminCourses" asp-action="Index">ADMINCOURS</a>
                 </li>
             }
 
@@ -71,8 +71,6 @@
             {
                 <li class="nav-item">
                     <span class="nav-link text-dark">@User?.Identity?.Name</span>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Déconnexion</a>
                 </li>
             }

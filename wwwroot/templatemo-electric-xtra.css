@@ -263,15 +263,7 @@ https://templatemo.com/tm-596-electric-xtra
         }
 
         .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #FF5E00, #00B2FF);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(255, 94, 0, 0.8);
+
         }
 
         .nav-links a:hover::after,

@@ -11,15 +11,18 @@ namespace CrudDemo.Data
 		{
 		}
 
-		public DbSet<Produit> Produits { get; set; }
-		public DbSet<Course> Courses { get; set; }
-		public DbSet<Module> Modules { get; set; }
-		public DbSet<Lesson> Lessons { get; set; }
-		public DbSet<Quiz> Quizzes { get; set; }
-		public DbSet<QuizOption> QuizOptions { get; set; }
-		public DbSet<UserQuizResult> UserQuizResults { get; set; }
+	public DbSet<Produit> Produits { get; set; }
+	public DbSet<Course> Courses { get; set; }
+	public DbSet<Module> Modules { get; set; }
+	public DbSet<Lesson> Lessons { get; set; }
+	public DbSet<Quiz> Quizzes { get; set; }
+	public DbSet<QuizOption> QuizOptions { get; set; }
+	public DbSet<UserQuizResult> UserQuizResults { get; set; }
+	public DbSet<Payment> Payments { get; set; }
+	public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+	public DbSet<Subscription> Subscriptions { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 

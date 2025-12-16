@@ -249,3 +249,4 @@
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Design.dll
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/bin/Debug/net8.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 /home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/Debug/net8.0/CrudDemo.sourcelink.json
+/home/lamri/Desktop/lmsprogfacil/CrudDemo/bin/Debug/net8.0/Stripe.net.dll

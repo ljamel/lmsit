@@ -23,6 +23,20 @@ namespace CrudDemo.Controllers
         // List all courses (public view for authenticated users)
         public async Task<IActionResult> Index()
         {
+            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
+            if (!User.IsInRole("Admin"))
+            {
+                var userId = User.Identity?.Name ?? "";
+                var hasActiveSubscription = await _context.Subscriptions
+                    .AnyAsync(s => s.UserId == userId && s.IsActive && s.Status == "active");
+
+                if (!hasActiveSubscription)
+                {
+                    TempData["Error"] = "Vous devez avoir un abonnement actif pour accéder aux cours.";
+                    return RedirectToAction("SubscriptionCheckout", "Payment");
+                }
+            }
+
             var courses = await _context.Courses
                 .Include(c => c.Modules)
                     .ThenInclude(m => m.Lessons)
@@ -36,6 +50,20 @@ namespace CrudDemo.Controllers
         // View course details with modules and lessons
         public async Task<IActionResult> Details(int id)
         {
+            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
+            if (!User.IsInRole("Admin"))
+            {
+                var userId = User.Identity?.Name ?? "";
+                var hasActiveSubscription = await _context.Subscriptions
+                    .AnyAsync(s => s.UserId == userId && s.IsActive && s.Status == "active");
+
+                if (!hasActiveSubscription)
+                {
+                    TempData["Error"] = "Vous devez avoir un abonnement actif pour accéder à ce cours.";
+                    return RedirectToAction("SubscriptionCheckout", "Payment");
+                }
+            }
+
             var course = await _context.Courses
                 .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
                     .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
@@ -44,7 +72,12 @@ namespace CrudDemo.Controllers
             if (course == null)
                 return NotFound();
             
+            // Vérifier si l'utilisateur est déjà inscrit
+            var userEmail = User.Identity?.Name ?? "";
+            var enrollment = await _context.CourseEnrollments
+                .FirstOrDefaultAsync(e => e.UserId == userEmail && e.CourseId == id && e.IsActive);
             
+            ViewBag.IsEnrolled = enrollment != null;
 
             return View(course);
         }
@@ -52,6 +85,20 @@ namespace CrudDemo.Controllers
         // View a specific lesson and video
         public async Task<IActionResult> Lesson(int id)
         {
+            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
+            if (!User.IsInRole("Admin"))
+            {
+                var userEmail = User.Identity?.Name ?? "";
+                var hasActiveSubscription = await _context.Subscriptions
+                    .AnyAsync(s => s.UserId == userEmail && s.IsActive && s.Status == "active");
+
+                if (!hasActiveSubscription)
+                {
+                    TempData["Error"] = "Vous devez avoir un abonnement actif pour accéder aux leçons.";
+                    return RedirectToAction("SubscriptionCheckout", "Payment");
+                }
+            }
+
             // Load lesson with module (no complex chaining)
             var lesson = await _context.Lessons
                 .Include(l => l.Module)

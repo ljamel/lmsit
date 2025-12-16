@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Paiement annulé";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg text-center animated-card">
+                <div class="card-body p-5">
+                    <div class="cancel-icon mb-4">
+                        <i class="fas fa-times-circle text-warning" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="text-warning mb-3">Paiement annulé</h2>
+                    <p class="lead mb-4">Vous avez annulé le paiement. Aucun montant n'a été débité.</p>
+                    
+                    @if (ViewBag.Course != null)
+                    {
+                        <div class="alert alert-info">
+                            <strong>@ViewBag.Course.Title</strong>
+                        </div>
+                    }
+                    
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Payment" asp-action="Checkout" asp-route-courseId="@ViewBag.Course?.Id" 
+                           class="btn btn-primary btn-lg animated-btn">
+                            <i class="fas fa-redo"></i> Réessayer le paiement
+                        </a>
+                        <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-list"></i> Retour aux cours
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animated-card {
+        animation: slideUp 0.5s ease-out;
+    }
+    
+    .cancel-icon {
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .animated-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+</style>

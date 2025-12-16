@@ -6,31 +6,94 @@
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white">
-                <h4>@ViewData["Title"]</h4>
+                    <h4 class="mb-0"><i class="fas fa-user-plus"></i> @ViewData["Title"]</h4>
                 </div>
-                <div class="contact-form">
-                    <form asp-action="Register" method="post">
-                        <div asp-validation-summary="All" class="text-danger"></div>
-                        <div class="form-group">
-                            <label for="name">Email</label><input asp-for="Email" class="form-control" id="email" name="email" required="">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Formulaire d'inscription -->
+                        <div class="col-md-7">
+                            <form asp-action="Register" method="post">
+                                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </label>
+                                    <input asp-for="Email" class="form-control" id="email" placeholder="votre@email.com" required>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock"></i> Mot de passe
+                                    </label>
+                                    <input asp-for="Password" class="form-control" id="password" placeholder="••••••••" required>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                                
+                                <div class="form-group mb-4">
+                                    <label for="confirmpassword" class="form-label">
+                                        <i class="fas fa-lock"></i> Confirmer le mot de passe
+                                    </label>
+                                    <input asp-for="ConfirmPassword" class="form-control" id="confirmpassword" placeholder="••••••••" required>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-check"></i> S'inscrire
+                                </button>
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <p class="mb-0">
+                                    Vous avez déjà un compte? <a asp-action="Login" class="text-primary fw-bold">Se connecter</a>
+                                </p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="Password">Mot de passe</label><input asp-for="Password" class="form-control" id="password" name="Password" required="">
+                        
+                        <!-- Informations sur l'abonnement -->
+                        <div class="col-md-5">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h5 class="text-success mb-3">
+                                        <i class="fas fa-star"></i> Abonnement Mensuel
+                                    </h5>
+                                    <h2 class="text-primary mb-3">
+                                        <strong>29,99 €</strong>
+                                        <small class="text-muted fs-6">/mois</small>
+                                    </h2>
+                                    
+                                    <hr>
+                                    
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success"></i> Accès à tous les cours
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success"></i> Contenu illimité
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success"></i> Certificats de fin de formation
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success"></i> Support par email
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success"></i> Mises à jour gratuites
+                                        </li>
+                                    </ul>
+                                    
+                                    <small class="text-muted d-block mt-3">
+                                        <i class="fas fa-shield-alt"></i> Paiement sécurisé par Stripe
+                                    </small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="ConfirmPassword">Confirmer le mot de passe</label><input asp-for="ConfirmPassword" class="form-control" required="">
-                        </div>
-                        <button type="submit" class="submit-btn">Se connecter</button>
-                    </form>
+                    </div>
                 </div>
-            </div>
-            <div class="card-footer">
-                <p class="text-center mb-0">
-                    Vous avez déjà un compte? <a asp-action="Login">Se connecter</a>
-                </p>
             </div>
         </div>
     </div>

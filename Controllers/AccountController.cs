@@ -47,10 +47,16 @@ namespace CrudDemo.Controllers
 						}
 
 						await _userManager.AddToRoleAsync(user, adminRole);
+						
+						// Premier utilisateur (Admin) - pas besoin de paiement
+						await _signInManager.SignInAsync(user, isPersistent: false);
+						return RedirectToAction("Index", "Home");
 					}
 
+					// Nouvel utilisateur normal - rediriger vers la page de paiement
 					await _signInManager.SignInAsync(user, isPersistent: false);
-					return RedirectToAction("Index", "Home");
+					TempData["Message"] = "Compte créé avec succès ! Veuillez procéder au paiement pour activer votre abonnement.";
+					return RedirectToAction("SubscriptionCheckout", "Payment");
 				}
 
 				foreach (var error in result.Errors)

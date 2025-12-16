@@ -10,14 +10,17 @@ namespace CrudDemo.Models
 		[Required]
 		public required string Title { get; set; }
 
-		[Required]
-		public required string Description { get; set; }
+	[Required]
+	public required string Description { get; set; }
 
-		public string CreatedBy { get; set; } = string.Empty;
+	[Range(0, 10000)]
+	public decimal Price { get; set; } = 0; // 0 = gratuit
 
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+	public bool IsFree { get; set; } = true;
 
-		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+	public string CreatedBy { get; set; } = string.Empty;
+
+	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 		public ICollection<Module> Modules { get; set; } = new List<Module>();
 	}

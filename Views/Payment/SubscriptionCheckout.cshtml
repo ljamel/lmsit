@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Abonnement";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg animated-card">
+                <div class="card-header gradient-header-subscription text-white">
+                    <h2 class="mb-0 text-center">
+                        <i class="fas fa-star"></i> Abonnement Mensuel
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-info">
+                            @TempData["Message"]
+                        </div>
+                    }
+                    
+                    <div class="text-center mb-4">
+                        <h1 class="text-primary mb-2">
+                            <strong>29,99 €</strong>
+                            <small class="text-muted fs-5">/mois</small>
+                        </h1>
+                        <p class="text-muted">Accès illimité à tous les cours</p>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Ce qui est inclus :</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Accès illimité</strong> à tous les cours
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Nouveau contenu</strong> ajouté régulièrement
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Certificats</strong> de fin de formation
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Support technique</strong> par email
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Mises à jour gratuites</strong> des cours
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Annulation</strong> à tout moment
+                        </li>
+                    </ul>
+                    
+                    <hr class="my-4">
+                    
+                    <form asp-action="CreateSubscriptionSession" method="post">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 animated-btn">
+                            <i class="fas fa-lock"></i> Procéder au paiement
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt"></i> Paiement 100% sécurisé par Stripe
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gradient-header-subscription {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+    }
+    
+    .animated-card {
+        animation: slideUp 0.5s ease-out;
+    }
+    
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .animated-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
