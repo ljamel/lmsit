@@ -941,6 +941,16 @@ https://templatemo.com/tm-596-electric-xtra
             animation: scan 3s linear infinite;
         }
 
+        /* subscribe and connect */
+        .card-body
+        {
+            margin-block: 8%;
+            text-align: center;
+        }
+        label.form-label {
+            font-size: 2em;
+        }
+
         @keyframes scan {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }

@@ -1,0 +1,411 @@
+@{
+    ViewData["Title"] = "Foire Aux Questions (FAQ)";
+}
+
+<div class="faq-page">
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h1 class="mb-4 text-center" style="color: #00B2FF; text-shadow: 0 0 20px rgba(0,178,255,0.5);">Foire Aux Questions</h1>
+                <p class="text-center mb-5" style="color: rgba(255,255,255,0.7); font-size: 1.1rem;">Retrouvez les réponses aux questions les plus fréquentes</p>
+
+            <!-- Général -->
+            <div class="faq-category mb-5">
+                <h2 class="category-title">
+                    <i class="fas fa-info-circle me-2"></i>Questions Générales
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Qu'est-ce que INGENIUS ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>INGENIUS est une plateforme de formation en ligne spécialisée dans la cybersécurité et les technologies de l'information. Nous proposons des cours complets, structurés en modules et leçons, avec des quiz interactifs pour valider vos connaissances.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>À qui s'adressent vos formations ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Nos formations s'adressent à tous les niveaux : débutants souhaitant découvrir la cybersécurité, professionnels en reconversion, ou experts cherchant à approfondir leurs compétences. Chaque cours indique le niveau requis.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Proposez-vous des cours gratuits ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Non, tous nos cours sont inclus dans l'abonnement mensuel à 29,99 €. Cette formule vous permet d'accéder à l'ensemble du catalogue sans limitation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Abonnement & Paiement -->
+            <div class="faq-category mb-5">
+                <h2 class="category-title">
+                    <i class="fas fa-credit-card me-2"></i>Abonnement & Paiement
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Quel est le prix de l'abonnement ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>L'abonnement mensuel coûte <strong>29,99 € TTC par mois</strong>. Il se renouvelle automatiquement chaque mois et vous donne un accès illimité à tous les cours de la plateforme.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Quels moyens de paiement acceptez-vous ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Nous acceptons toutes les cartes bancaires (Visa, Mastercard, American Express) via notre partenaire de paiement sécurisé Stripe. Vos données bancaires sont protégées selon les normes PCI-DSS niveau 1.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Comment fonctionne le renouvellement automatique ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Après votre premier paiement lors de l'inscription, votre abonnement est renouvelé automatiquement chaque mois à la même date. Vous serez débité de 29,99 € sans intervention de votre part.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Puis-je annuler mon abonnement à tout moment ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Oui, vous pouvez annuler votre abonnement à tout moment depuis votre espace personnel. L'annulation prendra effet à la fin de la période déjà payée. Vous conserverez l'accès aux cours jusqu'à cette date.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Puis-je obtenir un remboursement ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Conformément à la législation sur les contenus numériques fournis immédiatement, le droit de rétractation de 14 jours ne s'applique pas. Aucun remboursement n'est effectué pour la période en cours déjà payée.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accès & Utilisation -->
+            <div class="faq-category mb-5">
+                <h2 class="category-title">
+                    <i class="fas fa-laptop-code me-2"></i>Accès & Utilisation
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Quand puis-je accéder aux cours après mon inscription ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>L'accès aux cours est activé immédiatement après la validation de votre paiement. Vous pouvez commencer à suivre les formations dans les minutes qui suivent votre inscription.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Les cours sont-ils disponibles 24h/24 ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Oui, la plateforme est accessible 24 heures sur 24 et 7 jours sur 7, sous réserve de disponibilité technique. Vous pouvez suivre les cours à votre rythme, quand vous le souhaitez.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Puis-je télécharger les vidéos de cours ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Non, les vidéos et tous les contenus restent accessibles uniquement en streaming sur la plateforme. Le téléchargement, la copie ou la distribution des contenus est strictement interdit conformément aux droits d'auteur.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Puis-je partager mon compte avec d'autres personnes ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Non, le partage de compte est strictement interdit. Chaque abonnement est personnel et ne peut être utilisé que par une seule personne. Le partage d'identifiants peut entraîner la suspension immédiate de votre compte.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Comment fonctionne la progression dans les cours ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Chaque cours est structuré en modules contenant plusieurs leçons. Vous pouvez suivre les leçons dans l'ordre ou selon vos préférences. Des quiz sont disponibles pour tester vos connaissances et valider votre progression.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technique & Support -->
+            <div class="faq-category mb-5">
+                <h2 class="category-title">
+                    <i class="fas fa-tools me-2"></i>Technique & Support
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Quels sont les prérequis techniques ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Vous avez besoin d'un ordinateur, tablette ou smartphone avec une connexion Internet stable. La plateforme fonctionne sur tous les navigateurs modernes (Chrome, Firefox, Safari, Edge).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Que faire si je rencontre un problème technique ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Contactez notre support technique par email à <strong>support@ingenius.com</strong> ou via le formulaire de contact. Nous répondons généralement sous 24 heures ouvrées.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Mes données personnelles sont-elles sécurisées ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Oui, nous appliquons les normes RGPD pour la protection de vos données. Nous ne partageons jamais vos informations avec des tiers. Vos données bancaires sont gérées exclusivement par Stripe et ne sont jamais stockées sur nos serveurs.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Comment puis-je modifier mes informations personnelles ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Vous pouvez modifier vos informations depuis votre espace personnel. Pour toute demande de modification ou suppression de données conformément au RGPD, contactez-nous à <strong>privacy@ingenius.com</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certifications & Carrière -->
+            <div class="faq-category mb-5">
+                <h2 class="category-title">
+                    <i class="fas fa-certificate me-2"></i>Certifications & Carrière
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Recevrai-je un certificat après avoir terminé un cours ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Actuellement, nous ne délivrons pas de certificats officiels. Cependant, vous pouvez suivre votre progression et vos résultats aux quiz depuis votre tableau de bord personnel.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleAnswer(this)">
+                        <i class="fas fa-chevron-right me-2"></i>
+                        <strong>Les formations sont-elles reconnues professionnellement ?</strong>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Nos formations visent à développer des compétences pratiques en cybersécurité. Bien que nous ne délivrions pas de certification officielle, les connaissances acquises sont directement applicables dans le monde professionnel.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="card mt-5">
+                <div class="card-body text-center p-5">
+                    <h3 class="mb-3">Vous ne trouvez pas la réponse à votre question ?</h3>
+                    <p class="mb-4" style="color: rgba(255,255,255,0.7);">Notre équipe est là pour vous aider</p>
+                    <div class="contact-info">
+                        <p class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i><strong>Email :</strong> contact@ingenius.com</p>
+                        <p class="mb-2"><i class="fas fa-phone me-2 text-primary"></i><strong>Téléphone :</strong> +33 (0)1 XX XX XX XX</p>
+                        <p class="mb-0"><i class="fas fa-clock me-2 text-primary"></i><strong>Horaires :</strong> Lundi - Vendredi, 9h - 18h</p>
+                    </div>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-4">Retour à l'accueil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .faq-page {
+        min-height: 100vh;
+        padding: 80px 0 40px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .faq-category {
+        margin-bottom: 3rem;
+    }
+
+    .category-title {
+        color: #FF5E00;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid #00B2FF;
+        text-shadow: 0 0 20px rgba(255,94,0,0.5);
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .faq-item {
+        background: rgba(15, 15, 35, 0.8);
+        border: 1px solid rgba(0, 178, 255, 0.3);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 0 20px rgba(0, 178, 255, 0.2);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .faq-item:hover {
+        border-color: rgba(255, 94, 0, 0.6);
+        box-shadow: 0 0 30px rgba(255, 94, 0, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .faq-question {
+        padding: 1.25rem 1.5rem;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(90deg, rgba(255,94,0,0.1), transparent);
+        color: #fff;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .faq-question:hover {
+        background: linear-gradient(90deg, rgba(255,94,0,0.2), rgba(0,178,255,0.1));
+    }
+
+    .faq-question i {
+        transition: transform 0.3s ease;
+        color: #00B2FF;
+        font-size: 0.9rem;
+    }
+
+    .faq-question.active {
+        background: linear-gradient(90deg, rgba(255,94,0,0.3), rgba(0,178,255,0.2));
+        border-bottom: 1px solid rgba(0, 178, 255, 0.3);
+    }
+
+    .faq-question.active i {
+        transform: rotate(90deg);
+        color: #FF5E00;
+    }
+
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        background: rgba(10, 10, 25, 0.6);
+    }
+
+    .faq-answer.show {
+        max-height: 500px;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .faq-answer p {
+        margin: 0;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.8);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.05rem;
+    }
+
+    .card {
+        background: rgba(15, 15, 35, 0.9) !important;
+        border: 2px solid rgba(0, 178, 255, 0.4) !important;
+        box-shadow: 0 0 30px rgba(0, 178, 255, 0.3) !important;
+        backdrop-filter: blur(15px);
+    }
+
+    .card h3 {
+        color: #FF5E00;
+        font-family: 'Orbitron', sans-serif;
+        text-shadow: 0 0 15px rgba(255,94,0,0.5);
+    }
+
+    .card .text-muted {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    .contact-info p {
+        font-size: 1.05rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    .text-primary {
+        color: #00B2FF !important;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #FF5E00, #FF8C00);
+        border: 2px solid rgba(0, 178, 255, 0.5);
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-family: 'Orbitron', sans-serif;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 20px rgba(255, 94, 0, 0.4);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #00B2FF, #0095DD);
+        border-color: rgba(255, 94, 0, 0.8);
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(0, 178, 255, 0.6);
+    }
+</style>
+
+<script>
+    function toggleAnswer(element) {
+        const answer = element.nextElementSibling;
+        const isActive = element.classList.contains('active');
+        
+        // Fermer toutes les autres réponses
+        document.querySelectorAll('.faq-question.active').forEach(q => {
+            q.classList.remove('active');
+            q.nextElementSibling.classList.remove('show');
+        });
+        
+        // Ouvrir/fermer la réponse cliquée
+        if (!isActive) {
+            element.classList.add('active');
+            answer.classList.add('show');
+        }
+    }
+</script>
+

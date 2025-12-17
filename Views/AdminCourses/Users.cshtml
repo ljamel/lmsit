@@ -1,0 +1,387 @@
+@{
+    ViewData["Title"] = "Utilisateurs Inscrits";
+    var userSubscriptions = ViewBag.UserSubscriptions as IEnumerable<dynamic>;
+}
+
+<div class="users-page">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 style="color: #00B2FF; text-shadow: 0 0 20px rgba(0,178,255,0.5); font-family: 'Orbitron', sans-serif;">
+                <i class="fas fa-users me-2"></i>Utilisateurs Inscrits
+            </h1>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour aux Cours
+            </a>
+        </div>
+
+        <div class="stats-cards mb-4">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@userSubscriptions.Count()</h3>
+                    <p>Total Utilisateurs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@userSubscriptions.Count(us => us.Subscription != null && us.Subscription.IsActive)</h3>
+                    <p>Abonnements Actifs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon inactive">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@userSubscriptions.Count(us => us.Subscription == null || !us.Subscription.IsActive)</h3>
+                    <p>Sans Abonnement</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user me-2"></i>Email</th>
+                        <th><i class="fas fa-id-badge me-2"></i>Nom d'utilisateur</th>
+                        <th><i class="fas fa-shield-alt me-2"></i>Statut Abonnement</th>
+                        <th><i class="fas fa-calendar-alt me-2"></i>Date Début</th>
+                        <th><i class="fas fa-calendar-check me-2"></i>Fin de Période</th>
+                        <th><i class="fas fa-credit-card me-2"></i>ID Stripe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in userSubscriptions)
+                    {
+                        var user = item.User;
+                        var subscription = item.Subscription;
+                        var hasActiveSubscription = subscription != null && subscription.IsActive;
+                        
+                        <tr class="@(hasActiveSubscription ? "active-user" : "inactive-user")">
+                            <td>
+                                <div class="user-email">
+                                    <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
+                                    @user.Email
+                                </div>
+                            </td>
+                            <td>
+                                <div class="username">
+                                    @(user.UserName ?? "-")
+                                </div>
+                            </td>
+                            <td>
+                                @if (hasActiveSubscription)
+                                {
+                                    <span class="badge-active">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        @subscription.Status
+                                    </span>
+                                }
+                                else if (subscription != null)
+                                {
+                                    <span class="badge-inactive">
+                                        <i class="fas fa-times-circle me-1"></i>
+                                        @subscription.Status
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge-none">
+                                        <i class="fas fa-minus-circle me-1"></i>
+                                        Aucun
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (subscription != null)
+                                {
+                                    <span class="date-info">
+                                        @subscription.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (subscription != null)
+                                {
+                                    <span class="date-info">
+                                        @subscription.CurrentPeriodEnd.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (subscription != null && !string.IsNullOrEmpty(subscription.StripeSubscriptionId))
+                                {
+                                    <code class="stripe-id">@subscription.StripeSubscriptionId.Substring(0, Math.Min(20, subscription.StripeSubscriptionId.Length))...</code>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!userSubscriptions.Any())
+        {
+            <div class="alert-custom">
+                <i class="fas fa-info-circle me-2"></i>
+                Aucun utilisateur inscrit pour le moment.
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .users-page {
+        min-height: 100vh;
+        padding: 80px 0 40px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(15, 15, 35, 0.8);
+        border: 2px solid rgba(0, 178, 255, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-card:hover {
+        border-color: rgba(255, 94, 0, 0.6);
+        box-shadow: 0 0 30px rgba(255, 94, 0, 0.3);
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        color: #00B2FF;
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 178, 255, 0.1);
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(0, 178, 255, 0.3);
+    }
+
+    .stat-icon.active {
+        color: #00FF88;
+        background: rgba(0, 255, 136, 0.1);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+
+    .stat-icon.inactive {
+        color: #FF5E00;
+        background: rgba(255, 94, 0, 0.1);
+        box-shadow: 0 0 20px rgba(255, 94, 0, 0.3);
+    }
+
+    .stat-info h3 {
+        font-size: 2rem;
+        color: #fff;
+        margin: 0;
+        font-family: 'Orbitron', sans-serif;
+        text-shadow: 0 0 15px rgba(0, 178, 255, 0.5);
+    }
+
+    .stat-info p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.1rem;
+    }
+
+    .table-container {
+        background: rgba(15, 15, 35, 0.8);
+        border: 2px solid rgba(0, 178, 255, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .users-table thead tr {
+        background: linear-gradient(90deg, rgba(255, 94, 0, 0.2), rgba(0, 178, 255, 0.2));
+    }
+
+    .users-table th {
+        padding: 1rem;
+        text-align: left;
+        color: #00B2FF;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-bottom: 2px solid rgba(0, 178, 255, 0.3);
+    }
+
+    .users-table tbody tr {
+        background: rgba(10, 10, 25, 0.6);
+        transition: all 0.3s ease;
+    }
+
+    .users-table tbody tr:hover {
+        background: rgba(255, 94, 0, 0.15);
+        transform: translateX(5px);
+    }
+
+    .users-table tbody tr.active-user {
+        border-left: 3px solid #00FF88;
+    }
+
+    .users-table tbody tr.inactive-user {
+        border-left: 3px solid rgba(255, 94, 0, 0.6);
+    }
+
+    .users-table td {
+        padding: 1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1rem;
+    }
+
+    .user-email {
+        font-weight: 600;
+    }
+
+    .username {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .badge-active {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+        border: 1px solid #00FF88;
+        border-radius: 20px;
+        color: #00FF88;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .badge-inactive {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(255, 94, 0, 0.2), rgba(255, 94, 0, 0.1));
+        border: 1px solid #FF5E00;
+        border-radius: 20px;
+        color: #FF5E00;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .badge-none {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: rgba(128, 128, 128, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .date-info {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+    }
+
+    .stripe-id {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: #00B2FF;
+        background: rgba(0, 178, 255, 0.1);
+        padding: 0.25rem 0.5rem;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 178, 255, 0.3);
+    }
+
+    .text-muted {
+        color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .alert-custom {
+        background: rgba(255, 94, 0, 0.1);
+        border: 2px solid rgba(255, 94, 0, 0.4);
+        color: #FF5E00;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.1rem;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, rgba(108, 117, 125, 0.8), rgba(73, 80, 87, 0.8));
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, rgba(73, 80, 87, 0.9), rgba(52, 58, 64, 0.9));
+        border-color: rgba(0, 178, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(0, 178, 255, 0.3);
+    }
+
+    @@media (max-width: 768px) {
+        .stats-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .table-container {
+            overflow-x: scroll;
+        }
+
+        .users-table {
+            font-size: 0.85rem;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>

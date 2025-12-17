@@ -544,5 +544,23 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
             return RedirectToAction("Index");
         }
 
+        // -----------------------------
+        // USERS MANAGEMENT
+        // -----------------------------
+        public async Task<IActionResult> Users()
+        {
+            var users = await _context.Users.ToListAsync();
+            var subscriptions = await _context.Subscriptions.ToListAsync();
+            
+            var userSubscriptions = users.Select(user => new
+            {
+                User = user,
+                Subscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email && s.IsActive)
+            }).ToList();
+            
+            ViewBag.UserSubscriptions = userSubscriptions;
+            return View();
+        }
+
     }
 }

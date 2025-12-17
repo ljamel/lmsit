@@ -1,0 +1,184 @@
+@{
+    ViewData["Title"] = "Conditions Générales de Vente";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4">Conditions Générales de Vente</h1>
+            <p class="text-muted">Dernière mise à jour : @DateTime.Now.ToString("dd/MM/yyyy")</p>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 1 - Objet</h2>
+                    <p>Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre la plateforme de formation en ligne et ses utilisateurs concernant l'accès aux cours et formations proposés.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 2 - Prix et Abonnement</h2>
+                    <p><strong>Formule d'abonnement :</strong> Accès illimité mensuel à 29,99 € TTC par mois</p>
+                    <ul>
+                        <li>Le prix est indiqué en euros toutes taxes comprises (TTC)</li>
+                        <li>L'abonnement est renouvelé automatiquement chaque mois</li>
+                        <li>Le paiement s'effectue par carte bancaire via notre prestataire sécurisé Stripe</li>
+                        <li>Nous nous réservons le droit de modifier nos tarifs à tout moment, avec un préavis de 30 jours</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 3 - Modalités de Paiement</h2>
+                    <p>Le paiement de l'abonnement s'effectue :</p>
+                    <ul>
+                        <li>Par carte bancaire (Visa, Mastercard, American Express)</li>
+                        <li>Via la plateforme de paiement sécurisée Stripe</li>
+                        <li>Le premier paiement est effectué lors de l'inscription</li>
+                        <li>Les paiements suivants sont prélevés automatiquement chaque mois à la même date</li>
+                    </ul>
+                    <p class="mt-3"><strong>Sécurité :</strong> Nous ne stockons aucune information bancaire. Toutes les transactions sont sécurisées par Stripe, certifié PCI-DSS niveau 1.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 4 - Accès aux Cours</h2>
+                    <ul>
+                        <li>L'accès aux cours est activé immédiatement après la validation du paiement</li>
+                        <li>L'utilisateur dispose d'un accès illimité à tous les cours pendant la durée de son abonnement</li>
+                        <li>En cas d'annulation de l'abonnement, l'accès reste actif jusqu'à la fin de la période payée</li>
+                        <li>Les cours sont accessibles 24h/24 et 7j/7, sous réserve de disponibilité technique</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 5 - Droit de Rétractation</h2>
+                    <p>Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation ne peut être exercé pour les contenus numériques fournis immédiatement après la conclusion du contrat et avec l'accord préalable exprès du consommateur.</p>
+                    <p class="mt-2">En validant votre inscription et votre paiement, vous reconnaissez expressément :</p>
+                    <ul>
+                        <li>Que l'exécution du contrat commence immédiatement après le paiement</li>
+                        <li>Que vous renoncez à votre droit de rétractation de 14 jours</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 6 - Résiliation et Remboursement</h2>
+                    <p><strong>Résiliation par l'utilisateur :</strong></p>
+                    <ul>
+                        <li>Vous pouvez annuler votre abonnement à tout moment depuis votre espace personnel</li>
+                        <li>L'annulation prend effet à la fin de la période d'abonnement en cours</li>
+                        <li>Aucun remboursement n'est effectué pour la période en cours déjà payée</li>
+                        <li>Vous conservez l'accès aux cours jusqu'à la date d'expiration de votre abonnement</li>
+                    </ul>
+                    <p class="mt-3"><strong>Résiliation par la plateforme :</strong></p>
+                    <ul>
+                        <li>En cas de manquement grave aux CGU (partage de compte, fraude, etc.)</li>
+                        <li>En cas de comportement abusif ou contraire à l'éthique</li>
+                        <li>Sans préavis ni remboursement en cas de violation des conditions d'utilisation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 7 - Propriété Intellectuelle</h2>
+                    <p>Tous les contenus présents sur la plateforme (textes, vidéos, images, documents, etc.) sont protégés par le droit d'auteur et restent la propriété exclusive de la plateforme.</p>
+                    <p class="mt-2"><strong>Il est strictement interdit de :</strong></p>
+                    <ul>
+                        <li>Télécharger, copier, reproduire ou distribuer les contenus</li>
+                        <li>Partager votre compte ou vos identifiants avec des tiers</li>
+                        <li>Utiliser les contenus à des fins commerciales</li>
+                        <li>Modifier, adapter ou créer des œuvres dérivées</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 8 - Garanties et Responsabilités</h2>
+                    <p><strong>Nous garantissons :</strong></p>
+                    <ul>
+                        <li>La disponibilité de la plateforme dans la mesure du raisonnablement possible</li>
+                        <li>La qualité pédagogique de nos contenus</li>
+                        <li>La sécurité de vos données personnelles</li>
+                    </ul>
+                    <p class="mt-3"><strong>Limitations de responsabilité :</strong></p>
+                    <ul>
+                        <li>Nous ne garantissons pas de résultats spécifiques suite aux formations</li>
+                        <li>Nous ne sommes pas responsables des interruptions techniques indépendantes de notre volonté</li>
+                        <li>Nous ne sommes pas responsables de l'utilisation que vous faites des connaissances acquises</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 9 - Données Personnelles</h2>
+                    <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles.</p>
+                    <p class="mt-2">Pour plus d'informations, consultez notre <a href="#" class="text-primary">Politique de Confidentialité</a>.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 10 - Modification des CGV</h2>
+                    <p>Nous nous réservons le droit de modifier les présentes CGV à tout moment. Les modifications entrent en vigueur dès leur publication sur le site.</p>
+                    <p class="mt-2">Les utilisateurs seront informés par email de toute modification substantielle au moins 30 jours avant leur entrée en vigueur.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Article 11 - Litiges et Droit Applicable</h2>
+                    <p>Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée avant toute action judiciaire.</p>
+                    <p class="mt-2">À défaut de résolution amiable, les tribunaux français seront seuls compétents.</p>
+                    <p class="mt-3"><strong>Médiation :</strong> Conformément à l'article L612-1 du Code de la consommation, vous pouvez recourir à un médiateur de la consommation en cas de litige.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4 bg-light">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Contact</h2>
+                    <p>Pour toute question concernant nos conditions générales de vente :</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope me-2"></i>Email : contact@votreplateforme.com</li>
+                        <li><i class="fas fa-phone me-2"></i>Téléphone : +33 (0)1 XX XX XX XX</li>
+                        <li><i class="fas fa-clock me-2"></i>Horaires : Lundi - Vendredi, 9h - 18h</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 mb-5">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Retour à l'accueil</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    .card-body h2 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    .text-primary {
+        color: #3498db !important;
+    }
+    ul {
+        line-height: 1.8;
+    }
+</style>
