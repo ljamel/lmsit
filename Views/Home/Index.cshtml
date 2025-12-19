@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="cta-container">
-        <a href="#features" class="cta-button cta-primary">Commencer la formation</a>
+        <a  asp-controller="Account" asp-action="Register" class="cta-button cta-primary">Commencer la formation</a>
         <a href="#about" class="cta-button cta-secondary">En savoir plus</a>
     </div>
 </section>
@@ -112,19 +112,133 @@
 
 <!-- Testimonials Section -->
 <section class="testimonials" id="testimonials">
-    <h2 class="section-title">Témoignages</h2>
+    <h2 class="section-title">Témoignages de nos étudiants</h2>
+    <p class="section-subtitle">Découvrez ce que pensent ceux qui ont suivi notre formation</p>
+    
     <div class="testimonial-container">
-        <div class="testimonial-item">
-            <p>"Cette formation m'a permis de passer de débutant à un niveau professionnel. Les labs et exercices sont très réalistes !"</p>
-            <h4>— Julien R., Analyste sécurité</h4>
+        <div class="testimonial-card">
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">
+                    <div class="avatar-circle">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="avatar-glow"></div>
+                </div>
+                <div class="testimonial-meta">
+                    <h4 class="testimonial-name">Julien R.</h4>
+                    <p class="testimonial-role">Analyste Sécurité</p>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-body">
+                <i class="quote-icon fas fa-quote-left"></i>
+                <p class="testimonial-text">Cette formation m'a permis de passer de débutant à un niveau professionnel. Les labs et exercices sont très réalistes ! La progression est fluide et j'ai pu rapidement mettre en pratique mes nouvelles compétences.</p>
+                <div class="testimonial-badge">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certifié CEH</span>
+                </div>
+            </div>
         </div>
-        <div class="testimonial-item">
-            <p>"Les formateurs sont experts et très pédagogues. J'ai décroché mon premier emploi en cybersécurité grâce à Cyber Master."</p>
-            <h4>— Amélie D., Pentesteuse junior</h4>
+
+        <div class="testimonial-card featured">
+            <div class="featured-badge">
+                <i class="fas fa-crown"></i>
+                <span>Coup de cœur</span>
+            </div>
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">
+                    <div class="avatar-circle">
+                        <i class="fas fa-user-secret"></i>
+                    </div>
+                    <div class="avatar-glow"></div>
+                </div>
+                <div class="testimonial-meta">
+                    <h4 class="testimonial-name">Amélie D.</h4>
+                    <p class="testimonial-role">Pentesteuse Junior</p>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-body">
+                <i class="quote-icon fas fa-quote-left"></i>
+                <p class="testimonial-text">Les formateurs sont experts et très pédagogues. J'ai décroché mon premier emploi en cybersécurité grâce à Cyber Master. Le contenu va bien au-delà de la théorie, c'est du concret !</p>
+                <div class="testimonial-badge">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Embauché en 3 mois</span>
+                </div>
+            </div>
         </div>
-        <div class="testimonial-item">
-            <p>"Le contenu est clair, structuré et les certifications proposées donnent un vrai avantage sur le marché du travail."</p>
-            <h4>— Marc L., Consultant sécurité</h4>
+
+        <div class="testimonial-card">
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">
+                    <div class="avatar-circle">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="avatar-glow"></div>
+                </div>
+                <div class="testimonial-meta">
+                    <h4 class="testimonial-name">Marc L.</h4>
+                    <p class="testimonial-role">Consultant Sécurité</p>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-body">
+                <i class="quote-icon fas fa-quote-left"></i>
+                <p class="testimonial-text">Le contenu est clair, structuré et les certifications proposées donnent un vrai avantage sur le marché du travail. J'ai pu augmenter mon salaire de 40% après la formation.</p>
+                <div class="testimonial-badge">
+                    <i class="fas fa-chart-line"></i>
+                    <span>+40% de salaire</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="testimonial-stats">
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="stat-number" data-target="1250">0</h3>
+            <p class="stat-label">Étudiants formés</p>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <h3 class="stat-number">4.9<span>/5</span></h3>
+            <p class="stat-label">Note moyenne</p>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <h3 class="stat-number" data-target="87">0</h3>
+            <p class="stat-label">% d'embauche</p>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <h3 class="stat-number" data-target="650">0</h3>
+            <p class="stat-label">Certifications obtenues</p>
         </div>
     </div>
 </section>
@@ -172,14 +286,14 @@
                 <div class="info-icon">📧</div>
                 <div class="info-details">
                     <h4>Email</h4>
-                    <p>contact@cybermaster.fr</p>
+                    <p>contact@progfacil.com</p>
                 </div>
             </div>
             <div class="info-item">
                 <div class="info-icon">📱</div>
                 <div class="info-details">
                     <h4>Téléphone</h4>
-                    <p>+33 6 00 00 00 00</p>
+                    <p>+33 6 25 54 14 66</p>
                 </div>
             </div>
             <div class="info-item">
