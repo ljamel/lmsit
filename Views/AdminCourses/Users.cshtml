@@ -29,7 +29,7 @@
                     <i class="fas fa-crown"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions.Count(us => us.Subscription != null && us.Subscription.IsActive)</h3>
+                    <h3>@userSubscriptions.Count(us => us.Subscription != null && ((dynamic)us.Subscription).IsActive)</h3>
                     <p>Abonnements Actifs</p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                     <i class="fas fa-user-times"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions.Count(us => us.Subscription == null || !us.Subscription.IsActive)</h3>
+                    <h3>@userSubscriptions.Count(us => us.Subscription == null || !((dynamic)us.Subscription).IsActive)</h3>
                     <p>Sans Abonnement</p>
                 </div>
             </div>
@@ -60,8 +60,9 @@
                     @foreach (var item in userSubscriptions)
                     {
                         var user = item.User;
-                        var subscription = item.Subscription;
-                        var hasActiveSubscription = subscription != null && subscription.IsActive;
+                        dynamic subscriptionObj = item.Subscription;
+                        bool hasSubscription = subscriptionObj != null;
+                        var hasActiveSubscription = hasSubscription && subscriptionObj.IsActive;
                         
                         <tr class="@(hasActiveSubscription ? "active-user" : "inactive-user")">
                             <td>
@@ -80,14 +81,14 @@
                                 {
                                     <span class="badge-active">
                                         <i class="fas fa-check-circle me-1"></i>
-                                        @subscription.Status
+                                        @subscriptionObj.Status
                                     </span>
                                 }
-                                else if (subscription != null)
+                                else if (hasSubscription)
                                 {
                                     <span class="badge-inactive">
                                         <i class="fas fa-times-circle me-1"></i>
-                                        @subscription.Status
+                                        @subscriptionObj.Status
                                     </span>
                                 }
                                 else
@@ -99,10 +100,10 @@
                                 }
                             </td>
                             <td>
-                                @if (subscription != null)
+                                @if (hasSubscription)
                                 {
                                     <span class="date-info">
-                                        @subscription.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                        @subscriptionObj.StartDate.ToString("dd/MM/yyyy HH:mm")
                                     </span>
                                 }
                                 else
@@ -111,18 +112,22 @@
                                 }
                             </td>
                             <td>
-                                @if (subscription != null && subscription.EndDate.HasValue)
+                                @if (hasSubscription)
                                 {
-                                    <span class="date-info">
-                                        @subscription.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
-                                    </span>
-                                }
-                                else if (subscription != null)
-                                {
-                                    <span class="badge-active">
-                                        <i class="fas fa-infinity me-1"></i>
-                                        Actif
-                                    </span>
+                                    var endDate = subscriptionObj.EndDate;
+                                    if (endDate != null)
+                                    {
+                                        <span class="date-info">
+                                            @(((DateTime)endDate).ToString("dd/MM/yyyy HH:mm"))
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-active">
+                                            <i class="fas fa-infinity me-1"></i>
+                                            Actif
+                                        </span>
+                                    }
                                 }
                                 else
                                 {
@@ -130,9 +135,9 @@
                                 }
                             </td>
                             <td>
-                                @if (subscription != null && !string.IsNullOrEmpty(subscription.StripeSubscriptionId))
+                                @if (hasSubscription && !string.IsNullOrEmpty(subscriptionObj.StripeSubscriptionId))
                                 {
-                                    <code class="stripe-id">@subscription.StripeSubscriptionId.Substring(0, Math.Min(20, subscription.StripeSubscriptionId.Length))...</code>
+                                    <code class="stripe-id">@subscriptionObj.StripeSubscriptionId.Substring(0, Math.Min(20, subscriptionObj.StripeSubscriptionId.Length))...</code>
                                 }
                                 else
                                 {
