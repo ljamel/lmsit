@@ -112,8 +112,7 @@ namespace CrudDemo.Data
                                 StripeCustomerId = $"cus_test_{Guid.NewGuid().ToString().Substring(0, 8)}",
                                 Status = "active",
                                 IsActive = true,
-                                StartDate = DateTime.UtcNow,
-                                CurrentPeriodEnd = DateTime.UtcNow.AddMonths(1)
+                                StartDate = DateTime.UtcNow
                             };
                             context.Subscriptions.Add(subscription);
                         }
@@ -186,28 +185,25 @@ namespace CrudDemo.Data
                     {
                         ModuleId = module1.Id,
                         Title = "Qu'est-ce que la cybersécurité ?",
-                        Content = "La cybersécurité est la pratique de protéger les systèmes, réseaux et programmes contre les attaques numériques.",
-                        VideoUrl = "/videos/intro-cybersecurity.mp4",
-                        OrderIndex = 1,
-                        Duration = 15
+                        Description = "La cybersécurité est la pratique de protéger les systèmes, réseaux et programmes contre les attaques numériques.",
+                        VideoPath = "/videos/intro-cybersecurity.mp4",
+                        OrderIndex = 1
                     },
                     new Lesson
                     {
                         ModuleId = module1.Id,
                         Title = "Les types de menaces",
-                        Content = "Découvrez les différents types de menaces : malware, phishing, ransomware, etc.",
-                        VideoUrl = "/videos/types-menaces.mp4",
-                        OrderIndex = 2,
-                        Duration = 20
+                        Description = "Découvrez les différents types de menaces : malware, phishing, ransomware, etc.",
+                        VideoPath = "/videos/types-menaces.mp4",
+                        OrderIndex = 2
                     },
                     new Lesson
                     {
                         ModuleId = module1.Id,
                         Title = "Les bonnes pratiques de sécurité",
-                        Content = "Apprenez les bases pour sécuriser vos systèmes et protéger vos données.",
-                        VideoUrl = "/videos/bonnes-pratiques.mp4",
-                        OrderIndex = 3,
-                        Duration = 18
+                        Description = "Apprenez les bases pour sécuriser vos systèmes et protéger vos données.",
+                        VideoPath = "/videos/bonnes-pratiques.mp4",
+                        OrderIndex = 3
                     }
                 };
 
@@ -221,9 +217,8 @@ namespace CrudDemo.Data
                 var quiz = new Quiz
                 {
                     LessonId = lessons[0].Id,
-                    Title = "Quiz : Les bases de la cybersécurité",
                     Question = "Qu'est-ce qu'un firewall ?",
-                    OrderIndex = 1
+                    Points = 10
                 };
                 context.Quizzes.Add(quiz);
                 await context.SaveChangesAsync();
@@ -233,30 +228,26 @@ namespace CrudDemo.Data
                     new QuizOption
                     {
                         QuizId = quiz.Id,
-                        OptionText = "Un système de protection qui contrôle le trafic réseau",
-                        IsCorrect = true,
-                        OrderIndex = 1
+                        Text = "Un système de protection qui contrôle le trafic réseau",
+                        IsCorrect = true
                     },
                     new QuizOption
                     {
                         QuizId = quiz.Id,
-                        OptionText = "Un logiciel de navigation web",
-                        IsCorrect = false,
-                        OrderIndex = 2
+                        Text = "Un logiciel de navigation web",
+                        IsCorrect = false
                     },
                     new QuizOption
                     {
                         QuizId = quiz.Id,
-                        OptionText = "Un type de virus informatique",
-                        IsCorrect = false,
-                        OrderIndex = 3
+                        Text = "Un type de virus informatique",
+                        IsCorrect = false
                     },
                     new QuizOption
                     {
                         QuizId = quiz.Id,
-                        OptionText = "Un outil de cryptage de fichiers",
-                        IsCorrect = false,
-                        OrderIndex = 4
+                        Text = "Un outil de cryptage de fichiers",
+                        IsCorrect = false
                     }
                 };
 
