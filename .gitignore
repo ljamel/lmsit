@@ -139,5 +139,4 @@ secrets.json
 .env.production
 
 # databases
-Data/seedData.cs
 init-database.sql
