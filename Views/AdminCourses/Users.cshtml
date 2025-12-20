@@ -52,7 +52,7 @@
                         <th><i class="fas fa-id-badge me-2"></i>Nom d'utilisateur</th>
                         <th><i class="fas fa-shield-alt me-2"></i>Statut Abonnement</th>
                         <th><i class="fas fa-calendar-alt me-2"></i>Date Début</th>
-                        <th><i class="fas fa-calendar-check me-2"></i>Fin de Période</th>
+                        <th><i class="fas fa-calendar-check me-2"></i>Date Fin</th>
                         <th><i class="fas fa-credit-card me-2"></i>ID Stripe</th>
                     </tr>
                 </thead>
@@ -111,10 +111,17 @@
                                 }
                             </td>
                             <td>
-                                @if (subscription != null)
+                                @if (subscription != null && subscription.EndDate.HasValue)
                                 {
                                     <span class="date-info">
-                                        @subscription.CurrentPeriodEnd.ToString("dd/MM/yyyy HH:mm")
+                                        @subscription.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                }
+                                else if (subscription != null)
+                                {
+                                    <span class="badge-active">
+                                        <i class="fas fa-infinity me-1"></i>
+                                        Actif
                                     </span>
                                 }
                                 else
