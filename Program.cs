@@ -25,6 +25,22 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+// ============================================================
+// INITIALISATION DES DONNÉES (SEED)
+// ============================================================
+using (var scope = app.Services.CreateScope())
+{
+	try
+	{
+		await SeedData.InitializeAsync(scope.ServiceProvider);
+	}
+	catch (Exception ex)
+	{
+		var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+		logger.LogError(ex, "Une erreur s'est produite lors de l'initialisation des données");
+	}
+}
+
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Home/Error");

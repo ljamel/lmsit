@@ -137,3 +137,7 @@ secrets.json
 .env
 .env.local
 .env.production
+
+# databases
+Data/seedData.cs
+init-database.sql

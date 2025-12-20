@@ -7702,7 +7702,7 @@
     ]
   },
   "packageFolders": {
-    "/root/.nuget/packages/": {}
+    "/home/lamri/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
@@ -7710,11 +7710,11 @@
       "projectUniqueName": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/CrudDemo.csproj",
       "projectName": "CrudDemo",
       "projectPath": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/CrudDemo.csproj",
-      "packagesPath": "/root/.nuget/packages/",
+      "packagesPath": "/home/lamri/.nuget/packages/",
       "outputPath": "/home/lamri/Desktop/lmsprogfacil/CrudDemo/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/root/.nuget/NuGet/NuGet.Config"
+        "/home/lamri/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
