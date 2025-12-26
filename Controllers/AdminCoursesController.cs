@@ -26,7 +26,9 @@ namespace CrudDemo.Controllers
 
         public async Task<IActionResult> Index()
         {
+            // Optimisé: AsNoTracking pour lecture seule
             var courses = await _context.Courses
+                .AsNoTracking()
                 .Include(c => c.Modules)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
@@ -52,10 +54,14 @@ namespace CrudDemo.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
+            // Optimisé: AsNoTracking + WHERE précoce
             var course = await _context.Courses
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
                 .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync();
+                
             if (course == null) return NotFound();
             return View(course);
         }
@@ -134,8 +140,8 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
     {
         Console.WriteLine("ERROR: ModelState is invalid");
         var errors = ModelState
-            .Where(x => x.Value.Errors.Count > 0)
-            .Select(x => new { x.Key, x.Value.Errors })
+            .Where(x => x.Value!.Errors.Count > 0)
+            .Select(x => new { x.Key, x.Value!.Errors })
             .ToArray();
         
         foreach (var error in errors)
@@ -205,7 +211,9 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
         // -----------------------------
         public async Task<IActionResult> EditLesson(int lessonId)
         {
+            // Optimisé: AsNoTracking pour lecture seule lors de l'affichage du formulaire
             var lesson = await _context.Lessons
+                .AsNoTracking()
                 .Include(l => l.Module)
                 .FirstOrDefaultAsync(l => l.Id == lessonId);
 
@@ -439,13 +447,13 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
             var quiz = await _context.Quizzes
                 .Include(q => q.Options)
                 .Include(q => q.Lesson)
-                .ThenInclude(l => l.Module)
+                .ThenInclude(l => l!.Module)
                 .FirstOrDefaultAsync(q => q.Id == quizId);
 
             if (quiz == null)
                 return NotFound("Quiz introuvable.");
 
-            ViewBag.Lesson = quiz.Lesson;
+            ViewBag.Lesson = quiz.Lesson!;
             return View(quiz);
         }
 
@@ -525,13 +533,13 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
         {
             var quiz = await _context.Quizzes
                 .Include(q => q.Lesson)
-                .ThenInclude(l => l.Module)
+                .ThenInclude(l => l!.Module)
                 .FirstOrDefaultAsync(q => q.Id == quizId);
 
             if (quiz == null)
                 return NotFound("Quiz introuvable.");
 
-            var courseId = quiz.Lesson?.Module?.CourseId ?? 0;
+            var courseId = quiz.Lesson!.Module!.CourseId;
 
             _context.Quizzes.Remove(quiz);
             await _context.SaveChangesAsync();
@@ -549,8 +557,9 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
         // -----------------------------
         public async Task<IActionResult> Users()
         {
-            var users = await _context.Users.ToListAsync();
-            var subscriptions = await _context.Subscriptions.ToListAsync();
+            // Optimisé: AsNoTracking pour lecture seule
+            var users = await _context.Users.AsNoTracking().ToListAsync();
+            var subscriptions = await _context.Subscriptions.AsNoTracking().ToListAsync();
             
             var userSubscriptions = users.Select(user => new
             {

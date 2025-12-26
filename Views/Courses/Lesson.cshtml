@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="mb-3 animated-section">
-                <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId" class="btn btn-secondary btn-sm animated-btn">
+                <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module!.CourseId" class="btn btn-secondary btn-sm animated-btn">
                     <i class="fas fa-arrow-left"></i> Retour au cours
                 </a>
             </div>
@@ -120,9 +120,9 @@
                         <h6 class="mb-2">
                             <i class="fas fa-book-bookmark"></i> Cours
                         </h6>
-                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module.CourseId"
+                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Module!.CourseId"
                            class="badge bg-primary text-white" style="text-decoration: none;">
-                            @Model.Module.Course.Title
+                            @Model.Module.Course!.Title
                         </a>
                     </div>
                     <div class="progress-item mb-3 animated-progress">

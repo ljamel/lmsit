@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using CrudDemo.Models;
 using System;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace CrudDemo.Data
             const string adminEmail = "admin@ingenius.com";
             const string adminPassword = "Admin123!";
 
+            // Optimisé: Utiliser AsQueryable() au lieu de chercher dans Users directement
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
@@ -127,7 +129,8 @@ namespace CrudDemo.Data
             // ============================================================
             // 4. CRÉATION DE COURS D'EXEMPLE
             // ============================================================
-            if (!context.Courses.Any())
+            // Optimisé: AsNoTracking pour vérification lecture seule
+            if (!await context.Courses.AsNoTracking().AnyAsync())
             {
                 var courses = new[]
                 {

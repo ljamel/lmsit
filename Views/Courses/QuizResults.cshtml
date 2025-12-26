@@ -10,7 +10,7 @@
 
 <div class="container mt-4">
     <div class="mb-3 animated-section">
-        <a asp-action="Lesson" asp-route-id="@lesson.Id" class="btn btn-secondary btn-sm animated-btn">
+        <a asp-action="Lesson" asp-route-id="@lesson!.Id" class="btn btn-secondary btn-sm animated-btn">
             <i class="fas fa-arrow-left"></i> Retour à la leçon
         </a>
     </div>
@@ -87,7 +87,7 @@
                                 @(result.IsCorrect ? "✓ Correcte" : "✗ Incorrecte")
                             </span>
                         </div>
-                        <h6 class="mb-1">@result.Quiz.Question</h6>
+                        <h6 class="mb-1">@result.Quiz!.Question</h6>
                         <small class="text-muted d-block">
                             <i class="fas fa-clock"></i> @result.AttemptedAt.ToString("dd/MM/yyyy HH:mm")
                         </small>

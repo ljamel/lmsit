@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CrudDemo.Data;
+using System.Threading.Tasks;
 
 public class CoursesListViewComponent : ViewComponent
 {
@@ -11,11 +12,13 @@ public class CoursesListViewComponent : ViewComponent
         _context = context;
     }
 
-    public IViewComponentResult Invoke()
+    // Optimisé: Async + AsNoTracking pour réduire la consommation CPU
+    public async Task<IViewComponentResult> InvokeAsync()
     {
-        var courses = _context.Courses
+        var courses = await _context.Courses
+            .AsNoTracking()
             .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
-            .ToList();
+            .ToListAsync();
 
         return View(courses);
     }

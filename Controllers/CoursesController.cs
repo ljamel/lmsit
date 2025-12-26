@@ -28,7 +28,9 @@ namespace CrudDemo.Controllers
             {
                 var userId = User.Identity?.Name ?? "";
                 var hasActiveSubscription = await _context.Subscriptions
-                    .AnyAsync(s => s.UserId == userId && s.IsActive && s.Status == "active");
+                    .AsNoTracking()
+                    .Where(s => s.UserId == userId && s.IsActive && s.Status == "active")
+                    .AnyAsync();
 
                 if (!hasActiveSubscription)
                 {
@@ -37,7 +39,9 @@ namespace CrudDemo.Controllers
                 }
             }
 
+            // Optimisé: AsNoTracking + projection pour ne charger que les données nécessaires
             var courses = await _context.Courses
+                .AsNoTracking()
                 .Include(c => c.Modules)
                     .ThenInclude(m => m.Lessons)
                 .OrderByDescending(c => c.CreatedAt)
@@ -55,7 +59,9 @@ namespace CrudDemo.Controllers
             {
                 var userId = User.Identity?.Name ?? "";
                 var hasActiveSubscription = await _context.Subscriptions
-                    .AnyAsync(s => s.UserId == userId && s.IsActive && s.Status == "active");
+                    .AsNoTracking()
+                    .Where(s => s.UserId == userId && s.IsActive && s.Status == "active")
+                    .AnyAsync();
 
                 if (!hasActiveSubscription)
                 {
@@ -64,10 +70,13 @@ namespace CrudDemo.Controllers
                 }
             }
 
+            // Optimisé: AsNoTracking + filtre WHERE précoce
             var course = await _context.Courses
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
                     .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync();
 
             if (course == null)
                 return NotFound();
@@ -75,7 +84,9 @@ namespace CrudDemo.Controllers
             // Vérifier si l'utilisateur est déjà inscrit
             var userEmail = User.Identity?.Name ?? "";
             var enrollment = await _context.CourseEnrollments
-                .FirstOrDefaultAsync(e => e.UserId == userEmail && e.CourseId == id && e.IsActive);
+                .AsNoTracking()
+                .Where(e => e.UserId == userEmail && e.CourseId == id && e.IsActive)
+                .FirstOrDefaultAsync();
             
             ViewBag.IsEnrolled = enrollment != null;
 
@@ -90,7 +101,9 @@ namespace CrudDemo.Controllers
             {
                 var userEmail = User.Identity?.Name ?? "";
                 var hasActiveSubscription = await _context.Subscriptions
-                    .AnyAsync(s => s.UserId == userEmail && s.IsActive && s.Status == "active");
+                    .AsNoTracking()
+                    .Where(s => s.UserId == userEmail && s.IsActive && s.Status == "active")
+                    .AnyAsync();
 
                 if (!hasActiveSubscription)
                 {
@@ -99,43 +112,26 @@ namespace CrudDemo.Controllers
                 }
             }
 
-            // Load lesson with module (no complex chaining)
+            // Optimisé: Une seule requête avec Include pour charger tout d'un coup (évite N+1)
             var lesson = await _context.Lessons
+                .AsNoTracking()
+                .Where(l => l.Id == id)
                 .Include(l => l.Module)
-                .FirstOrDefaultAsync(l => l.Id == id);
+                    .ThenInclude(m => m!.Course)
+                .Include(l => l.Quizzes)
+                    .ThenInclude(q => q.Options)
+                .FirstOrDefaultAsync();
 
             if (lesson == null)
                 return NotFound();
 
-            // Load course separately
-            if (lesson.Module != null)
-            {
-                var course = await _context.Courses.FindAsync(lesson.Module.CourseId);
-                lesson.Module.Course = course;
-            }
-
-            // Load quizzes separately (without ThenInclude)
-            var quizzes = await _context.Quizzes
-                .Where(q => q.LessonId == id)
-                .ToListAsync();
-
-            // Load quiz options for each quiz
-            foreach (var quiz in quizzes)
-            {
-                var options = await _context.QuizOptions
-                    .Where(o => o.QuizId == quiz.Id)
-                    .ToListAsync();
-                quiz.Options = options;
-            }
-
-            lesson.Quizzes = quizzes;
-
             // Get the current user's previous quiz attempts for this lesson
             var userId = _userManager.GetUserId(User);
-            if (!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId) && lesson.Quizzes?.Any() == true)
             {
-                var quizIds = quizzes.Select(q => q.Id).ToList();
+                var quizIds = lesson.Quizzes.Select(q => q.Id).ToList();
                 var userAttempts = await _context.UserQuizResults
+                    .AsNoTracking()
                     .Where(r => r.UserId == userId && quizIds.Contains(r.QuizId))
                     .ToListAsync();
 
@@ -182,28 +178,30 @@ namespace CrudDemo.Controllers
         // Show quiz results for a lesson
         public async Task<IActionResult> QuizResults(int lessonId)
         {
+            // Optimisé: Charger tout en une requête
             var lesson = await _context.Lessons
+                .AsNoTracking()
+                .Where(l => l.Id == lessonId)
                 .Include(l => l.Module)
-                .FirstOrDefaultAsync(l => l.Id == lessonId);
+                    .ThenInclude(m => m!.Course)
+                .FirstOrDefaultAsync();
 
             if (lesson == null)
                 return NotFound();
-
-            // Load course separately to avoid null reference issues
-            var course = await _context.Courses.FindAsync(lesson.Module?.CourseId);
-            if (lesson.Module != null)
-                lesson.Module.Course = course;
-
-            var quizzes = await _context.Quizzes
-                .Where(q => q.LessonId == lessonId)
-                .ToListAsync();
 
             var userId = _userManager.GetUserId(User);
             if (userId == null)
                 return Unauthorized();
 
+            // Optimisé: Une seule requête avec projection
+            var quizzes = await _context.Quizzes
+                .AsNoTracking()
+                .Where(q => q.LessonId == lessonId)
+                .ToListAsync();
+
             var quizIds = quizzes.Select(q => q.Id).ToList();
             var results = await _context.UserQuizResults
+                .AsNoTracking()
                 .Where(r => r.UserId == userId && quizIds.Contains(r.QuizId))
                 .Include(r => r.Quiz)
                 .ToListAsync();

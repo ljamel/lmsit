@@ -79,9 +79,11 @@ namespace CrudDemo.Controllers
             {
                 var userId = User.Identity?.Name ?? "";
 
-                // Vérifier si l'abonnement n'existe pas déjà
+                // Optimisé: Vérifier si l'abonnement n'existe pas déjà avec AsNoTracking
                 var existingSubscription = await _context.Subscriptions
-                    .FirstOrDefaultAsync(s => s.UserId == userId && s.IsActive);
+                    .AsNoTracking()
+                    .Where(s => s.UserId == userId && s.IsActive)
+                    .FirstOrDefaultAsync();
 
                 if (existingSubscription == null)
                 {
@@ -112,14 +114,21 @@ namespace CrudDemo.Controllers
         // Page de checkout
         public async Task<IActionResult> Checkout(int courseId)
         {
-            var course = await _context.Courses.FindAsync(courseId);
+            // Optimisé: AsNoTracking pour lecture seule + filtre WHERE
+            var course = await _context.Courses
+                .AsNoTracking()
+                .Where(c => c.Id == courseId)
+                .FirstOrDefaultAsync();
+                
             if (course == null)
                 return NotFound();
 
             // Vérifier si l'utilisateur est déjà inscrit
             var userId = User.Identity?.Name ?? "";
             var existingEnrollment = await _context.CourseEnrollments
-                .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId && e.IsActive);
+                .AsNoTracking()
+                .Where(e => e.UserId == userId && e.CourseId == courseId && e.IsActive)
+                .FirstOrDefaultAsync();
 
             if (existingEnrollment != null)
             {
@@ -135,7 +144,12 @@ namespace CrudDemo.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCheckoutSession(int courseId)
         {
-            var course = await _context.Courses.FindAsync(courseId);
+            // Optimisé: AsNoTracking pour lecture seule
+            var course = await _context.Courses
+                .AsNoTracking()
+                .Where(c => c.Id == courseId)
+                .FirstOrDefaultAsync();
+                
             if (course == null)
                 return NotFound();
 
@@ -200,10 +214,11 @@ namespace CrudDemo.Controllers
                 var courseId = int.Parse(session.ClientReferenceId);
                 var userId = User.Identity?.Name ?? "";
 
-                // Mettre à jour le paiement
+                // Optimisé: Mettre à jour le paiement (sans AsNoTracking car on modifie)
                 var payment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.StripePaymentIntentId == session.PaymentIntentId 
-                        || p.StripePaymentIntentId == session.Id);
+                    .Where(p => p.StripePaymentIntentId == session.PaymentIntentId 
+                        || p.StripePaymentIntentId == session.Id)
+                    .FirstOrDefaultAsync();
 
                 if (payment != null)
                 {
@@ -212,9 +227,11 @@ namespace CrudDemo.Controllers
                     payment.StripePaymentIntentId = session.PaymentIntentId ?? session.Id;
                 }
 
-                // Créer l'inscription si elle n'existe pas
+                // Optimisé: Vérifier inscription existante avec AsNoTracking
                 var existingEnrollment = await _context.CourseEnrollments
-                    .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
+                    .AsNoTracking()
+                    .Where(e => e.UserId == userId && e.CourseId == courseId)
+                    .FirstOrDefaultAsync();
 
                 if (existingEnrollment == null)
                 {
@@ -229,7 +246,12 @@ namespace CrudDemo.Controllers
 
                 await _context.SaveChangesAsync();
 
-                var course = await _context.Courses.FindAsync(courseId);
+                // Optimisé: Lecture seule avec AsNoTracking
+                var course = await _context.Courses
+                    .AsNoTracking()
+                    .Where(c => c.Id == courseId)
+                    .FirstOrDefaultAsync();
+                    
                 ViewBag.Course = course;
                 return View();
             }
@@ -240,7 +262,12 @@ namespace CrudDemo.Controllers
         // Page d'annulation
         public async Task<IActionResult> Cancel(int courseId)
         {
-            var course = await _context.Courses.FindAsync(courseId);
+            // Optimisé: AsNoTracking pour lecture seule
+            var course = await _context.Courses
+                .AsNoTracking()
+                .Where(c => c.Id == courseId)
+                .FirstOrDefaultAsync();
+                
             ViewBag.Course = course;
             return View();
         }
@@ -249,9 +276,12 @@ namespace CrudDemo.Controllers
         public async Task<IActionResult> MyPayments()
         {
             var userId = User.Identity?.Name ?? "";
+            
+            // Optimisé: AsNoTracking + filtre WHERE + projection
             var payments = await _context.Payments
-                .Include(p => p.Course)
+                .AsNoTracking()
                 .Where(p => p.UserId == userId)
+                .Include(p => p.Course)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 

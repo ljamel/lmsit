@@ -3,6 +3,7 @@
     var userSubscriptions = ViewBag.UserSubscriptions as IEnumerable<dynamic>;
 }
 
+
 <div class="users-page">
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -20,7 +21,7 @@
                     <i class="fas fa-user-check"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions.Count()</h3>
+                    <h3>@userSubscriptions!.Count()</h3>
                     <p>Total Utilisateurs</p>
                 </div>
             </div>
@@ -29,7 +30,7 @@
                     <i class="fas fa-crown"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions.Count(us => us.Subscription != null && ((dynamic)us.Subscription).IsActive)</h3>
+                    <h3>@userSubscriptions!.Count(us => us.Subscription != null && ((dynamic)us.Subscription).IsActive)</h3>
                     <p>Abonnements Actifs</p>
                 </div>
             </div>
@@ -38,7 +39,7 @@
                     <i class="fas fa-user-times"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions.Count(us => us.Subscription == null || !((dynamic)us.Subscription).IsActive)</h3>
+                    <h3>@userSubscriptions!.Count(us => us.Subscription == null || !((dynamic)us.Subscription).IsActive)</h3>
                     <p>Sans Abonnement</p>
                 </div>
             </div>
@@ -57,10 +58,13 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @{
+                        #pragma warning disable CS8602
+                    }
                     @foreach (var item in userSubscriptions)
                     {
                         var user = item.User;
-                        dynamic subscriptionObj = item.Subscription;
+                        dynamic? subscriptionObj = item.Subscription;
                         bool hasSubscription = subscriptionObj != null;
                         var hasActiveSubscription = hasSubscription && subscriptionObj.IsActive;
                         
@@ -68,7 +72,7 @@
                             <td>
                                 <div class="user-email">
                                     <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
-                                    @user.Email
+                                    @user!.Email
                                 </div>
                             </td>
                             <td>
@@ -81,14 +85,14 @@
                                 {
                                     <span class="badge-active">
                                         <i class="fas fa-check-circle me-1"></i>
-                                        @subscriptionObj.Status
+                                        @subscriptionObj!.Status
                                     </span>
                                 }
                                 else if (hasSubscription)
                                 {
                                     <span class="badge-inactive">
                                         <i class="fas fa-times-circle me-1"></i>
-                                        @subscriptionObj.Status
+                                        @subscriptionObj!.Status
                                     </span>
                                 }
                                 else
@@ -103,7 +107,7 @@
                                 @if (hasSubscription)
                                 {
                                     <span class="date-info">
-                                        @subscriptionObj.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                        @subscriptionObj!.StartDate.ToString("dd/MM/yyyy HH:mm")
                                     </span>
                                 }
                                 else
@@ -114,7 +118,7 @@
                             <td>
                                 @if (hasSubscription)
                                 {
-                                    var endDate = subscriptionObj.EndDate;
+                                    var endDate = subscriptionObj!.EndDate;
                                     if (endDate != null)
                                     {
                                         <span class="date-info">
@@ -137,7 +141,7 @@
                             <td>
                                 @if (hasSubscription && !string.IsNullOrEmpty(subscriptionObj.StripeSubscriptionId))
                                 {
-                                    <code class="stripe-id">@subscriptionObj.StripeSubscriptionId.Substring(0, Math.Min(20, subscriptionObj.StripeSubscriptionId.Length))...</code>
+                                    <code class="stripe-id">@subscriptionObj!.StripeSubscriptionId!.Substring(0, Math.Min(20, subscriptionObj!.StripeSubscriptionId.Length))...</code>
                                 }
                                 else
                                 {
@@ -145,6 +149,9 @@
                                 }
                             </td>
                         </tr>
+                    }
+                    @{
+                        #pragma warning restore CS8602
                     }
                 </tbody>
             </table>

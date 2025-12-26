@@ -5,9 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ajouter le DbContext SQL Server Docker
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Ajouter le DbContext MariaDB avec pooling pour réduire la consommation CPU
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+	options.UseMySql(
+		builder.Configuration.GetConnectionString("DefaultConnection"),
+		ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+		mysqlOptions => {
+			mysqlOptions.CommandTimeout(30);
+			mysqlOptions.EnableRetryOnFailure(maxRetryCount: 3);
+		}));
 
 // Ajouter Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
