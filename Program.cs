@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 	options.UseMySql(
 		builder.Configuration.GetConnectionString("DefaultConnection"),
-		ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+		new MySqlServerVersion(new Version(8, 0, 21)), // Version MySQL fixe au lieu de AutoDetect
 		mysqlOptions => {
 			mysqlOptions.CommandTimeout(30);
 			mysqlOptions.EnableRetryOnFailure(maxRetryCount: 3);
