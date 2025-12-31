@@ -140,3 +140,6 @@ secrets.json
 
 # databases
 init-database.sql
+
+# Program.cs (configuration spécifique à chaque environnement)
+Program.cs
