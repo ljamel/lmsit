@@ -145,3 +145,5 @@ init-database.sql
 Program.cs
 
 build.sh
+
+SeedData.cs
