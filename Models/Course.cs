@@ -13,10 +13,7 @@ namespace CrudDemo.Models
 	[Required]
 	public required string Description { get; set; }
 
-	[Range(0, 10000)]
-	public decimal Price { get; set; } = 0; // 0 = gratuit
-
-	public bool IsFree { get; set; } = true;
+	public bool IsFree { get; set; } = true; // true = gratuit, false = payant
 
 	public string CreatedBy { get; set; } = string.Empty;
 

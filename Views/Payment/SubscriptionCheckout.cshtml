@@ -19,12 +19,21 @@
                         </div>
                     }
                     
-                    <div class="text-center mb-4">
-                        <h1 class="text-primary mb-2">
-                            <strong>29,99 €</strong>
-                            <small class="text-muted fs-5">/mois</small>
+                    <div class="text-center mb-4 pricing-section">
+                        <div class="price-badge">
+                            <span class="price-tag">OFFRE SPÉCIALE</span>
+                        </div>
+                        <h1 class="price-display mb-2">
+                            <span class="currency">€</span>
+                            <span class="price-amount">10</span>
+                            <span class="price-period">/mois</span>
                         </h1>
-                        <p class="text-muted">Accès illimité à tous les cours</p>
+                        <p class="price-description">
+                            <i class="fas fa-infinity"></i> Accès illimité à tous les cours
+                        </p>
+                        <p class="text-success fw-bold">
+                            <i class="fas fa-check-circle"></i> Sans engagement - Annulez à tout moment
+                        </p>
                     </div>
                     
                     <hr class="my-4">
@@ -84,15 +93,89 @@
     
     .animated-card {
         animation: slideUp 0.5s ease-out;
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .pricing-section {
+        position: relative;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+    
+    .price-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .price-tag {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        letter-spacing: 1px;
+    }
+    
+    .price-display {
+        margin-top: 1.5rem;
+        font-weight: 900;
+        line-height: 1;
+        color: #2c3e50;
+    }
+    
+    .currency {
+        font-size: 2rem;
+        vertical-align: super;
+        color: #667eea;
+    }
+    
+    .price-amount {
+        font-size: 4.5rem;
+        color: #667eea;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .price-period {
+        font-size: 1.5rem;
+        color: #6c757d;
+        font-weight: 400;
+    }
+    
+    .price-description {
+        font-size: 1.1rem;
+        color: #495057;
+        margin-top: 1rem;
+        font-weight: 500;
     }
     
     .animated-btn {
         transition: all 0.3s ease;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
     }
     
     .animated-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .list-unstyled li {
+        transition: transform 0.2s ease;
+    }
+    
+    .list-unstyled li:hover {
+        transform: translateX(5px);
     }
     
     @@keyframes slideUp {

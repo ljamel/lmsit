@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Leçon: " + Model.Title;
+    var comments = ViewBag.Comments as List<CrudDemo.Models.Comment> ?? new List<CrudDemo.Models.Comment>();
+    var courseId = ViewBag.CourseId as int? ?? Model.Module!.CourseId;
 }
 
 <div class="container mt-4">
@@ -327,5 +329,122 @@
             transform: scale(1);
         }
     }
-</style>    </div>
+</style>
+    </div>
+
+    <!-- Section Commentaires du cours -->
+    <div class="col-lg-12 mt-4">
+        <div class="card shadow-sm animated-card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-comments"></i> Commentaires du cours (@comments.Count)
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fas fa-check-circle"></i> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <!-- Formulaire d'ajout de commentaire -->
+                <form asp-action="AddComment" method="post" class="mb-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@courseId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-edit"></i> Ajouter un commentaire sur ce cours
+                        </label>
+                        <textarea name="content" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Partagez votre avis..." 
+                                  maxlength="1000"
+                                  required></textarea>
+                        <small class="text-muted">Maximum 1000 caractères</small>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i> Publier
+                    </button>
+                </form>
+
+                <hr>
+
+                <!-- Liste des commentaires -->
+                @if (comments.Any())
+                {
+                    <h5 class="mb-3">Commentaires</h5>
+                    <div class="comments-list" style="max-height: 500px; overflow-y: auto;">
+                        @foreach (var comment in comments)
+                        {
+                            <div class="comment-item p-3 mb-3 border rounded bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="mb-2">
+                                            <strong class="text-primary">
+                                                <i class="fas fa-user-circle"></i> @comment.UserId.Split('@')[0]
+                                            </strong>
+                                            <small class="text-muted ms-2">
+                                                <i class="far fa-clock"></i> @comment.CreatedAt.ToString("dd/MM/yyyy à HH:mm")
+                                            </small>
+                                        </div>
+                                        <p class="mb-0">@comment.Content</p>
+                                    </div>
+                                    @if (comment.UserId == User.Identity?.Name || User.IsInRole("Admin"))
+                                    {
+                                        <form asp-action="DeleteComment" method="post" class="ms-3">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="commentId" value="@comment.Id" />
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Supprimer ce commentaire?')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Aucun commentaire pour ce cours. Soyez le premier!
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .comment-item {
+        transition: all 0.2s ease;
+        border-left: 4px solid #0d6efd !important;
+    }
+    
+    .comment-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateX(5px);
+    }
+    
+    .comments-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .comments-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .comments-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .comments-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>

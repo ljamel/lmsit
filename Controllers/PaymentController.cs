@@ -48,7 +48,7 @@ namespace CrudDemo.Controllers
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = "Accès complet à tous les cours de la plateforme",
                             },
-                            UnitAmount = 2999, // 29.99 EUR en centimes
+                            UnitAmount = 1000, // 10 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -172,7 +172,7 @@ namespace CrudDemo.Controllers
                                     ? course.Description.Substring(0, 200) + "..." 
                                     : course.Description,
                             },
-                            UnitAmount = (long)(course.Price * 100), // Stripe utilise les centimes
+                            UnitAmount = 1000, // Prix fixe: 10€ (en centimes)
                         },
                         Quantity = 1,
                     },
@@ -192,7 +192,7 @@ namespace CrudDemo.Controllers
             {
                 UserId = User.Identity?.Name ?? "",
                 CourseId = courseId,
-                Amount = course.Price,
+                Amount = 10.00m, // Prix fixe: 10€
                 Currency = "eur",
                 StripePaymentIntentId = session.PaymentIntentId ?? session.Id,
                 Status = "pending"

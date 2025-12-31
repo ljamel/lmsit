@@ -140,7 +140,6 @@ namespace CrudDemo.Data
                         Description = "Découvrez les fondamentaux de la cybersécurité, les menaces courantes et les bonnes pratiques de protection.",
                         CreatedBy = adminEmail,
                         CreatedAt = DateTime.UtcNow,
-                        Price = 0,
                         IsFree = false
                     },
                     new Course
@@ -149,7 +148,6 @@ namespace CrudDemo.Data
                         Description = "Apprenez les bases du hacking éthique et du pentesting avec des exercices pratiques.",
                         CreatedBy = adminEmail,
                         CreatedAt = DateTime.UtcNow,
-                        Price = 0,
                         IsFree = false
                     },
                     new Course
@@ -158,7 +156,6 @@ namespace CrudDemo.Data
                         Description = "Maîtrisez la sécurisation des infrastructures réseau et la détection d'intrusions.",
                         CreatedBy = adminEmail,
                         CreatedAt = DateTime.UtcNow,
-                        Price = 0,
                         IsFree = false
                     }
                 };

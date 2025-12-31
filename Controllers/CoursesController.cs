@@ -47,6 +47,16 @@ namespace CrudDemo.Controllers
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
 
+            // Charger les commentaires pour tous les cours
+            var courseIds = courses.Select(c => c.Id).ToList();
+            var comments = await _context.Comments
+                .AsNoTracking()
+                .Where(c => courseIds.Contains(c.CourseId))
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.Comments = comments;
+
             return View(courses);
         }
 
@@ -89,6 +99,16 @@ namespace CrudDemo.Controllers
                 .FirstOrDefaultAsync();
             
             ViewBag.IsEnrolled = enrollment != null;
+
+            // Charger les commentaires pour ce cours
+            var comments = await _context.Comments
+                .AsNoTracking()
+                .Where(c => c.CourseId == id)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.Comments = comments;
+            ViewBag.CourseId = id;
 
             return View(course);
         }
@@ -137,6 +157,17 @@ namespace CrudDemo.Controllers
 
                 ViewBag.UserAttempts = userAttempts;
             }
+
+            // Charger les commentaires pour ce cours
+            var courseId = lesson.Module!.CourseId;
+            var comments = await _context.Comments
+                .AsNoTracking()
+                .Where(c => c.CourseId == courseId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.Comments = comments;
+            ViewBag.CourseId = courseId;
 
             return View(lesson);
         }
@@ -211,6 +242,58 @@ namespace CrudDemo.Controllers
             ViewBag.TotalQuestions = quizzes.Count;
 
             return View(results);
+        }
+
+        // Add comment to a course
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int courseId, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content) || content.Length > 1000)
+            {
+                TempData["Error"] = "Le commentaire doit contenir entre 1 et 1000 caractères.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = User.Identity?.Name ?? "";
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var comment = new Comment
+            {
+                CourseId = courseId,
+                UserId = userId,
+                Content = content,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Commentaire ajouté avec succès!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Delete a comment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            var comment = await _context.Comments.FindAsync(commentId);
+            if (comment == null)
+                return NotFound();
+
+            var userId = User.Identity?.Name ?? "";
+            
+            // Only the comment author or admin can delete
+            if (comment.UserId != userId && !User.IsInRole("Admin"))
+                return Forbid();
+
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Commentaire supprimé avec succès!";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

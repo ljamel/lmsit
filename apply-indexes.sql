@@ -86,7 +86,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Courses_CreatedAt')
 BEGIN
     CREATE NONCLUSTERED INDEX IX_Courses_CreatedAt
     ON Courses (CreatedAt DESC)
-    INCLUDE (Title, Description, CreatedBy, Price, IsFree);
+    INCLUDE (Title, Description, CreatedBy, IsFree);
     PRINT '✓ Index IX_Courses_CreatedAt créé';
 END
 ELSE

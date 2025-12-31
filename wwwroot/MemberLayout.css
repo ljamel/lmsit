@@ -17,7 +17,6 @@ body {
 
 .member-container {
     display: flex;
-    flex-wrap: wrap-reverse;
 }
 
 /* ========== DASHBOARD MENU ========== */

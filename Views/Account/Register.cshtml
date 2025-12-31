@@ -56,39 +56,79 @@
                         
                         <!-- Informations sur l'abonnement -->
                         <div class="col-md-5">
-                            <div class="card border-success">
-                                <div class="card-body text-center">
-                                    <h5 class="text-success mb-3">
-                                        <i class="fas fa-star"></i> Abonnement Mensuel
-                                    </h5>
-                                    <h2 class="text-primary mb-3">
-                                        <strong>29,99 €</strong>
-                                        <small class="text-muted fs-6">/mois</small>
-                                    </h2>
-                                    
-                                    <hr>
-                                    
-                                    <ul class="list-unstyled text-start">
-                                        <li class="mb-2">
-                                            <i class="fas fa-check text-success"></i> Accès à tous les cours
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fas fa-check text-success"></i> Contenu illimité
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fas fa-check text-success"></i> Certificats de fin de formation
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fas fa-check text-success"></i> Support par email
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fas fa-check text-success"></i> Mises à jour gratuites
-                                        </li>
-                                    </ul>
-                                    
-                                    <small class="text-muted d-block mt-3">
-                                        <i class="fas fa-shield-alt"></i> Paiement sécurisé par Stripe
-                                    </small>
+                            <div class="pricing-card">
+                                <div class="pricing-badge">
+                                    <span class="badge-text">OFFRE PREMIUM</span>
+                                </div>
+                                
+                                <div class="pricing-header">
+                                    <div class="pricing-icon">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <h5 class="pricing-title">Abonnement Mensuel</h5>
+                                </div>
+                                
+                                <div class="pricing-price">
+                                    <span class="price-currency">€</span>
+                                    <span class="price-amount">10</span>
+                                    <span class="price-period">/mois</span>
+                                </div>
+                                
+                                <p class="pricing-description">
+                                    Accès complet à tous les cours de cybersécurité et hacking éthique
+                                </p>
+                                
+                                <div class="pricing-divider"></div>
+                                
+                                <ul class="pricing-features">
+                                    <li class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span>Accès illimité à tous les cours</span>
+                                    </li>
+                                    <li class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span>Nouveau contenu chaque mois</span>
+                                    </li>
+                                    <li class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span>Certificats de complétion</span>
+                                    </li>
+                                    <li class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span>Support prioritaire 24/7</span>
+                                    </li>
+                                    <li class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span>Mises à jour gratuites</span>
+                                    </li>
+                                    <li class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <span>Accès mobile et desktop</span>
+                                    </li>
+                                </ul>
+                                
+                                <div class="pricing-footer">
+                                    <div class="secure-badge">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span>Paiement 100% sécurisé</span>
+                                    </div>
+                                    <div class="payment-methods">
+                                        <i class="fab fa-cc-visa"></i>
+                                        <i class="fab fa-cc-mastercard"></i>
+                                        <i class="fab fa-cc-stripe"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -102,3 +142,270 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+<style>
+    /* Carte de prix principale */
+    .pricing-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        color: white;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 70px rgba(102, 126, 234, 0.5);
+    }
+    
+    /* Badge "OFFRE PREMIUM" */
+    .pricing-badge {
+        position: absolute;
+        top: -10px;
+        right: -35px;
+        background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        padding: 25px 40px 10px 40px;
+        transform: rotate(45deg);
+        box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+    }
+    
+    .badge-text {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    
+    /* Header avec icône */
+    .pricing-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .pricing-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        backdrop-filter: blur(10px);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .pricing-icon i {
+        font-size: 32px;
+        color: #ffd700;
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+    }
+    
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .pricing-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Prix */
+    .pricing-price {
+        text-align: center;
+        margin: 25px 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .price-currency {
+        font-size: 28px;
+        font-weight: 700;
+        margin-top: 8px;
+        opacity: 0.9;
+    }
+    
+    .price-amount {
+        font-size: 64px;
+        font-weight: 900;
+        line-height: 1;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .price-period {
+        font-size: 18px;
+        font-weight: 500;
+        margin-top: 42px;
+        opacity: 0.9;
+    }
+    
+    /* Description */
+    .pricing-description {
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        opacity: 0.95;
+        padding: 0 10px;
+    }
+    
+    /* Séparateur */
+    .pricing-divider {
+        height: 2px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255, 255, 255, 0.4) 50%, 
+            transparent 100%);
+        margin: 25px 0;
+    }
+    
+    /* Liste des fonctionnalités */
+    .pricing-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 25px 0;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        font-size: 14px;
+        line-height: 1.5;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-item:last-child {
+        border-bottom: none;
+    }
+    
+    .feature-item:hover {
+        padding-left: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        margin: 0 -10px;
+        padding-right: 10px;
+        border-radius: 8px;
+    }
+    
+    .feature-icon {
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        backdrop-filter: blur(10px);
+    }
+    
+    .feature-icon i {
+        font-size: 12px;
+        color: #4ade80;
+    }
+    
+    /* Footer */
+    .pricing-footer {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .secure-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 13px;
+        margin-bottom: 15px;
+        opacity: 0.9;
+    }
+    
+    .secure-badge i {
+        font-size: 16px;
+        color: #4ade80;
+    }
+    
+    .payment-methods {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        opacity: 0.7;
+    }
+    
+    .payment-methods i {
+        font-size: 28px;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-methods i:hover {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    
+    /* Bouton d'inscription stylisé */
+    .submit-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+    
+    /* Animation de pulsation pour attirer l'attention */
+    @@keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        }
+        50% {
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.6);
+        }
+    }
+    
+    .pricing-card {
+        animation: pulse 4s ease-in-out infinite;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .pricing-card {
+            margin-top: 30px;
+        }
+        
+        .price-amount {
+            font-size: 48px;
+        }
+        
+        .pricing-badge {
+            right: -30px;
+        }
+    }
+</style>

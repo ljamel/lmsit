@@ -21,6 +21,7 @@ namespace CrudDemo.Data
 	public DbSet<Payment> Payments { get; set; }
 	public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
 	public DbSet<Subscription> Subscriptions { get; set; }
+	public DbSet<Comment> Comments { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
