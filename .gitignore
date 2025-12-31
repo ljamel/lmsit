@@ -143,3 +143,5 @@ init-database.sql
 
 # Program.cs (configuration spécifique à chaque environnement)
 Program.cs
+
+build.sh
