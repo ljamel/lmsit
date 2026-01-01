@@ -88,9 +88,12 @@ namespace CrudDemo.Models
 		public required string UserId { get; set; }
 		[Required]
 		public int QuizId { get; set; }
+		public int SelectedOptionId { get; set; }
 		public bool IsCorrect { get; set; }
 		public DateTime AttemptedAt { get; set; } = DateTime.UtcNow;
 		[ForeignKey("QuizId")]
 		public Quiz? Quiz { get; set; }
+		[ForeignKey("SelectedOptionId")]
+		public QuizOption? SelectedOption { get; set; }
 	}
 }

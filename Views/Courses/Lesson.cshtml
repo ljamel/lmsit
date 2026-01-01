@@ -29,25 +29,6 @@
                 </div>
             </div>
 
-            @if (!string.IsNullOrEmpty(Model.VideoPath))
-            {
-                <div class="card mb-4">
-                    <div class="card-header gradient-header-secondary">
-                        <h5 class="mb-0">
-                            <i class="fas fa-film"></i> Vidéo
-                        </h5>
-                    </div>
-                    <div class="card-body video-container">
-                        <div class="video-wrapper animated-video">
-                            <video width="100%" height="auto" controls style="max-height: 500px; border-radius: 8px;">
-                                <source src="@Model.VideoPath" type="video/mp4">
-                                Votre navigateur ne supporte pas la vidéo HTML5.
-                            </video>
-                        </div>
-                    </div>
-                </div>
-            }
-
             @if (Model.Quizzes != null && Model.Quizzes.Any())
             {
                 <div class="card">

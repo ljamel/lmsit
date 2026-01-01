@@ -87,7 +87,45 @@
                                 @(result.IsCorrect ? "✓ Correcte" : "✗ Incorrecte")
                             </span>
                         </div>
-                        <h6 class="mb-1">@result.Quiz!.Question</h6>
+                        <h6 class="mb-2">
+                            <i class="fas fa-question"></i> @result.Quiz!.Question
+                        </h6>
+                        
+                        <!-- Afficher la réponse donnée par l'utilisateur -->
+                        <div class="user-answer-box mb-2 p-3 border rounded @(result.IsCorrect ? "bg-success-subtle" : "bg-danger-subtle")">
+                            <strong class="d-block mb-1">
+                                <i class="fas fa-user"></i> Votre réponse:
+                            </strong>
+                            <div class="answer-text">
+                                @if (result.SelectedOption != null)
+                                {
+                                    <span class="@(result.IsCorrect ? "text-success" : "text-danger")">
+                                        @(result.IsCorrect ? "✓" : "✗") @result.SelectedOption.Text
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Afficher la ou les bonnes réponses si la réponse était incorrecte -->
+                        @if (!result.IsCorrect && result.Quiz.Options != null)
+                        {
+                            var correctOptions = result.Quiz.Options.Where(o => o.IsCorrect).ToList();
+                            if (correctOptions.Any())
+                            {
+                                <div class="correct-answer-box mb-2 p-3 border rounded bg-success-subtle">
+                                    <strong class="d-block mb-1">
+                                        <i class="fas fa-check-circle"></i> Bonne@(correctOptions.Count > 1 ? "s" : "") réponse@(correctOptions.Count > 1 ? "s" : ""):
+                                    </strong>
+                                    @foreach (var correctOption in correctOptions)
+                                    {
+                                        <div class="text-success">
+                                            ✓ @correctOption.Text
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+
                         <small class="text-muted d-block">
                             <i class="fas fa-clock"></i> @result.AttemptedAt.ToString("dd/MM/yyyy HH:mm")
                         </small>

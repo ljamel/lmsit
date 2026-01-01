@@ -17,10 +17,10 @@
             </div>
             <div>
                 <a class="btn btn-primary btn-lg animated-btn" 
-                   href="/AdminCourses/CreateModule?courseId=@Model.Id">
+                   asp-action="CreateModule" asp-route-courseId="@Model.Id">
                     <i class="fas fa-plus"></i> Ajouter Module
                 </a>
-                <a class="btn btn-secondary btn-lg animated-btn" href="/AdminCourses">
+                <a class="btn btn-secondary btn-lg animated-btn" asp-action="Index">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
             </div>
@@ -61,7 +61,7 @@
                                 }
                             </div>
                             <a class="btn btn-sm btn-outline-light animated-btn" 
-                               href="/AdminCourses/CreateLesson?moduleId=@m.Id">
+                               asp-action="CreateLesson" asp-route-moduleId="@m.Id">
                                 <i class="fas fa-plus-circle"></i> Ajouter Leçon
                             </a>
                         </div>
@@ -84,12 +84,6 @@
                                                     <i class="fas fa-video"></i> @l.Title
                                                 </h6>
                                                 <small class="text-muted d-block mb-2">@l.Description</small>
-                                                @if (!string.IsNullOrEmpty(l.VideoFileName))
-                                                {
-                                                    <span class="badge bg-success mb-2">
-                                                        <i class="fas fa-film"></i> Vidéo: @l.VideoFileName
-                                                    </span>
-                                                }
 
                                                 <!-- Quiz Section -->
                                                 @if (l.Quizzes != null && l.Quizzes.Any())
@@ -106,7 +100,7 @@
                                                                     <span class="badge bg-secondary">@quiz.Options.Count options</span>
                                                                     <span class="badge bg-warning">@quiz.Points pts</span>
                                                                     <a class="btn btn-xs btn-sm btn-outline-primary ms-2" 
-                                                                       href="/AdminCourses/EditQuiz?quizId=@quiz.Id">
+                                                                       asp-action="EditQuiz" asp-route-quizId="@quiz.Id">
                                                                         <i class="fas fa-edit"></i>
                                                                     </a>
                                                                 </li>
@@ -121,12 +115,12 @@
                                             </div>
                                             <div class="btn-group-vertical ms-2" role="group">
                                                 <a class="btn btn-sm btn-outline-warning animated-btn mb-1" 
-                                                   href="/AdminCourses/EditLesson?lessonId=@l.Id" 
+                                                   asp-action="EditLesson" asp-route-lessonId="@l.Id" 
                                                    title="Éditer la leçon">
                                                     <i class="fas fa-edit"></i> Éditer
                                                 </a>
                                                 <a class="btn btn-sm btn-outline-primary animated-btn" 
-                                                   href="/AdminCourses/CreateQuiz?lessonId=@l.Id" 
+                                                   asp-action="CreateQuiz" asp-route-lessonId="@l.Id" 
                                                    title="Ajouter un quiz">
                                                     <i class="fas fa-plus"></i> Quiz
                                                 </a>

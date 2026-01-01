@@ -25,7 +25,7 @@
             <div class="card-body">
                 <div asp-validation-summary="All" class="text-danger mb-3"></div>
                 
-                <form asp-action="CreateLesson" method="post" enctype="multipart/form-data" id="lessonForm">
+                <form asp-action="CreateLesson" method="post" id="lessonForm">
                     <input type="hidden" asp-for="ModuleId" value="@ViewBag.ModuleId" />
                     
                     <div class="form-group mb-3">
@@ -46,14 +46,6 @@
                         <textarea asp-for="Description" id="descriptionInput" style="display:none;"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                         <small class="form-text text-muted">Utilisez l'éditeur pour formater votre description</small>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-video"></i> Fichier Vidéo (optionnel)
-                        </label>
-                        <input type="file" name="videoFile" class="form-control animated-input" accept="video/mp4,video/webm,video/ogg,audio/mp3" />
-                        <small class="form-text text-muted">Optionnel - Formats acceptés: MP4, WebM, OGG, MP3 (max 200MB)</small>
                     </div>
 
                     <div class="form-group mb-4">

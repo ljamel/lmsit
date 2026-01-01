@@ -187,10 +187,21 @@ namespace CrudDemo.Controllers
             if (userId == null)
                 return Unauthorized();
 
+            // Supprimer les anciennes réponses pour ce quiz (permettre de réessayer)
+            var existingResults = await _context.UserQuizResults
+                .Where(r => r.UserId == userId && r.QuizId == quizId)
+                .ToListAsync();
+            
+            if (existingResults.Any())
+            {
+                _context.UserQuizResults.RemoveRange(existingResults);
+            }
+
             var result = new UserQuizResult
             {
                 UserId = userId,
                 QuizId = quizId,
+                SelectedOptionId = optionId,
                 IsCorrect = option.IsCorrect,
                 AttemptedAt = DateTime.UtcNow
             };
@@ -235,6 +246,8 @@ namespace CrudDemo.Controllers
                 .AsNoTracking()
                 .Where(r => r.UserId == userId && quizIds.Contains(r.QuizId))
                 .Include(r => r.Quiz)
+                    .ThenInclude(q => q!.Options)
+                .Include(r => r.SelectedOption)
                 .ToListAsync();
 
             ViewBag.Lesson = lesson;

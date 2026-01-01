@@ -1,0 +1,305 @@
+@model CrudDemo.Models.Quiz
+
+@{
+    ViewData["Title"] = "Créer un Quiz";
+    var lesson = ViewBag.Lesson as CrudDemo.Models.Lesson;
+    var lessonId = ViewBag.LessonId;
+}
+
+<div class="container mt-4">
+    <div class="animated-section">
+        <div class="mb-4">
+            <a asp-action="Details" asp-route-id="@lesson?.Module?.CourseId" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+
+        <div class="card shadow-lg animated-card">
+            <div class="card-header gradient-header">
+                <h2 class="mb-0">
+                    <i class="fas fa-plus-circle"></i> Créer un Quiz
+                </h2>
+                <small class="text-muted">@lesson?.Title</small>
+            </div>
+
+            <div class="card-body">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-action="CreateQuiz" method="post" class="needs-validation">
+                    <input type="hidden" name="lessonId" value="@lessonId" />
+                    
+                    <div class="form-group mb-3">
+                        <label for="question" class="form-label">
+                            <i class="fas fa-edit"></i> Question
+                        </label>
+                        <textarea class="form-control animated-input" id="question" name="quiz.question" 
+                                  placeholder="Entrez votre question..." 
+                                  rows="3" required maxlength="500"></textarea>
+                        <small class="form-text text-muted">Maximum 500 caractères</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-file-alt"></i> Description (optionnel)
+                        </label>
+                        <textarea class="form-control animated-input" id="description" name="quiz.description" 
+                                  placeholder="Ajoutez une description ou une explication..." 
+                                  rows="2" maxlength="1000"></textarea>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="points" class="form-label">
+                            <i class="fas fa-star"></i> Points
+                        </label>
+                        <input type="number" class="form-control animated-input" id="points" 
+                               name="quiz.points" value="1" min="1" max="100" required>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">
+                        <i class="fas fa-list"></i> Options de Réponse
+                    </h5>
+                    <p class="text-muted small">
+                        <i class="fas fa-info-circle"></i> Ajoutez au moins 2 options et cochez la ou les réponses correctes.
+                    </p>
+
+                    <div id="optionsContainer">
+                        <!-- Options initiales (2 minimum) -->
+                        <div class="option-item mb-3 animated-option" data-option="0">
+                            <div class="input-group">
+                                <input type="text" class="form-control animated-input" 
+                                       name="optionTexts" placeholder="Option 1" required>
+                                <div class="input-group-text">
+                                    <input type="checkbox" class="form-check-input" 
+                                           name="optionCorrects" value="true" aria-label="Correcte">
+                                    <label class="ms-2 mb-0">Correcte</label>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm remove-option" 
+                                        style="visibility:hidden;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="option-item mb-3 animated-option" data-option="1">
+                            <div class="input-group">
+                                <input type="text" class="form-control animated-input" 
+                                       name="optionTexts" placeholder="Option 2" required>
+                                <div class="input-group-text">
+                                    <input type="checkbox" class="form-check-input" 
+                                           name="optionCorrects" value="true" aria-label="Correcte">
+                                    <label class="ms-2 mb-0">Correcte</label>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm remove-option" 
+                                        style="visibility:hidden;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary mt-3" id="addOptionBtn">
+                        <i class="fas fa-plus"></i> Ajouter une Option
+                    </button>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-lg animated-btn">
+                            <i class="fas fa-check"></i> Créer le Quiz
+                        </button>
+                        
+                        <a asp-action="Details" asp-route-id="@lesson?.Module?.CourseId" 
+                           class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animated-section {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .animated-card {
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .animated-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .animated-input {
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 8px;
+        padding: 0.75rem;
+    }
+
+    .animated-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+
+    .animated-option {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        animation: slideInLeft 0.4s ease-out forwards;
+    }
+
+    .animated-option:hover {
+        transform: translateX(5px);
+    }
+
+    .animated-btn {
+        transition: all 0.3s ease;
+    }
+
+    .animated-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .option-item .input-group-text {
+        background-color: #f8f9fa;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideOut {
+        to {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+    }
+</style>
+
+<script>
+    let optionCount = 2;
+
+    document.getElementById('addOptionBtn').addEventListener('click', function () {
+        const container = document.getElementById('optionsContainer');
+        const newOption = document.createElement('div');
+        newOption.className = 'option-item mb-3 animated-option';
+        newOption.dataset.option = optionCount;
+        newOption.innerHTML = `
+            <div class="input-group">
+                <input type="text" class="form-control animated-input" 
+                       name="optionTexts" placeholder="Option ${optionCount + 1}" required>
+                <div class="input-group-text">
+                    <input type="checkbox" class="form-check-input" 
+                           name="optionCorrects" value="true" aria-label="Correcte">
+                    <label class="ms-2 mb-0">Correcte</label>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm remove-option">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newOption);
+        optionCount++;
+        updateRemoveButtons();
+
+        // Attach remove handler
+        newOption.querySelector('.remove-option').addEventListener('click', removeOption);
+    });
+
+    function removeOption(e) {
+        e.preventDefault();
+        const optionItem = e.target.closest('.option-item');
+        optionItem.style.animation = 'slideOut 0.3s ease-out forwards';
+        setTimeout(() => {
+            optionItem.remove();
+            updateRemoveButtons();
+        }, 300);
+    }
+
+    function updateRemoveButtons() {
+        const options = document.querySelectorAll('.option-item');
+        options.forEach((option, index) => {
+            const removeBtn = option.querySelector('.remove-option');
+            if (options.length <= 2) {
+                removeBtn.style.visibility = 'hidden';
+            } else {
+                removeBtn.style.visibility = 'visible';
+            }
+        });
+    }
+
+    // Attach remove handlers to existing options
+    document.querySelectorAll('.remove-option').forEach(btn => {
+        btn.addEventListener('click', removeOption);
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('input[name="optionCorrects"]:checked');
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            alert('Veuillez cocher au moins une réponse correcte.');
+            return false;
+        }
+
+        const inputs = document.querySelectorAll('input[name="optionTexts"]');
+        if (inputs.length < 2) {
+            e.preventDefault();
+            alert('Veuillez ajouter au moins 2 options.');
+            return false;
+        }
+
+        for (let input of inputs) {
+            if (input.value.trim() === '') {
+                e.preventDefault();
+                alert('Toutes les options doivent avoir un texte.');
+                return false;
+            }
+        }
+    });
+
+    // Initialize button visibility
+    updateRemoveButtons();
+</script>

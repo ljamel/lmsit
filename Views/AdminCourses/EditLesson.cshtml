@@ -24,7 +24,7 @@
             </div>
 
             <div class="card-body">
-                <form asp-action="EditLesson" method="post" enctype="multipart/form-data" id="lessonForm">
+                <form asp-action="EditLesson" method="post" id="lessonForm">
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="ModuleId" />
                     
@@ -43,26 +43,9 @@
                         <!-- Quill Editor Container -->
                         <div id="editor" style="height: 300px;"></div>
                         <!-- Hidden field to store the HTML content -->
-                        <textarea asp-for="Description" id="descriptionInput" style="display:none;">@Html.Raw(Model.Description)</textarea>
+                        <textarea asp-for="Description" id="descriptionInput" style="display:none;"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                         <small class="form-text text-muted">Utilisez l'éditeur pour formater votre description</small>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(Model.VideoPath))
-                    {
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-film"></i> Vidéo actuelle: <strong>@Model.VideoFileName</strong>
-                            <br>
-                            <small>Téléchargez une nouvelle vidéo pour remplacer l'actuelle</small>
-                        </div>
-                    }
-
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-video"></i> Nouveau Fichier Vidéo (optionnel)
-                        </label>
-                        <input type="file" name="videoFile" class="form-control animated-input" accept="video/mp4,video/webm,video/ogg,audio/mp3" />
-                        <small class="form-text text-muted">Formats acceptés: MP4, WebM, OGG, MP3 (max 200MB)</small>
                     </div>
 
                     <div class="form-group mb-4">
@@ -205,10 +188,12 @@
         placeholder: 'Rédigez la description de votre leçon ici...'
     });
 
-    // Load existing content
-    var existingContent = document.getElementById('descriptionInput').value;
+    // Load existing content from the model
+    var existingContent = @Html.Raw(Json.Serialize(Model.Description ?? ""));
     if (existingContent) {
         quill.root.innerHTML = existingContent;
+        // Update hidden field
+        document.getElementById('descriptionInput').value = existingContent;
     }
 
     // Update hidden textarea on form submit

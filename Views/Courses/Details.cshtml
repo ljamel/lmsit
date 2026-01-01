@@ -54,10 +54,6 @@
                                             <a asp-action="Lesson" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-play-circle"></i> @lesson.Title
                                             </a>
-                                            @if (!string.IsNullOrEmpty(lesson.VideoFileName))
-                                            {
-                                                <small class="text-muted d-block">(@lesson.VideoFileName)</small>
-                                            }
                                         </li>
                                     }
                                 </ul>

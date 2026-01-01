@@ -67,23 +67,8 @@
                                             <div class="flex-grow-1">
                                                 <h6>@lesson.Title</h6>
                                                 <p class="small mb-2">@lesson.Description</p>
-                                                @if (!string.IsNullOrEmpty(lesson.VideoPath))
-                                                {
-                                                    <div class="mb-2">
-                                                        <small class="badge bg-success"><i class="fas fa-check"></i> Vidéo uploadée</small>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <div class="mb-2">
-                                                        <small class="badge bg-warning"><i class="fas fa-warning"></i> Pas de vidéo</small>
-                                                    </div>
-                                                }
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="uploadVideo(@lesson.Id)">
-                                            <i class="fas fa-video"></i> Upload Vidéo
-                                        </button>
                                     </div>
                                 }
                             </div>

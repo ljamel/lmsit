@@ -106,14 +106,13 @@ namespace CrudDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile)
+public async Task<IActionResult> CreateLesson(Lesson lesson)
 {
     Console.WriteLine($"=== CreateLesson POST called ===");
     Console.WriteLine($"ModuleId: {lesson.ModuleId}");
     Console.WriteLine($"Title: {lesson.Title}");
     Console.WriteLine($"Description length: {lesson.Description?.Length ?? 0}");
     Console.WriteLine($"OrderIndex: {lesson.OrderIndex}");
-    Console.WriteLine($"VideoFile: {videoFile?.FileName ?? "null"}");
     
     // Vérification module valide
     var module = await _context.Modules
@@ -131,9 +130,6 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
 
     // Remove Description validation error if it exists (Quill handles it)
     ModelState.Remove("Description");
-    
-    // Remove videoFile validation error (video is optional)
-    ModelState.Remove("videoFile");
 
     // Debug: Log validation errors
     if (!ModelState.IsValid)
@@ -159,41 +155,6 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
 
     Console.WriteLine("Validation passed, proceeding with save");
 
-    // Upload vidéo
-    if (videoFile != null && videoFile.Length > 0)
-    {
-        var allowed = new[] { ".mp4", ".webm", ".ogg", ".mp3" };
-        var ext = Path.GetExtension(videoFile.FileName).ToLowerInvariant();
-
-        if (!allowed.Contains(ext))
-        {
-            ModelState.AddModelError("videoFile", "Formats autorisés : MP4 / WebM / OGG / MP3");
-            ViewBag.ModuleId = lesson.ModuleId;
-            return View(lesson);
-        }
-
-        if (videoFile.Length > 200L * 1024 * 1024)
-        {
-            ModelState.AddModelError("videoFile", "Fichier trop volumineux (max 200 MB).");
-            ViewBag.ModuleId = lesson.ModuleId;
-            return View(lesson);
-        }
-
-        var videosPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "videos");
-        Directory.CreateDirectory(videosPath);
-
-        var fileName = Guid.NewGuid().ToString("N") + ext;
-        var savePath = Path.Combine(videosPath, fileName);
-
-        await using (var stream = new FileStream(savePath, FileMode.Create))
-        {
-            await videoFile.CopyToAsync(stream);
-        }
-
-        lesson.VideoFileName = videoFile.FileName;
-        lesson.VideoPath = "/videos/" + fileName;
-    }
-
     Console.WriteLine("Adding lesson to context");
     _context.Lessons.Add(lesson);
     
@@ -211,6 +172,8 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
         // -----------------------------
         public async Task<IActionResult> EditLesson(int lessonId)
         {
+            Console.WriteLine($"[EditLesson GET] Called with lessonId={lessonId}");
+            
             // Optimisé: AsNoTracking pour lecture seule lors de l'affichage du formulaire
             var lesson = await _context.Lessons
                 .AsNoTracking()
@@ -218,8 +181,12 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
                 .FirstOrDefaultAsync(l => l.Id == lessonId);
 
             if (lesson == null)
+            {
+                Console.WriteLine($"[EditLesson GET] Lesson not found with ID={lessonId}");
                 return NotFound("Leçon introuvable.");
+            }
 
+            Console.WriteLine($"[EditLesson GET] Lesson found: {lesson.Title}");
             ViewBag.ModuleId = lesson.ModuleId;
             ViewBag.CourseId = lesson.Module?.CourseId;
 
@@ -228,78 +195,61 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditLesson(Lesson lesson, IFormFile videoFile)
+        public async Task<IActionResult> EditLesson(Lesson lesson)
         {
+            Console.WriteLine($"[EditLesson POST] Called with LessonId={lesson.Id}");
+            Console.WriteLine($"[EditLesson POST] Title={lesson.Title}");
+            Console.WriteLine($"[EditLesson POST] Description length={lesson.Description?.Length ?? 0}");
+            Console.WriteLine($"[EditLesson POST] OrderIndex={lesson.OrderIndex}");
+            
             var existingLesson = await _context.Lessons
                 .Include(l => l.Module)
                 .FirstOrDefaultAsync(l => l.Id == lesson.Id);
 
             if (existingLesson == null)
+            {
+                Console.WriteLine($"[EditLesson POST] Lesson not found with ID={lesson.Id}");
                 return NotFound("Leçon introuvable.");
+            }
+
+            Console.WriteLine($"[EditLesson POST] Existing lesson found: {existingLesson.Title}");
+            Console.WriteLine($"[EditLesson POST] Existing description length={existingLesson.Description?.Length ?? 0}");
 
             // Remove Description validation error if it exists (Quill handles it)
             ModelState.Remove("Description");
 
             if (!ModelState.IsValid)
             {
+                Console.WriteLine("[EditLesson POST] ModelState is invalid:");
+                foreach (var key in ModelState.Keys)
+                {
+                    var errors = ModelState[key]?.Errors;
+                    if (errors != null && errors.Count > 0)
+                    {
+                        Console.WriteLine($"  - {key}: {string.Join(", ", errors.Select(e => e.ErrorMessage))}");
+                    }
+                }
                 ViewBag.ModuleId = existingLesson.ModuleId;
                 ViewBag.CourseId = existingLesson.Module?.CourseId;
                 return View(lesson);
             }
 
-            // Upload new video if provided
-            if (videoFile != null && videoFile.Length > 0)
-            {
-                var allowed = new[] { ".mp4", ".webm", ".ogg", ".mp3" };
-                var ext = Path.GetExtension(videoFile.FileName).ToLowerInvariant();
-
-                if (!allowed.Contains(ext))
-                {
-                    ModelState.AddModelError("videoFile", "Formats autorisés : MP4 / WebM / OGG / MP3");
-                    ViewBag.ModuleId = existingLesson.ModuleId;
-                    ViewBag.CourseId = existingLesson.Module?.CourseId;
-                    return View(lesson);
-                }
-
-                if (videoFile.Length > 200L * 1024 * 1024)
-                {
-                    ModelState.AddModelError("videoFile", "Fichier trop volumineux (max 200 MB).");
-                    ViewBag.ModuleId = existingLesson.ModuleId;
-                    ViewBag.CourseId = existingLesson.Module?.CourseId;
-                    return View(lesson);
-                }
-
-                var videosPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "videos");
-                Directory.CreateDirectory(videosPath);
-
-                var fileName = Guid.NewGuid().ToString("N") + ext;
-                var savePath = Path.Combine(videosPath, fileName);
-
-                await using (var stream = new FileStream(savePath, FileMode.Create))
-                {
-                    await videoFile.CopyToAsync(stream);
-                }
-
-                // Delete old video if exists
-                if (!string.IsNullOrEmpty(existingLesson.VideoPath))
-                {
-                    var oldPath = Path.Combine(_env.WebRootPath ?? "wwwroot", existingLesson.VideoPath.TrimStart('/'));
-                    if (System.IO.File.Exists(oldPath))
-                    {
-                        System.IO.File.Delete(oldPath);
-                    }
-                }
-
-                existingLesson.VideoFileName = videoFile.FileName;
-                existingLesson.VideoPath = "/videos/" + fileName;
-            }
-
             existingLesson.Title = lesson.Title;
-            existingLesson.Description = lesson.Description;
+            existingLesson.Description = lesson.Description ?? "";
             existingLesson.OrderIndex = lesson.OrderIndex;
+
+            Console.WriteLine($"[EditLesson POST] Updating lesson with new values:");
+            Console.WriteLine($"[EditLesson POST] New Title={existingLesson.Title}");
+            Console.WriteLine($"[EditLesson POST] New Description length={existingLesson.Description?.Length ?? 0}");
+            if (!string.IsNullOrEmpty(existingLesson.Description))
+            {
+                Console.WriteLine($"[EditLesson POST] New Description preview={existingLesson.Description.Substring(0, Math.Min(100, existingLesson.Description.Length))}");
+            }
 
             _context.Lessons.Update(existingLesson);
             await _context.SaveChangesAsync();
+            
+            Console.WriteLine("[EditLesson POST] Changes saved successfully");
 
             var courseId = existingLesson.Module?.CourseId ?? 0;
             if (courseId > 0)
@@ -325,16 +275,6 @@ public async Task<IActionResult> CreateLesson(Lesson lesson, IFormFile videoFile
                 return NotFound("Leçon introuvable.");
 
             var courseId = lesson.Module?.CourseId ?? 0;
-
-            // Delete video file if exists
-            if (!string.IsNullOrEmpty(lesson.VideoPath))
-            {
-                var videoPath = Path.Combine(_env.WebRootPath ?? "wwwroot", lesson.VideoPath.TrimStart('/'));
-                if (System.IO.File.Exists(videoPath))
-                {
-                    System.IO.File.Delete(videoPath);
-                }
-            }
 
             _context.Lessons.Remove(lesson);
             await _context.SaveChangesAsync();
