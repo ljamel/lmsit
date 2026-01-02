@@ -66,9 +66,20 @@ namespace CrudDemo.Controllers
             return View(course);
         }
 
-        public IActionResult CreateModule(int courseId)
+        public async Task<IActionResult> CreateModule(int courseId)
         {
+            // Verify the course exists
+            var course = await _context.Courses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == courseId);
+            
+            if (course == null)
+            {
+                return NotFound("Course not found.");
+            }
+            
             ViewBag.CourseId = courseId;
+            ViewBag.CourseName = course.Title;
             return View();
         }
 
@@ -76,12 +87,38 @@ namespace CrudDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateModule(Module module)
         {
-            if (!ModelState.IsValid)
-                return View(module);
+            Console.WriteLine($"=== CreateModule POST called ===");
+            Console.WriteLine($"CourseId: {module.CourseId}");
+            Console.WriteLine($"Title: {module.Title}");
+            Console.WriteLine($"Description: {module.Description}");
+            Console.WriteLine($"OrderIndex: {module.OrderIndex}");
 
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("ERROR: ModelState is invalid");
+                var errors = ModelState
+                    .Where(x => x.Value!.Errors.Count > 0)
+                    .Select(x => new { x.Key, x.Value!.Errors })
+                    .ToArray();
+                
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"Validation Error - Field: {error.Key}");
+                    foreach (var err in error.Errors)
+                    {
+                        Console.WriteLine($"  Message: {err.ErrorMessage}");
+                    }
+                }
+                
+                ViewBag.CourseId = module.CourseId;
+                return View(module);
+            }
+
+            module.CreatedAt = DateTime.UtcNow;
             _context.Modules.Add(module);
             await _context.SaveChangesAsync();
 
+            Console.WriteLine($"Module created successfully with ID: {module.Id}");
             return RedirectToAction(nameof(Details), new { id = module.CourseId });
         }
 
