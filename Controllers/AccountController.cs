@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using CrudDemo.Models;
+using CrudDemo.Services;
 
 namespace CrudDemo.Controllers
 {
@@ -9,12 +10,21 @@ namespace CrudDemo.Controllers
 			private readonly UserManager<IdentityUser> _userManager;
 			private readonly SignInManager<IdentityUser> _signInManager;
 			private readonly RoleManager<IdentityRole> _roleManager;
+			private readonly IEmailService _emailService;
+			private readonly ILogger<AccountController> _logger;
 
-			public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, RoleManager<IdentityRole> roleManager)
+			public AccountController(
+				UserManager<IdentityUser> userManager, 
+				SignInManager<IdentityUser> signInManager, 
+				RoleManager<IdentityRole> roleManager,
+				IEmailService emailService,
+				ILogger<AccountController> logger)
 			{
 				_userManager = userManager;
 				_signInManager = signInManager;
 				_roleManager = roleManager;
+				_emailService = emailService;
+				_logger = logger;
 			}
 
 		// GET: Account/Register
@@ -38,6 +48,17 @@ namespace CrudDemo.Controllers
 
 				if (result.Succeeded)
 				{
+					// Envoyer un email de bienvenue
+					try
+					{
+						await _emailService.SendRegistrationEmailAsync(user.Email!, model.Email);
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Erreur lors de l'envoi de l'email de bienvenue à {Email}", user.Email);
+						// Ne pas bloquer l'inscription si l'email échoue
+					}
+
 					if (isFirstUser)
 					{
 						const string adminRole = "Admin";

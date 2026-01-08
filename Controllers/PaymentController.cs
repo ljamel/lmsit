@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CrudDemo.Data;
 using CrudDemo.Models;
+using CrudDemo.Services;
 using Stripe;
 using Stripe.Checkout;
 
@@ -13,11 +14,19 @@ namespace CrudDemo.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(ApplicationDbContext context, IConfiguration configuration)
+        public PaymentController(
+            ApplicationDbContext context, 
+            IConfiguration configuration,
+            IEmailService emailService,
+            ILogger<PaymentController> logger)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
+            _logger = logger;
             StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
         }
 
@@ -98,6 +107,21 @@ namespace CrudDemo.Controllers
                     };
                     _context.Subscriptions.Add(subscription);
                     await _context.SaveChangesAsync();
+
+                    // Envoyer un email de confirmation d'abonnement
+                    try
+                    {
+                        await _emailService.SendSubscriptionEmailAsync(
+                            userId, 
+                            userId.Split('@')[0], 
+                            "Abonnement Mensuel - Accès Illimité", 
+                            10.00m);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erreur lors de l'envoi de l'email d'abonnement à {Email}", userId);
+                        // Ne pas bloquer le processus si l'email échoue
+                    }
                 }
             }
 
@@ -251,6 +275,24 @@ namespace CrudDemo.Controllers
                     .AsNoTracking()
                     .Where(c => c.Id == courseId)
                     .FirstOrDefaultAsync();
+
+                // Envoyer un email de confirmation d'inscription au cours
+                if (course != null)
+                {
+                    try
+                    {
+                        await _emailService.SendSubscriptionEmailAsync(
+                            userId, 
+                            userId.Split('@')[0], 
+                            course.Title, 
+                            10.00m);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erreur lors de l'envoi de l'email de confirmation pour le cours {CourseId}", courseId);
+                        // Ne pas bloquer le processus si l'email échoue
+                    }
+                }
                     
                 ViewBag.Course = course;
                 return View();
