@@ -132,4 +132,28 @@ public class MattermostService
             return null;
         }
     }
+
+    // 7️⃣ Envoyer un email de réinitialisation de mot de passe
+    public async Task<bool> SendPasswordResetEmailAsync(string email)
+    {
+        try
+        {
+            var payload = new { email };
+            var res = await _http.PostAsync(
+                "/api/v4/users/password/reset/send",
+                new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
+
+            return res.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // 8️⃣ Obtenir l'URL de base Mattermost
+    public string GetMattermostUrl()
+    {
+        return _http.BaseAddress?.ToString().TrimEnd('/') ?? "";
+    }
 }

@@ -166,16 +166,15 @@ namespace CrudDemo.Controllers
 			if (!string.IsNullOrEmpty(subscription.MattermostUserId))
 			{
 				// Réactiver le compte si nécessaire
-				var activated = await _mattermostService.ActivateUserAsync(subscription.MattermostUserId);
-				if (activated)
-				{
-					TempData["Success"] = "Votre compte Mattermost a été activé avec succès!";
-				}
-				else
-				{
-					TempData["Warning"] = "Votre compte Mattermost existe déjà.";
-				}
-				return RedirectToAction("Index", "Courses");
+				await _mattermostService.ActivateUserAsync(subscription.MattermostUserId);
+				
+				// Envoyer un email de réinitialisation de mot de passe
+				await _mattermostService.SendPasswordResetEmailAsync(userEmail);
+				
+				// Rediriger directement vers la page de reset de Mattermost
+				var mattermostUrl = _mattermostService.GetMattermostUrl();
+				var resetUrl = $"{mattermostUrl}/reset_password_complete?email={Uri.EscapeDataString(userEmail)}";
+				return Redirect(resetUrl);
 			}
 
 			// Créer un nouveau compte Mattermost
@@ -210,7 +209,13 @@ namespace CrudDemo.Controllers
 					subscription.MattermostCreatedAt = DateTime.UtcNow;
 					await _context.SaveChangesAsync();
 
-					TempData["Success"] = "Votre compte Mattermost a été créé avec succès! Vous allez recevoir un email avec vos identifiants.";
+					// Envoyer un email de réinitialisation de mot de passe
+					await _mattermostService.SendPasswordResetEmailAsync(userEmail);
+					
+					// Rediriger directement vers la page de reset de Mattermost
+					var mattermostUrl = _mattermostService.GetMattermostUrl();
+					var resetUrl = $"{mattermostUrl}/reset_password_complete?email={Uri.EscapeDataString(userEmail)}";
+					return Redirect(resetUrl);
 				}
 				else
 				{
