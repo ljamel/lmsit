@@ -81,11 +81,5 @@ namespace CrudDemo.Models
         public DateTime? CanceledAt { get; set; }
         
         public bool IsActive { get; set; } = true;
-        
-        // ID de l'utilisateur Mattermost associé
-        public string? MattermostUserId { get; set; }
-        
-        // Date de création du compte Mattermost
-        public DateTime? MattermostCreatedAt { get; set; }
     }
 }

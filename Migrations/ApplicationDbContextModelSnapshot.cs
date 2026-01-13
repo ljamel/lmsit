@@ -343,12 +343,6 @@ namespace CrudDemo.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("MattermostCreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("MattermostUserId")
-                        .HasColumnType("longtext");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
 
