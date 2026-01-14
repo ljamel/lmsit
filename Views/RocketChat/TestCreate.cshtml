@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Test Rocket.Chat";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Test de création d'utilisateur Rocket.Chat</h3>
+                </div>
+                <div class="card-body">
+                    <div id="result" class="alert" style="display: none;"></div>
+
+                    <form id="createUserForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nom complet</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <small class="form-text text-muted">Sans espaces ni caractères spéciaux</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="roles" class="form-label">Rôles (optionnel)</label>
+                            <input type="text" class="form-control" id="roles" name="roles" placeholder="user">
+                            <small class="form-text text-muted">Séparés par des virgules (ex: user,admin)</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Créer et obtenir le lien</button>
+                        <button type="button" class="btn btn-success" id="createAndRedirect">Créer et rediriger</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const rolesInput = document.getElementById('roles').value;
+        const roles = rolesInput ? rolesInput.split(',').map(r => r.trim()) : ['user'];
+        
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'none';
+        
+        try {
+            const response = await fetch('/RocketChat/CreateUser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, username, email, roles })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                resultDiv.className = 'alert alert-success';
+                resultDiv.innerHTML = `
+                    <h5>✅ Utilisateur créé avec succès !</h5>
+                    <p><strong>User ID:</strong> ${data.userId}</p>
+                    <p><strong>URL de connexion:</strong></p>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="loginUrl" value="${data.loginUrl}" readonly>
+                        <button class="btn btn-outline-secondary" onclick="copyToClipboard()">Copier</button>
+                    </div>
+                    <a href="${data.loginUrl}" class="btn btn-primary" target="_blank">Ouvrir Rocket.Chat</a>
+                `;
+            } else {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.innerHTML = `<strong>Erreur:</strong> ${data.error || 'Une erreur est survenue'}`;
+            }
+            
+            resultDiv.style.display = 'block';
+        } catch (error) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.innerHTML = `<strong>Erreur:</strong> ${error.message}`;
+            resultDiv.style.display = 'block';
+        }
+    });
+    
+    document.getElementById('createAndRedirect').addEventListener('click', function() {
+        const name = document.getElementById('name').value;
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        
+        if (name && username && email) {
+            window.location.href = `/RocketChat/CreateAndRedirect?name=${encodeURIComponent(name)}&username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}`;
+        } else {
+            alert('Veuillez remplir tous les champs obligatoires');
+        }
+    });
+    
+    function copyToClipboard() {
+        const loginUrl = document.getElementById('loginUrl');
+        loginUrl.select();
+        document.execCommand('copy');
+        alert('URL copiée dans le presse-papiers !');
+    }
+</script>
+}

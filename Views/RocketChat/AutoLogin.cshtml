@@ -1,0 +1,59 @@
+@model CrudDemo.Services.RocketChatUserResult
+@{
+    ViewData["Title"] = "Redirection vers le chat...";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Connexion au chat...</h2>
+        <div class="spinner"></div>
+        <p>Vous allez être redirigé automatiquement.</p>
+        <p><a href="@Model.LoginUrl">Cliquez ici si la redirection ne fonctionne pas</a></p>
+    </div>
+
+    <script>
+        // Redirection automatique après 1 seconde
+        setTimeout(function() {
+            window.location.href = '@Model.LoginUrl';
+        }, 1000);
+    </script>
+</body>
+</html>
