@@ -1,0 +1,221 @@
+@{
+    ViewData["Title"] = "Paiement de l'Abonnement";
+}
+
+<style>
+    .checkout-container {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        min-height: 100vh;
+        padding: 50px 0;
+    }
+
+    .checkout-card {
+        background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+        border: 2px solid #00B2FF;
+        border-radius: 20px;
+        box-shadow: 0 10px 50px rgba(0, 178, 255, 0.3);
+        padding: 40px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .checkout-title {
+        color: #00B2FF;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-shadow: 0 0 20px rgba(0, 178, 255, 0.5);
+        margin-bottom: 10px;
+    }
+
+    .checkout-subtitle {
+        color: #fff;
+        font-size: 1.2rem;
+        opacity: 0.8;
+    }
+
+    .price-box {
+        background: linear-gradient(135deg, #00B2FF 0%, #0080FF 100%);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin: 30px 0;
+        box-shadow: 0 5px 20px rgba(0, 178, 255, 0.4);
+    }
+
+    .price-amount {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #fff;
+        margin: 0;
+    }
+
+    .price-period {
+        font-size: 1.5rem;
+        color: #fff;
+        opacity: 0.9;
+    }
+
+    .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 30px 0;
+    }
+
+    .features-list li {
+        color: #fff;
+        padding: 15px;
+        margin: 10px 0;
+        background: rgba(0, 178, 255, 0.1);
+        border-left: 4px solid #00B2FF;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .features-list li:hover {
+        background: rgba(0, 178, 255, 0.2);
+        transform: translateX(10px);
+    }
+
+    .features-list i {
+        color: #00B2FF;
+        margin-right: 15px;
+        font-size: 1.2rem;
+    }
+
+    .payment-btn {
+        width: 100%;
+        padding: 20px;
+        font-size: 1.3rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, #00B2FF 0%, #0080FF 100%);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0, 178, 255, 0.4);
+    }
+
+    .payment-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 178, 255, 0.6);
+    }
+
+    .secure-badge {
+        text-align: center;
+        margin-top: 20px;
+        color: #fff;
+        opacity: 0.7;
+    }
+
+    .secure-badge i {
+        color: #00B2FF;
+        margin-right: 5px;
+    }
+
+    .alert-info {
+        background: rgba(0, 178, 255, 0.1);
+        border: 1px solid #00B2FF;
+        color: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="container">
+        <div class="checkout-card">
+            <div class="checkout-header">
+                <h1 class="checkout-title">
+                    <i class="fas fa-rocket"></i> Rejoignez Notre Plateforme
+                </h1>
+                <p class="checkout-subtitle">Étape 1/2 : Paiement de votre abonnement</p>
+                <p class="checkout-subtitle" style="font-size: 1rem; margin-top: 10px;">
+                    Après le paiement, vous pourrez créer votre compte et accéder immédiatement à tous les cours.
+                </p>
+            </div>
+
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> @TempData["Message"]
+                </div>
+            }
+
+            <div class="price-box">
+                <p class="price-amount">10€</p>
+                <p class="price-period">/ mois</p>
+            </div>
+
+            <ul class="features-list">
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Accès illimité à tous les cours
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Des lives exclusives pour les abonnés tous les mois
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Des exercices pratiques chaque semaine, corrigés par nos soins
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Aide personnalisée aux exercices
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Certificats de réussite
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Communauté d'apprenants active
+                </li>
+            </ul>
+
+            <form asp-action="CreatePreRegistrationSession" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div class="mb-4">
+                    <label for="email" class="form-label" style="color: #fff; font-weight: bold;">
+                        <i class="fas fa-envelope me-2"></i>Votre Email
+                    </label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        id="email" 
+                        class="form-control form-control-lg" 
+                        placeholder="votre@email.com" 
+                        required
+                        style="background: #16213e; border: 1px solid #00B2FF; color: #fff; padding: 15px;"
+                    />
+                    <small class="form-text" style="color: rgba(255,255,255,0.7);">
+                        Votre compte sera créé automatiquement après le paiement
+                    </small>
+                </div>
+                
+                <button type="submit" class="payment-btn">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Payer et Continuer
+                </button>
+            </form>
+
+            <div class="secure-badge">
+                <i class="fas fa-lock"></i>
+                Paiement 100% sécurisé avec Stripe
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-controller="Home" asp-action="Index" class="text-white-50">
+                    <i class="fas fa-arrow-left me-1"></i> Retour à l'accueil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

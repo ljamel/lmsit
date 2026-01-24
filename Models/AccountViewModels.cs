@@ -31,4 +31,23 @@ namespace CrudDemo.Models
 		[Display(Name = "Remember me?")]
 		public bool RememberMe { get; set; }
 	}
+
+	public class ResetPasswordViewModel
+	{
+		[Required]
+		[EmailAddress]
+		public string Email { get; set; } = string.Empty;
+
+		[Required]
+		[StringLength(100, ErrorMessage = "Le mot de passe doit contenir au moins {2} caractères.", MinimumLength = 6)]
+		[DataType(DataType.Password)]
+		public string NewPassword { get; set; } = string.Empty;
+
+		[DataType(DataType.Password)]
+		[Compare("NewPassword", ErrorMessage = "Les mots de passe ne correspondent pas.")]
+		public string ConfirmPassword { get; set; } = string.Empty;
+
+		[Required]
+		public string Token { get; set; } = string.Empty;
+	}
 }

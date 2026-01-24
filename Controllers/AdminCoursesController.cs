@@ -532,19 +532,39 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         // -----------------------------
         // USERS MANAGEMENT
         // -----------------------------
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(string? search)
         {
-            // Optimisé: AsNoTracking pour lecture seule
-            var users = await _context.Users.AsNoTracking().ToListAsync();
-            var subscriptions = await _context.Subscriptions.AsNoTracking().ToListAsync();
+            // Optimisé: AsNoTracking pour lecture seule, trié par date d'inscription
+            var users = await _context.Users
+                .AsNoTracking()
+                .ToListAsync();
+            var subscriptions = await _context.Subscriptions
+                .AsNoTracking()
+                .OrderByDescending(s => s.StartDate)
+                .ToListAsync();
             
             var userSubscriptions = users.Select(user => new
             {
                 User = user,
                 Subscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email && s.IsActive)
-            }).ToList();
+            })
+            .OrderByDescending(us => us.Subscription?.StartDate ?? DateTime.MinValue)
+            .ToList();
+            
+            // Filtrage par recherche si présent
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                userSubscriptions = userSubscriptions
+                    .Where(us => 
+                        (us.User.Email != null && us.User.Email.ToLower().Contains(searchLower)) ||
+                        (us.User.UserName != null && us.User.UserName.ToLower().Contains(searchLower))
+                    )
+                    .ToList();
+            }
             
             ViewBag.UserSubscriptions = userSubscriptions;
+            ViewBag.SearchQuery = search;
             return View();
         }
 

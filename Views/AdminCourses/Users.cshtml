@@ -15,6 +15,34 @@
             </a>
         </div>
 
+        <!-- Barre de recherche -->
+        <div class="search-container mb-4">
+            <form method="get" asp-action="Users" class="d-flex gap-2">
+                <div class="input-group flex-grow-1">
+                    <span class="input-group-text" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid #00B2FF; color: #00B2FF;">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        class="form-control" 
+                        placeholder="Rechercher par email ou nom d'utilisateur..." 
+                        value="@ViewBag.SearchQuery"
+                        style="background: #16213e; border: 1px solid #00B2FF; color: #fff;"
+                    />
+                </div>
+                <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #00B2FF 0%, #0080FF 100%); border: none;">
+                    <i class="fas fa-search me-1"></i> Rechercher
+                </button>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.SearchQuery))
+                {
+                    <a asp-action="Users" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> Effacer
+                    </a>
+                }
+            </form>
+        </div>
+
         <div class="stats-cards mb-4">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -72,7 +100,7 @@
                             <td>
                                 <div class="user-email">
                                     <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
-                                    @user!.Email
+                                    @user!.Email @user.Id
                                 </div>
                             </td>
                             <td>

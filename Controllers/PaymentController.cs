@@ -9,7 +9,6 @@ using Stripe.Checkout;
 
 namespace CrudDemo.Controllers
 {
-    [Authorize]
     public class PaymentController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -30,7 +29,111 @@ namespace CrudDemo.Controllers
             StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
         }
 
-        // Page de paiement d'abonnement mensuel
+        // Page de paiement AVANT l'inscription (accessible sans authentification)
+        [AllowAnonymous]
+        public IActionResult PreRegistrationCheckout()
+        {
+            return View();
+        }
+
+        // Créer une session de paiement pour la pré-inscription - Redirection directe vers Stripe
+        [AllowAnonymous]
+        [HttpPost]
+        [HttpGet]
+        public IActionResult CreatePreRegistrationSession()
+        {
+            var domain = $"{Request.Scheme}://{Request.Host}";
+            
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>
+                {
+                    new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            Currency = "eur",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = "Abonnement Mensuel - Accès Illimité",
+                                Description = "Accès complet à tous les cours de la plateforme",
+                            },
+                            UnitAmount = 1000, // 10 EUR en centimes
+                            Recurring = new SessionLineItemPriceDataRecurringOptions
+                            {
+                                Interval = "month",
+                            }
+                        },
+                        Quantity = 1,
+                    },
+                },
+                Mode = "subscription",
+                BillingAddressCollection = "required",
+                SubscriptionData = new SessionSubscriptionDataOptions
+                {
+                    TrialPeriodDays = 7,
+                },
+                SuccessUrl = $"{domain}/Payment/PreRegistrationSuccess?session_id={{CHECKOUT_SESSION_ID}}",
+                CancelUrl = $"{domain}/Payment/PreRegistrationCancel",
+            };
+
+            var service = new SessionService();
+            var session = service.Create(options);
+
+            return Redirect(session.Url);
+        }
+
+        // Succès du paiement de pré-inscription - Créer le compte automatiquement
+        [AllowAnonymous]
+        public async Task<IActionResult> PreRegistrationSuccess(string session_id)
+        {
+            var service = new SessionService();
+            var session = await service.GetAsync(session_id);
+
+            if (session.PaymentStatus == "paid" || session.Status == "complete")
+            {
+                // Récupérer l'email depuis le customer Stripe
+                string? email = null;
+                
+                if (!string.IsNullOrEmpty(session.CustomerId))
+                {
+                    var customerService = new Stripe.CustomerService();
+                    var customer = await customerService.GetAsync(session.CustomerId);
+                    email = customer.Email;
+                }
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    TempData["Error"] = "Impossible de récupérer votre email. Veuillez contacter le support.";
+                    return RedirectToAction("Register", "Account");
+                }
+
+                // Stocker les informations de paiement pour créer l'abonnement
+                TempData["PaymentSessionId"] = session_id;
+                TempData["StripeSubscriptionId"] = session.SubscriptionId ?? session.Id;
+                TempData["StripeCustomerId"] = session.CustomerId ?? "";
+                TempData["UserEmail"] = email;
+                TempData["Success"] = "Paiement réussi ! Votre compte a été créé. Veuillez définir votre mot de passe.";
+                
+                // Rediriger vers la page de création du compte avec mot de passe aléatoire
+                return RedirectToAction("CompleteRegistrationAfterPayment", "Account", new { email = email });
+            }
+
+            TempData["Error"] = "Le paiement n'a pas été confirmé. Veuillez réessayer.";
+            return RedirectToAction("Register", "Account");
+        }
+
+        // Annulation du paiement de pré-inscription
+        [AllowAnonymous]
+        public IActionResult PreRegistrationCancel()
+        {
+            TempData["Message"] = "Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.";
+            return View();
+        }
+
+        // Page de paiement d'abonnement mensuel (pour utilisateurs déjà inscrits)
+        [Authorize]
         public IActionResult SubscriptionCheckout()
         {
             return View();

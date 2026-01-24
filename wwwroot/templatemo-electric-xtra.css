@@ -1114,6 +1114,80 @@ https://templatemo.com/tm-596-electric-xtra
             }
         }
 
+        /* Advantages Section */
+        .advantages {
+            padding: 100px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .advantages-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .advantage-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 94, 0, 0.2);
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .advantage-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 94, 0, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+
+        .advantage-item:hover::before {
+            left: 100%;
+        }
+
+        .advantage-item:hover {
+            transform: translateY(-10px);
+            border-color: #FF5E00;
+            box-shadow: 0 20px 50px rgba(255, 94, 0, 0.3);
+        }
+
+        .advantage-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(255, 94, 0, 0.5));
+        }
+
+        .advantage-item h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ffffff, #FF5E00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .advantage-item p {
+            opacity: 0.8;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
         /* Contact Section */
         .contact {
             padding: 100px 20px;
@@ -1448,6 +1522,14 @@ https://templatemo.com/tm-596-electric-xtra
             .about-content,
             .contact-container {
                 grid-template-columns: 1fr;
+            }
+
+            .advantages-container {
+                grid-template-columns: 1fr;
+            }
+
+            .advantage-item {
+                padding: 30px 20px;
             }
 
             .about-graphic {
