@@ -53,6 +53,9 @@
             <li>
                 <a href="/#contact" class="nav-link">Contact</a>
             </li>
+            <li>
+                <a asp-area="" asp-controller="Challenges" asp-action="Index" class="nav-link">Challenges</a>
+            </li>
 
             @if (User?.Identity?.IsAuthenticated ?? false)
             {

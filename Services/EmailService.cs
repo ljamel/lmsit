@@ -37,19 +37,15 @@ public class EmailService : IEmailService
                 smtpHost, smtpPort, smtpUsername);
 
             // Accepter tous les certificats SSL (pour localhost/développement)
-            ServicePointManager.ServerCertificateValidationCallback = 
-                delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
-                { 
-                    return true; 
-                };
+            ServicePointManager.ServerCertificateValidationCallback = (_, _, _, _) => true;
 
             using var smtpClient = new SmtpClient(smtpHost, smtpPort)
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(smtpUsername, smtpPassword),
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                Timeout = 30000
+                Timeout = 30000,
+                DeliveryMethod = SmtpDeliveryMethod.Network
             };
 
             var mailMessage = new MailMessage

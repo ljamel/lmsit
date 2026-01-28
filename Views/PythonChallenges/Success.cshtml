@@ -1,0 +1,91 @@
+@{
+    ViewData["Title"] = "Félicitations - Challenges Python !";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-success">
+                <div class="card-header bg-success text-white text-center">
+                    <h1 class="mb-0"><i class="fas fa-trophy"></i> Félicitations !</h1>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fab fa-python text-success" style="font-size: 100px;"></i>
+                    </div>
+                    
+                    <h3 class="mb-4">Vous avez réussi tous les challenges Python !</h3>
+                    
+                    <p class="lead">
+                        Vous avez démontré votre maîtrise de la programmation Python en résolvant les 6 exercices :
+                    </p>
+
+                    <div class="alert alert-success text-left">
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="fas fa-check text-success"></i> <strong>Challenge 1</strong> - Inverser une liste</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Challenge 2</strong> - Trier du plus grand au plus petit</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Challenge 3</strong> - Calculer la médiane</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Challenge 4</strong> - Calculer la moyenne</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Challenge 5</strong> - Supprimer les doublons</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Challenge 6</strong> - Filtrer les valeurs supérieures à la moyenne</li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="text-success">🎉 Score : 6/6 🎉</h4>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mt-4">
+                        <a href="@Url.Action("Exercise1", "PythonChallenges")" class="btn btn-success btn-lg mr-2">
+                            <i class="fas fa-redo"></i> Recommencer
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-home"></i> Retour à l'accueil
+                        </a>
+                    </div>
+
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            Continuez à pratiquer pour améliorer vos compétences en Python !
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fab {
+        animation: bounce 2s infinite;
+    }
+    
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-20px);
+        }
+        60% {
+            transform: translateY(-10px);
+        }
+    }
+</style>
