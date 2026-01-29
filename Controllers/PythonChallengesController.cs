@@ -42,7 +42,7 @@ namespace CrudDemo.Controllers
             var result = ExecutePythonCode(code);
             
             string cleanOutput = System.Text.RegularExpressions.Regex.Replace(result.output.Trim(), @"\s+", " ");
-            if (result.success && cleanOutput == "[7, 6, 5, 4, 3, 2, 1]")
+            if (result.success && cleanOutput == "[8, 7, 6, 5, 4, 3, 2, 1]")
             {
                 return RedirectToAction("Exercise3");
             }
@@ -134,9 +134,39 @@ namespace CrudDemo.Controllers
             string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
             if (result.success && cleanOutput == "[32, 87, 90, 77, 88]")
             {
-                return RedirectToAction("Success");
+                return RedirectToAction("Exercise7");
             }
             
+            ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
+            ViewBag.Output = result.output;
+            return View();
+        }
+
+        // Challenge 7: Moyenne des notes par âge (describe)
+        public IActionResult Exercise7()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Exercise7(string code)
+        {
+            var result = ExecutePythonCode(code);
+
+            if (result.success)
+            {
+                string output = result.output.Trim();
+
+                bool has21 = Regex.IsMatch(output, @"\b21\b\D+9(\.0+)?\b", RegexOptions.Multiline);
+                bool has42 = Regex.IsMatch(output, @"\b42\b\D+12\.5\b", RegexOptions.Multiline);
+                bool has84 = Regex.IsMatch(output, @"\b84\b\D+14(\.0+)?\b", RegexOptions.Multiline);
+
+                if (has21 && has42 && has84)
+                {
+                    return RedirectToAction("Success");
+                }
+            }
+
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
             return View();

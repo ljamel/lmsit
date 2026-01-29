@@ -92,17 +92,13 @@ public class EmailService : IEmailService
 
             <p>Merci de vous être inscrit à notre cours de cybersécurité.</p>
 
-            <p>
-            Pour commencer, abonnez-vous dès maintenant pour 9 euros par mois:<br />
-            <a href='https://progfacil.fr/Account/Login'>https://progfacil.fr/Account/Login</a>
-            </p>
 
             <p>
             🎁 <strong>Bonus exclusif</strong><br />
-            Nous vous offrons une sélection des meilleurs livres de cybersécurité en PDF à télécharger ici :<br />
-            <a href='https://docs.google.com/document/d/125qy1y56yMGLpjicOo6iudWR0a42itXenYFop2bqfdo/edit?usp=sharing'>
-            https://docs.google.com/document/d/125qy1y56yMGLpjicOo6iudWR0a42itXenYFop2bqfdo/edit?usp=sharing
-            </a>
+            Nous vous offrons une sélection des livres pour bien commencer la  cybersécurité en PDF à télécharger ici :<br />
+            <a href='https://drive.google.com/file/d/1paB0tcQ3KvTabqdLVV4eo3wdRG_iezi2/view?usp=sharing'>CCNA les bases du réseaux</a>
+            <a href='https://drive.google.com/file/d/1AzGbAi_tZYaLApg-9ioJbHAOfkao3dNL/view?usp=sharing'>LPIC les bases de Linux</a>
+            <a href='https://docs.google.com/document/d/125qy1y56yMGLpjicOo6iudWR0a42itXenYFop2bqfdo/edit?usp=sharing'>Initiation à la cyber</a>
             </p>
 
             <p>
@@ -128,10 +124,9 @@ public class EmailService : IEmailService
             </ul>
 
             <p>
-            🚀 <strong>Accès exclusif</strong><br />
-            Pour accéder au contenu premium et au <strong>groupe privé d’entraide</strong>, vous pouvez vous abonner pour <strong>9 € par mois</strong> via ce lien :<br />
-            <a href='https://progfacil.fr/Account/Login'>https://progfacil.fr/Account/Login</a>
+            🚀 <strong>Accès exclusif</strong>
             </p>
+            <p>Vous avez maintenant accès à tout le contenu du cours. Via la lien <a href='https://progfacil.fr/Account/Login'>https://progfacil.fr/Account/Login</a> Bonne formation !</p>
 
             <p>
             Nous avons hâte de vous voir commencer cette aventure passionnante avec nous.<br />

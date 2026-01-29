@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Challenge Python 4 - Moyenne";
+    ViewData["Title"] = "Challenge Python 7 - Moyenne des notes par âge";
 }
 
 <div class="container mt-5">
@@ -7,18 +7,24 @@
         <div class="col-md-10">
             <div class="card shadow">
                 <div class="card-header bg-success text-white">
-                    <h2 class="mb-0"><i class="fab fa-python"></i> Challenge Python 4 / 7</h2>
+                    <h2 class="mb-0"><i class="fab fa-python"></i> Challenge Python 7 / 7</h2>
                 </div>
                 <div class="card-body">
-                    <h4 class="mb-4">Calculer la moyenne</h4>
+                    <h4 class="mb-4">Moyenne des notes par âge</h4>
                     
                     <div class="alert alert-info">
-                        <strong>Liste Python :</strong>
+                        <strong>Dictionnaire Python :</strong>
                         <pre class="mb-0 mt-2 no-copy">
-[22,11,23,1,88,7,4,3,5]
+{
+    'names': ['James', 'Bob', 'Mark', 'Kate', 'Sarah'],
+    'notes': [17, 12, 14, 1, 13],
+    'Ages': [21, 42, 84, 21, 42]
+}
                         </pre>
                         <small class="text-muted mt-2 d-block">
-                            <strong>Objectif:</strong> Écrivez un script Python qui calcule et affiche la moyenne de cette liste.
+                            <strong>Objectif:</strong> À partir de ce dictionnaire, créez un DataFrame, utilisez <strong>describe</strong> et affichez la moyenne des notes par âge.
+                            <br />
+                            <strong>Indice:</strong> Vous pouvez grouper par <code>Ages</code> et récupérer la colonne <code>mean</code> du <code>describe()</code>.
                         </small>
                     </div>
 
@@ -37,14 +43,14 @@
                         </div>
                     }
 
-                    <form method="post" asp-action="Exercise4">
+                    <form method="post" asp-action="Exercise7">
                         <div class="form-group">
                             <label for="code"><strong>Votre code Python :</strong></label>
                             <textarea class="form-control no-copy" 
                                       id="code" 
                                       name="code" 
-                                      placeholder="# Écrivez votre code Python ici&#10;# Indice: diviser la somme par le nombre d'éléments"
-                                      rows="8"
+                                      placeholder="# Écrivez votre code Python ici&#10;# indice :&#10;# module pandas &#10;# regrouper deux champs avec groupby puis faite la moyenne"
+                                      rows="10"
                                       required 
                                       autocomplete="off"
                                       spellcheck="false"></textarea>
@@ -59,7 +65,10 @@
                         <span class="badge badge-success">Challenge 1 ✓</span>
                         <span class="badge badge-success">Challenge 2 ✓</span>
                         <span class="badge badge-success">Challenge 3 ✓</span>
-                        <span class="badge badge-info">Challenge 4 de 7</span>
+                        <span class="badge badge-success">Challenge 4 ✓</span>
+                        <span class="badge badge-success">Challenge 5 ✓</span>
+                        <span class="badge badge-success">Challenge 6 ✓</span>
+                        <span class="badge badge-info">Challenge 7 de 7</span>
                     </div>
                 </div>
             </div>
