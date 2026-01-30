@@ -48,10 +48,7 @@
                 <a href="/#features" class="nav-link">Compétences</a>
             </li>
             <li>
-                <a href="/#about" class="nav-link">POURQUOI</a>
-            </li>
-            <li>
-                <a href="/#contact" class="nav-link">Contact</a>
+                <a asp-area="" asp-controller="Home" asp-action="Actual" class="nav-link">Actualités</a>
             </li>
             <li>
                 <a asp-area="" asp-controller="Challenges" asp-action="Index" class="nav-link">Challenges</a>
@@ -87,6 +84,9 @@
                 </li>
             }
 
+            <li>
+                <a href="/#contact" class="nav-link">Contact</a>
+            </li>
 
         </ul>
         <div class="menu-toggle" id="menuToggle">
@@ -103,7 +103,7 @@
         <div class="footer-links">
             <a asp-controller="Legal" asp-action="FAQ">FAQ</a>
             <a asp-controller="Legal" asp-action="TermsOfSale">Conditions générales de vente</a>
-            <a href="#careers">Recrutement</a>
+            <a asp-controller="Home" asp-action="Recruting">Recrutement</a>
         </div>
         <p class="copyright">© 2025 INGENIUS. Tous droits réservés.</p>
     </div>

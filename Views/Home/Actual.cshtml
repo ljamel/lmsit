@@ -1,0 +1,36 @@
+@using CrudDemo.Models
+@model List<CyberFeedItem>
+
+@{
+    ViewData["Title"] = "Veille Cybersécurité";
+}
+
+<section class="features">
+    <h1>@ViewData["Title"]</h1>
+
+    <p>
+        La veille cyber permet l'analyse les vulnérabilités, exploits adverses pour identifier des chemins d’attaque crédibles. Elle permet d’anticiper les techniques réellement utilisées par les attaquants et de reproduire des scénarios d’intrusion réalistes. Son but est de tester la détection, la résistance et la réponse des défenses en conditions proches du réel.
+    </p><br />
+    <p>Ci-dessous les sites pour faire de la veille cyber :</p><br />
+
+    @if (Model == null || !Model.Any())
+    {
+        <p>Chargement des flux de veille...</p>
+    }
+    else
+    {
+        <ul class="nav-links" style="display: block;">
+            @foreach (var item in Model)
+            {
+                <li><small>@item.PublishedDate</small>
+                    <a href="@item.Link" target="_blank">
+                        <strong>@item.Source</strong> – @item.Title
+                    </a>
+                    <br />
+                    
+                </li>
+            }
+        </ul>
+    }
+
+</section>
