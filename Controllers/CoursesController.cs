@@ -114,7 +114,7 @@ namespace CrudDemo.Controllers
         }
 
         // View a specific lesson and video
-        public async Task<IActionResult> Lesson(int id)
+        public async Task<IActionResult> Lesson(int id, string? lessonSearch)
         {
             // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
             if (!User.IsInRole("Admin"))
@@ -168,6 +168,24 @@ namespace CrudDemo.Controllers
 
             ViewBag.Comments = comments;
             ViewBag.CourseId = courseId;
+
+            if (!string.IsNullOrWhiteSpace(lessonSearch))
+            {
+                var term = lessonSearch.Trim();
+                var likePattern = $"%{term}%";
+
+                var relatedLessons = await _context.Lessons
+                    .AsNoTracking()
+                    .Include(l => l.Module)
+                    .Where(l => l.Module != null && l.Module.CourseId == courseId)
+                    .Where(l => l.Description != null && EF.Functions.Like(l.Description, likePattern))
+                    .OrderBy(l => l.Module!.OrderIndex)
+                    .ThenBy(l => l.OrderIndex)
+                    .ToListAsync();
+
+                ViewBag.LessonSearchTerm = term;
+                ViewBag.LessonSearchResults = relatedLessons;
+            }
 
             return View(lesson);
         }

@@ -2,7 +2,7 @@
 @model IEnumerable<CrudDemo.Models.Course>
 
 <div class="menu-dashboard">
-    
+    <a asp-area="" asp-controller="Courses" asp-action="Index">ACCUEIL</a>
     <h2>APPLICATIONS</h2>
 
     <a href="@Url.Action("ConnectToChat", "RocketChat")" target="_blank">
@@ -10,6 +10,30 @@
     </a>
 
     <h2>COURS</h2>
+
+    @{
+        var lessonSearchTerm = (Context.Request.Query["lessonSearch"].ToString() ?? string.Empty).Trim();
+        var hasLessonSearch = !string.IsNullOrEmpty(lessonSearchTerm);
+        var hasAnyLessonMatch = false;
+    }
+
+    <form method="get" asp-controller="Courses" asp-action="Index" class="mb-3">
+        <div class="input-group">
+            <input
+                id="lesson-search"
+                name="lessonSearch"
+                type="search"
+                class="form-control"
+                placeholder="Ex: sécurité, réseau, injection"
+                value="@lessonSearchTerm"
+                aria-label="Chercher une leçon" /><br />
+            <button class="btn btn-primary" type="submit">Rechercher</button>
+            @if (hasLessonSearch)
+            {
+                <a class="btn btn-outline-secondary" asp-controller="Courses" asp-action="Index">Effacer</a>
+            }
+        </div>
+    </form>
 
     @if (!Model.Any())
     {
@@ -19,40 +43,59 @@
     }
     else
     {
-
-
         <div class="row">
-
-            <a asp-area="" asp-controller="Courses" asp-action="Index">ACCUEIL</a>
+            
             @{ var module = 0; }
             @foreach (var course in Model)
             {
                 ++module;
+                var modules = course.Modules ?? new List<CrudDemo.Models.Module>();
+                if (hasLessonSearch)
+                {
+                    modules = modules
+                        .Where(m => m.Lessons != null && m.Lessons.Any(l =>
+                            !string.IsNullOrEmpty(l.Description)
+                            && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase)))
+                        .ToList();
+
+                    if (!modules.Any())
+                    {
+                        continue;
+                    }
+                }
+
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-footer bg-white border-top">
-
-                            @{
-                                var module1 = module;
-                            }
                             <a
                                 asp-controller="Courses"
                                 asp-action="Details"
                                 asp-route-id="@course.Id">
-                                <i class="fas fa-eye"></i> Modules @module1 @course.Title
+                                <i class="fas fa-eye"></i> @course.Title
 
                             </a>
 
-                            @foreach (var m in course.Modules)
+                            @foreach (var m in modules)
                             {
-
-
-                                @if (m.Lessons != null && m.Lessons.Any())
+                                var lessons = m.Lessons ?? new List<CrudDemo.Models.Lesson>();
+                                if (hasLessonSearch)
                                 {
-                                    <h4><i class="fas fa-video"></i> Sous module @m.Title</h4>
+                                    lessons = lessons
+                                        .Where(l =>
+                                            !string.IsNullOrEmpty(l.Description)
+                                            && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+                                }
+
+                                if (lessons.Any())
+                                {
                                     <ul class="list-unstyled ms-3 mt-2">
-                                        @foreach (var lesson in m.Lessons.OrderBy(l => l.OrderIndex))
+                                        @foreach (var lesson in lessons.OrderBy(l => l.OrderIndex))
                                         {
+                                            if (hasLessonSearch)
+                                            {
+                                                hasAnyLessonMatch = true;
+                                            }
                                             <li class="mb-2">
                                                 <a asp-action="Lesson" asp-route-id="@lesson.Id">
                                                     <i class="fas fa-play-circle"></i> @lesson.Title
@@ -70,5 +113,12 @@
                 </div>
             }
         </div>
+
+        @if (hasLessonSearch && !hasAnyLessonMatch)
+        {
+            <div class="alert alert-info mt-3">
+                <p>Aucune leçon trouvée dans les descriptions.</p>
+            </div>
+        }
     }
 </div>

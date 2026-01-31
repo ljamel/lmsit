@@ -18,6 +18,7 @@ public class CoursesListViewComponent : ViewComponent
         var courses = await _context.Courses
             .AsNoTracking()
             .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
+                .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
             .ToListAsync();
 
         return View(courses);

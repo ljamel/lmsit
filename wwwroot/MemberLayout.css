@@ -40,6 +40,7 @@ iframe.ql-video {
     transition: all 0.4s ease;
     animation: slideInLeft 0.5s ease-out;
     min-width: 350px;
+    font-size: 14px;
 }
 
 .menu-dashboard a {
@@ -50,6 +51,15 @@ iframe.ql-video {
     margin: 8px 0;
     font-weight: 500;
     letter-spacing: 0.5px;
+}
+
+.mb-2 {
+  list-style: none;
+}
+
+.list-unstyled.ms-3.mt-2 {
+  margin-left: -15px;
+  margin-top: 0;
 }
 
 /* ========== CARDS ========== */

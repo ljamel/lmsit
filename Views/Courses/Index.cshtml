@@ -10,169 +10,22 @@
         <i class="fas fa-graduation-cap"></i> Bienvenue. Sélectionnez un cours pour commencer votre apprentissage.
     </h1>
     <video controls="" width="750px" height="450px">
-  <source src="https://progfacil.fr/videos/bienvenue1.MOV"></video>
+        <source src="https://progfacil.fr/videos/bienvenue1.MOV"></video>
 
     <p data-start="55" data-end="287">Bienvenue dans la le&ccedil;on <strong data-start="79" data-end="110">&laquo; Introduction au Hacking &raquo;</strong>. Dans cette le&ccedil;on, nous allons explorer les bases du hacking, y compris ce qu&rsquo;est le hacking, les diff&eacute;rents types de hackers et les consid&eacute;rations &eacute;thiques li&eacute;es au hacking.</p>
-<p data-start="289" data-end="797">Le hacking consiste en l&rsquo;acc&egrave;s ou le contr&ocirc;le non conventionnel de syst&egrave;mes informatiques ou de r&eacute;seaux. Il existe trois principaux types de hackers : les <strong data-start="439" data-end="460">hackers white hat</strong>, qui utilisent leurs comp&eacute;tences &agrave; des fins positives, les <strong data-start="520" data-end="541">hackers black hat</strong>, qui utilisent leurs comp&eacute;tences &agrave; des fins malveillantes, et les <strong data-start="608" data-end="628">hackers grey hat</strong>, qui se situent quelque part entre les deux. Il est important de comprendre les implications &eacute;thiques du hacking et d&rsquo;utiliser ses comp&eacute;tences de mani&egrave;re responsable.</p>
-<p data-start="799" data-end="1199">En conclusion, le hacking est un sujet complexe et controvers&eacute; qui n&eacute;cessite une compr&eacute;hension approfondie de la technologie et de l&rsquo;&eacute;thique. En apprenant les diff&eacute;rents types de hackers et les consid&eacute;rations &eacute;thiques impliqu&eacute;es, vous pouvez prendre des d&eacute;cisions &eacute;clair&eacute;es sur la mani&egrave;re d&rsquo;utiliser vos comp&eacute;tences en hacking. N&rsquo;oubliez pas : avec un grand pouvoir vient une grande responsabilit&eacute;.</p>
-<ul data-start="1201" data-end="1436">
-<li data-start="1201" data-end="1287">
-<p data-start="1203" data-end="1287">Le hacking implique un acc&egrave;s non autoris&eacute; &agrave; des syst&egrave;mes ou r&eacute;seaux informatiques.</p>
-</li>
-<li data-start="1288" data-end="1371">
-<p data-start="1290" data-end="1371">Il existe trois principaux types de hackers : white hat, black hat et grey hat.</p>
-</li>
-<li data-start="1372" data-end="1436">
-<p data-start="1374" data-end="1436">Comprendre les implications &eacute;thiques du hacking est crucial.</p>
-</li>
-</ul>
-<p>A vous de choisir votre camp !</p>
+    <p data-start="289" data-end="797">Le hacking consiste en l&rsquo;acc&egrave;s ou le contr&ocirc;le non conventionnel de syst&egrave;mes informatiques ou de r&eacute;seaux. Il existe trois principaux types de hackers : les <strong data-start="439" data-end="460">hackers white hat</strong>, qui utilisent leurs comp&eacute;tences &agrave; des fins positives, les <strong data-start="520" data-end="541">hackers black hat</strong>, qui utilisent leurs comp&eacute;tences &agrave; des fins malveillantes, et les <strong data-start="608" data-end="628">hackers grey hat</strong>, qui se situent quelque part entre les deux. Il est important de comprendre les implications &eacute;thiques du hacking et d&rsquo;utiliser ses comp&eacute;tences de mani&egrave;re responsable.</p>
+    <p data-start="799" data-end="1199">En conclusion, le hacking est un sujet complexe et controvers&eacute; qui n&eacute;cessite une compr&eacute;hension approfondie de la technologie et de l&rsquo;&eacute;thique. En apprenant les diff&eacute;rents types de hackers et les consid&eacute;rations &eacute;thiques impliqu&eacute;es, vous pouvez prendre des d&eacute;cisions &eacute;clair&eacute;es sur la mani&egrave;re d&rsquo;utiliser vos comp&eacute;tences en hacking. N&rsquo;oubliez pas : avec un grand pouvoir vient une grande responsabilit&eacute;.</p>
+    <ul data-start="1201" data-end="1436">
+        <li data-start="1201" data-end="1287">
+            <p data-start="1203" data-end="1287">Le hacking implique un acc&egrave;s non autoris&eacute; &agrave; des syst&egrave;mes ou r&eacute;seaux informatiques.</p>
+        </li>
+        <li data-start="1288" data-end="1371">
+            <p data-start="1290" data-end="1371">Il existe trois principaux types de hackers : white hat, black hat et grey hat.</p>
+        </li>
+        <li data-start="1372" data-end="1436">
+            <p data-start="1374" data-end="1436">Comprendre les implications &eacute;thiques du hacking est crucial.</p>
+        </li>
+    </ul>
+    <p>A vous de choisir votre camp !</p>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    <div class="row">
-        @foreach (var course in Model)
-        {
-            var courseComments = comments.Where(c => c.CourseId == course.Id).ToList();
-            
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm course-card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="fas fa-book"></i> @course.Title
-                        </h5>
-                        <p class="card-text text-muted">@course.Description</p>
-                        
-                        <div class="mb-3">
-                            <small class="text-muted">
-                                <i class="fas fa-layer-group"></i> @course.Modules.Count module(s) •
-                                <i class="fas fa-video"></i> @course.Modules.Sum(m => m.Lessons.Count) leçon(s)
-                            </small>
-                        </div>
-
-                        <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-primary w-100 mb-3">
-                            <i class="fas fa-play-circle"></i> Accéder au cours
-                        </a>
-
-                        <!-- Section Commentaires -->
-                        <div class="comments-section mt-3">
-                            <h6 class="border-top pt-3">
-                                <i class="fas fa-comments"></i> Commentaires (@courseComments.Count)
-                            </h6>
-
-                            <!-- Formulaire d'ajout de commentaire -->
-                            <form asp-action="AddComment" method="post" class="mb-3">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="courseId" value="@course.Id" />
-                                <div class="input-group input-group-sm">
-                                    <input type="text" 
-                                           name="content" 
-                                           class="form-control" 
-                                           placeholder="Ajouter un commentaire..." 
-                                           maxlength="1000"
-                                           required />
-                                    <button type="submit" class="btn btn-success btn-sm"> Envoyer
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </form>
-
-                            <!-- Liste des commentaires -->
-                            @if (courseComments.Any())
-                            {
-                                <div class="comments-list" style="max-height: 200px; overflow-y: auto;">
-                                    @foreach (var comment in courseComments.Take(3))
-                                    {
-                                        <div class="comment-item p-2 mb-2 bg-light rounded">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div class="flex-grow-1">
-                                                    <small class="text-primary fw-bold">
-                                                        <i class="fas fa-user"></i> @comment.UserId.Split('@')[0]
-                                                    </small>
-                                                    <p class="mb-1 small">@comment.Content</p>
-                                                    <small class="text-muted">
-                                                        <i class="far fa-clock"></i> @comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                                                    </small>
-                                                </div>
-                                                @if (comment.UserId == User.Identity?.Name || User.IsInRole("Admin"))
-                                                {
-                                                    <form asp-action="DeleteComment" method="post" class="d-inline">
-                                                        @Html.AntiForgeryToken()
-                                                        <input type="hidden" name="commentId" value="@comment.Id" />
-                                                        <button type="submit" 
-                                                                class="btn btn-sm btn-link text-danger p-0"
-                                                                onclick="return confirm('Supprimer ce commentaire?')">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                    @if (courseComments.Count > 3)
-                                    {
-                                        <small class="text-muted">
-                                            + @(courseComments.Count - 3) autre(s) commentaire(s)
-                                        </small>
-                                    }
-                                </div>
-                            }
-                            else
-                            {
-                                <p class="text-muted small mb-0">Aucun commentaire pour le moment.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
 </div>
-
-<style>
-    .course-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border: none;
-        border-radius: 10px;
-    }
-    
-    .course-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
-    }
-    
-    .comment-item {
-        border-left: 3px solid #0d6efd;
-    }
-    
-    .comments-list::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .comments-list::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-    
-    .comments-list::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 3px;
-    }
-    
-    .comments-list::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-</style>

@@ -78,10 +78,8 @@
                 <thead>
                     <tr>
                         <th><i class="fas fa-user me-2"></i>Email</th>
-                        <th><i class="fas fa-id-badge me-2"></i>Nom d'utilisateur</th>
                         <th><i class="fas fa-shield-alt me-2"></i>Statut Abonnement</th>
                         <th><i class="fas fa-calendar-alt me-2"></i>Date Début</th>
-                        <th><i class="fas fa-calendar-check me-2"></i>Date Fin</th>
                         <th><i class="fas fa-credit-card me-2"></i>ID Stripe</th>
                     </tr>
                 </thead>
@@ -100,26 +98,14 @@
                             <td>
                                 <div class="user-email">
                                     <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
-                                    @user!.Email @user.Id
+                                    @user!.Email
                                 </div>
                             </td>
                             <td>
-                                <div class="username">
-                                    @(user.UserName ?? "-")
-                                </div>
-                            </td>
-                            <td>
-                                @if (hasActiveSubscription)
+                                @if (hasActiveSubscription || hasSubscription)
                                 {
                                     <span class="badge-active">
                                         <i class="fas fa-check-circle me-1"></i>
-                                        @subscriptionObj!.Status
-                                    </span>
-                                }
-                                else if (hasSubscription)
-                                {
-                                    <span class="badge-inactive">
-                                        <i class="fas fa-times-circle me-1"></i>
                                         @subscriptionObj!.Status
                                     </span>
                                 }
@@ -143,29 +129,7 @@
                                     <span class="text-muted">-</span>
                                 }
                             </td>
-                            <td>
-                                @if (hasSubscription)
-                                {
-                                    var endDate = subscriptionObj!.EndDate;
-                                    if (endDate != null)
-                                    {
-                                        <span class="date-info">
-                                            @(((DateTime)endDate).ToString("dd/MM/yyyy HH:mm"))
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge-active">
-                                            <i class="fas fa-infinity me-1"></i>
-                                            Actif
-                                        </span>
-                                    }
-                                }
-                                else
-                                {
-                                    <span class="text-muted">-</span>
-                                }
-                            </td>
+
                             <td>
                                 @if (hasSubscription && !string.IsNullOrEmpty(subscriptionObj.StripeSubscriptionId))
                                 {
