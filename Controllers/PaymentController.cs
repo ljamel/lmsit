@@ -70,10 +70,6 @@ namespace CrudDemo.Controllers
                 },
                 Mode = "subscription",
                 BillingAddressCollection = "required",
-                SubscriptionData = new SessionSubscriptionDataOptions
-                {
-                    TrialPeriodDays = 7,
-                },
                 SuccessUrl = $"{domain}/Payment/PreRegistrationSuccess?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{domain}/Payment/PreRegistrationCancel",
             };

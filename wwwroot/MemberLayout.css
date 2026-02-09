@@ -31,6 +31,15 @@ iframe.ql-video {
     flex-wrap: wrap-reverse;
 }
 
+.ql-syntax {
+  background-color: #23241f;
+  color: #f8f8f2;
+  overflow: visible;
+  padding: 5px;
+  font-size: 16px;
+  margin-top: 0;
+}
+
 /* ========== DASHBOARD MENU ========== */
 .menu-dashboard {
     background: linear-gradient(135deg, #434c5e 0%, #2c3142 100%);

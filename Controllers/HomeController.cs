@@ -20,6 +20,11 @@ public class HomeController : Controller
         return View();
     }
 
+        public IActionResult Outils()
+    {
+        return View();
+    }
+
     public async Task<IActionResult> Actual()
     {
         var feeds = new List<CyberFeedItem>();
