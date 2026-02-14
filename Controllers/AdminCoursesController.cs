@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Stripe;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,11 +19,13 @@ namespace CrudDemo.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
 
-        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env)
+        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration)
         {
             _context = context;
             _env = env;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -534,7 +538,13 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         // -----------------------------
         public async Task<IActionResult> Users(string? search)
         {
-            // Optimisé: AsNoTracking pour lecture seule, trié par date d'inscription
+            var activeSubscriptions = await _context.Subscriptions
+                .Where(s => s.IsActive)
+                .ToListAsync();
+
+            await SyncStripeSubscriptionsAsync(activeSubscriptions);
+
+            // Optimise: AsNoTracking pour lecture seule, trie par date d'inscription
             var users = await _context.Users
                 .AsNoTracking()
                 .ToListAsync();
@@ -566,6 +576,117 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             ViewBag.UserSubscriptions = userSubscriptions;
             ViewBag.SearchQuery = search;
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateMember(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return RedirectToAction(nameof(Users));
+            }
+
+            var secretKey = _configuration["Stripe:SecretKey"];
+            if (string.IsNullOrWhiteSpace(secretKey))
+            {
+                TempData["Error"] = "Clé Stripe manquante. Annulation impossible.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            StripeConfiguration.ApiKey = secretKey;
+            var stripeService = new Stripe.SubscriptionService();
+
+            var subscriptions = await _context.Subscriptions
+                .Where(s => s.UserId == userId && s.IsActive)
+                .ToListAsync();
+
+            if (subscriptions.Count == 0)
+            {
+                TempData["Error"] = "Aucun abonnement actif à désactiver.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var now = DateTime.UtcNow;
+            var stripeErrors = false;
+            foreach (var subscription in subscriptions)
+            {
+                if (!string.IsNullOrWhiteSpace(subscription.StripeSubscriptionId))
+                {
+                    try
+                    {
+                        await stripeService.CancelAsync(subscription.StripeSubscriptionId);
+                    }
+                    catch (StripeException ex)
+                    {
+                        stripeErrors = true;
+                        Console.WriteLine($"Stripe cancel failed for subscription {subscription.Id}: {ex.Message}");
+                    }
+                }
+
+                subscription.IsActive = false;
+                subscription.Status = "canceled";
+                subscription.CanceledAt = now;
+                subscription.EndDate = now;
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = stripeErrors
+                ? "Abonnement désactivé en base, mais l'annulation Stripe a échoué."
+                : "Abonnement désactivé et annulé sur Stripe.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        private async Task SyncStripeSubscriptionsAsync(IEnumerable<CrudDemo.Models.Subscription> activeSubscriptions)
+        {
+            var secretKey = _configuration["Stripe:SecretKey"];
+            if (string.IsNullOrWhiteSpace(secretKey))
+            {
+                return;
+            }
+
+            StripeConfiguration.ApiKey = secretKey;
+            var stripeService = new Stripe.SubscriptionService();
+
+            foreach (var subscription in activeSubscriptions)
+            {
+                if (string.IsNullOrWhiteSpace(subscription.StripeSubscriptionId))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    var stripeSubscription = await stripeService.GetAsync(subscription.StripeSubscriptionId);
+                    var isStripeActive = stripeSubscription != null
+                        && (stripeSubscription.Status == "active" || stripeSubscription.Status == "trialing");
+
+                    if (!isStripeActive)
+                    {
+                        subscription.IsActive = false;
+                        subscription.Status = stripeSubscription?.Status ?? "inactive";
+                        subscription.EndDate = DateTime.UtcNow;
+
+                        if (stripeSubscription?.CanceledAt != null)
+                        {
+                            subscription.CanceledAt = stripeSubscription.CanceledAt.Value;
+                        }
+                    }
+                }
+                catch (StripeException ex)
+                {
+                    if (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        subscription.IsActive = false;
+                        subscription.Status = "not_found";
+                        subscription.EndDate = DateTime.UtcNow;
+                    }
+
+                    Console.WriteLine($"Stripe check failed for subscription {subscription.Id}: {ex.Message}");
+                }
+            }
+
+            await _context.SaveChangesAsync();
         }
 
     }

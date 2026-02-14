@@ -326,5 +326,10 @@ namespace CrudDemo.Controllers
             TempData["Success"] = "Commentaire supprimé avec succès!";
             return RedirectToAction(nameof(Index));
         }
+
+            public IActionResult Event()
+            {
+                return View();
+            }
     }
 }
