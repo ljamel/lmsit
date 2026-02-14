@@ -10,5 +10,29 @@
         @RenderBody()
     </div>
 
+    <script>
+        (function() {
+            const regex = /\b(exercice)\b/gi;
+
+            function highlightText(node) {
+                if (node.nodeType === 3) { // Texte
+                    if (regex.test(node.textContent)) {
+                        const span = document.createElement('span');
+                        span.innerHTML = node.textContent.replace(regex, 
+                            '<span style="background:#fff3a3; color:#2d3436; font-weight:bold; padding:2px 4px; border-radius:3px; box-shadow: 0 8px 25px rgba(102,126,234,0.5);">$1</span>'
+                        );
+                        node.parentNode.replaceChild(span, node);
+                    }
+                } else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        highlightText(node.childNodes[i]);
+                    }
+                }
+            }
+
+            highlightText(document.body);
+        })();
+    </script>
+
     @RenderSection("Scripts", required: false)
 </body>
