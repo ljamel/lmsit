@@ -114,13 +114,6 @@ https://templatemo.com/tm-596-electric-xtra
         });
 
         // Form submission
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Add your form submission logic here
-            alert('Message sent! We\'ll get back to you soon.');
-            this.reset();
-        });
-
         // Initialize particles
         createParticles();
 
@@ -132,7 +125,7 @@ https://templatemo.com/tm-596-electric-xtra
         function wrapTextInSpans(element) {
             const text = element.textContent;
             element.innerHTML = text.split('').map((char, i) => 
-                `<span class="char" style="animation-delay: ${i * 0.05}s">${char === ' ' ? '&nbsp;' : char}</span>`
+                `<span class="char" style="animation-delay: ${i * 0.05}s">${char === ' ' ? '' : char}</span>`
             ).join('');
         }
 
@@ -156,11 +149,7 @@ https://templatemo.com/tm-596-electric-xtra
             const chars = textSet.querySelectorAll('.char');
             const subtitle = textSet.querySelector('.subtitle');
             
-            // Animate characters out
-            chars.forEach((char, i) => {
-                char.style.animationDelay = `${i * 0.02}s`;
-                char.classList.add('out');
-            });
+
             
             // Hide subtitle
             subtitle.classList.remove('visible');
@@ -197,18 +186,7 @@ https://templatemo.com/tm-596-electric-xtra
             setInterval(rotateText, 5000); // Change every 5 seconds
         }, 4000);
 
-        // Add random glitch effect
-        setInterval(() => {
-            const glitchTexts = document.querySelectorAll('.glitch-text');
-            glitchTexts.forEach(text => {
-                if (Math.random() > 0.95) {
-                    text.style.animation = 'none';
-                    setTimeout(() => {
-                        text.style.animation = '';
-                    }, 200);
-                }
-            });
-        }, 3000);
+
 
         // Testimonial stats counter animation
         function animateCounter(element) {

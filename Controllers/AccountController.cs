@@ -36,6 +36,11 @@ namespace CrudDemo.Controllers
 // GET: Account/Register - Redirige directement vers Stripe
 	public IActionResult Register()
 	{
+		if (User.Identity?.IsAuthenticated == true)
+		{
+			return RedirectToAction("Index", "Courses");
+		}
+
 		// Vérifier si c'est le premier utilisateur (Admin)
 		var isFirstUser = !_userManager.Users.Any();
 
