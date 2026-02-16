@@ -1,0 +1,75 @@
+@model CrudDemo.Models.Subscription?
+
+@{
+    ViewData["Title"] = "Espace Membre";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h1 class="h4 mb-0"><i class="fas fa-user-shield"></i> Espace Membre</h1>
+        </div>
+        <div class="card-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <p><strong>Email :</strong> @User.Identity?.Name</p>
+
+            @if (Model == null)
+            {
+                <div class="alert alert-warning">
+                    Vous n'avez pas encore d'abonnement actif.
+                </div>
+
+                <a asp-controller="Payment" asp-action="SubscriptionCheckout" class="btn btn-primary">
+                    <i class="fas fa-credit-card"></i> Souscrire un abonnement
+                </a>
+            }
+            else
+            {
+                var isActive = Model.IsActive && Model.Status == "active";
+
+                <p>
+                    <strong>Statut :</strong>
+                    @if (isActive)
+                    {
+                        <span class="badge bg-success">Actif</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inactif</span>
+                    }
+                </p>
+                <p><strong>Début :</strong> @Model.StartDate.ToString("dd/MM/yyyy HH:mm")</p>
+
+                @if (Model.CanceledAt.HasValue)
+                {
+                    <p><strong>Annulé le :</strong> @Model.CanceledAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                }
+
+                @if (isActive)
+                {
+                    <form asp-controller="Courses" asp-action="CancelSubscription" method="post" onsubmit="return confirm('Confirmer l\'annulation de votre abonnement ?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times-circle"></i> Annuler mon abonnement
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Payment" asp-action="SubscriptionCheckout" class="btn btn-primary">
+                        <i class="fas fa-credit-card"></i> Réactiver un abonnement
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</div>

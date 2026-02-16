@@ -90,7 +90,9 @@ iframe.ql-video {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
-
+.card-body > p {
+    margin: 10px;
+}
 
 /* ========== BUTTONS ========== */
 .btn {

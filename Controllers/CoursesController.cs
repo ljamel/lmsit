@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using System.Threading.Tasks;
 
 namespace CrudDemo.Controllers
@@ -13,11 +14,88 @@ namespace CrudDemo.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<CoursesController> _logger;
 
-        public CoursesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public CoursesController(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration,
+            ILogger<CoursesController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _configuration = configuration;
+            _logger = logger;
+        }
+
+        public async Task<IActionResult> Member()
+        {
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var subscription = await _context.Subscriptions
+                .AsNoTracking()
+                .Where(s => s.UserId == userEmail)
+                .OrderByDescending(s => s.StartDate)
+                .FirstOrDefaultAsync();
+
+            return View(subscription);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelSubscription()
+        {
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var subscription = await _context.Subscriptions
+                .Where(s => s.UserId == userEmail && s.IsActive)
+                .OrderByDescending(s => s.StartDate)
+                .FirstOrDefaultAsync();
+
+            if (subscription == null)
+            {
+                TempData["Error"] = "Aucun abonnement actif trouvé.";
+                return RedirectToAction(nameof(Member));
+            }
+
+            var stripeCancelFailed = false;
+
+            if (!string.IsNullOrWhiteSpace(subscription.StripeSubscriptionId))
+            {
+                try
+                {
+                    StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+                    var stripeService = new SubscriptionService();
+                    await stripeService.CancelAsync(subscription.StripeSubscriptionId);
+                }
+                catch (Exception ex)
+                {
+                    stripeCancelFailed = true;
+                    _logger.LogWarning(ex, "Erreur lors de l'annulation Stripe pour l'utilisateur {UserEmail}", userEmail);
+                }
+            }
+
+            subscription.IsActive = false;
+            subscription.Status = "canceled";
+            subscription.CanceledAt = DateTime.UtcNow;
+            subscription.EndDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = stripeCancelFailed
+                ? "Abonnement désactivé sur la plateforme, mais l'annulation Stripe a échoué. Contactez le support."
+                : "Votre abonnement a été annulé avec succès.";
+
+            return RedirectToAction(nameof(Member));
         }
 
         // List all courses (public view for authenticated users)
