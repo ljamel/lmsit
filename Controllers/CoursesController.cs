@@ -405,9 +405,17 @@ namespace CrudDemo.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-            public IActionResult Event()
+            public async Task<IActionResult> Event()
             {
-                return View();
+                var latestLessons = await _context.Lessons
+                    .AsNoTracking()
+                    .Include(l => l.Module)
+                        .ThenInclude(m => m!.Course)
+                    .OrderByDescending(l => l.CreatedAt)
+                    .Take(10)
+                    .ToListAsync();
+
+                return View(latestLessons);
             }
     }
 }

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<CrudDemo.Models.Lesson>
+
+@{
     ViewData["Title"] = "Evenement et actualités";
 }
 
@@ -12,5 +14,32 @@
     <P>Dans la section challenge des lots à gagné ! (carte amazon, voucher certification et bien d'autre)</P>
 
     <p>Je vous attend tout les dimanche à 18 heures sur discord https://discord.gg/SeB5E4Yp pour un live</p>
+
+    <hr class="my-4" />
+
+    <h2 class="h4 mb-3">Dernières leçons créées</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="list-group">
+            @foreach (var lesson in Model)
+            {
+                <a asp-action="Lesson" asp-route-id="@lesson.Id" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="fw-bold">@lesson.Title</div>
+                        @if (lesson.Module?.Course != null)
+                        {
+                            <small class="text-muted">Cours : @lesson.Module.Course.Title</small>
+                        }
+                    </div>
+                    <small class="text-muted">@lesson.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">Aucune leçon disponible pour le moment.</p>
+    }
 
 </div>
