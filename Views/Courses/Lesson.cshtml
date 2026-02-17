@@ -25,7 +25,7 @@
                     <p class="text-muted animated-description">
                         <i class="fas fa-layer-group"></i> Module: <strong>@Model.Module.Title</strong>
                     </p>
-                    <p class="animated-description">@Html.Raw(Model.Description)</p>
+                    <p class="animated-description">@Html.Raw(System.Net.WebUtility.HtmlDecode(Model.Description))</p>
                 </div>
             </div>
 
@@ -183,6 +183,14 @@
 </div>
 
 <style>
+     /* quiz interacti par niveau */
+    .section {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        border: 2px solid #333;
+    }
+
     .animated-section {
         animation: slideDown 0.5s ease-out;
     }
@@ -389,3 +397,47 @@
         background: #555;
     }
 </style>
+
+
+<!-- quiz par iveau -->
+<script>
+(function () {
+
+    const passwords = {
+        1: "Windows Server 2019 Datacenter",
+        2: "MsMpEng_1772_160.36",
+        3: "714C533967FE9EA1C8AB7A9B31CFA13F0C1CEEBCD4BF4D365F9AE8E95764B983"
+    };
+
+    function checkLevel(level) {
+        const input = document.getElementById("input" + level);
+        if (!input) return;
+
+        const value = input.value.trim().toLowerCase();
+
+        if (value === passwords[level]) {
+            if (level === 1) {
+                document.getElementById("section2").style.display = "block";
+            } 
+            else if (level === 2) {
+                document.getElementById("section3").style.display = "block";
+            } 
+            else if (level === 3) {
+                document.getElementById("finalSection").style.display = "block";
+            }
+        } else {
+            alert("Mot incorrect");
+        }
+    }
+
+    // Attache proprement les événements (pas de onclick inline)
+    document.querySelectorAll("button[data-level]").forEach(button => {
+        button.addEventListener("click", function () {
+            const level = parseInt(this.getAttribute("data-level"));
+            checkLevel(level);
+        });
+    });
+
+})();
+</script>
+

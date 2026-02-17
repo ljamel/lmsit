@@ -319,7 +319,7 @@ namespace CrudDemo.Controllers
 
 				if (result.Succeeded)
 				{
-					return LocalRedirect(returnUrl ?? "/");
+					return RedirectToAction("Index", "Courses");
 				}
 
 				if (result.IsLockedOut)
