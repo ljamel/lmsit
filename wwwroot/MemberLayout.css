@@ -80,6 +80,20 @@ iframe.ql-video {
     animation: slideUp 0.5s ease-out;
 }
 
+.logo-link {
+  width: 34px;
+  font-family: 'Orbitron', monospace;
+  font-size: 24px;
+  font-weight: 900;
+  background: linear-gradient(45deg, #FF5E00, #00B2FF);
+    background-clip: border-box;
+  background-clip: border-box;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: floralwhite;
+  animation: glow 2s ease-in-out infinite;
+  text-shadow: 0 0 30px rgba(255, 94, 0, 0.5);
+}
+
 
 .card-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
