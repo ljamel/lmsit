@@ -417,13 +417,10 @@
         const value = input.value.replace(/^\s+|\s+$/g, "");
 
         if (value === passwords[level.toString()]) {
-            alert("Correct !");
             if (level === 1) document.getElementById("section2").style.display = "block";
             else if (level === 2) document.getElementById("section3").style.display = "block";
             else if (level === 3) document.getElementById("finalSection").style.display = "block";
-        } else {
-            alert("Mot incorrect");
-        }
+        } 
     }
 
     document.querySelectorAll("button[data-level]").forEach(button => {
@@ -441,7 +438,7 @@
 (function () {
 
     const passwords = {
-        "1": "x == 42",
+        "1": "x = 42",
         "2": "[1, 2, 3, 4, 5]",
         "3": "'cybersecurite'.count('e')",
         "4": "'Python'[::-1]"
@@ -455,13 +452,10 @@
         const value = input.value.replace(/^\s+|\s+$/g, "");
 
         if (value === passwords[level.toString()]) {
-            alert("Correct !");
             if (level === 1) document.getElementById("section2").style.display = "block";
             else if (level === 2) document.getElementById("section3").style.display = "block";
             else if (level === 3) document.getElementById("finalSection").style.display = "block";
-        } else {
-            alert("Mot incorrect");
-        }
+        } 
     }
 
     document.querySelectorAll("button[data-level]").forEach(button => {
