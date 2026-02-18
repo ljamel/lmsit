@@ -310,10 +310,11 @@ namespace CrudDemo.Controllers
             if (lesson == null)
                 return NotFound();
 
-            return RedirectToAction(nameof(Lesson), new { id = lesson.Id });
+            return LocalRedirect($"/QuizResults?lessonId={lesson.Id}");
         }
 
         // Show quiz results for a lesson
+        [HttpGet("/QuizResults")]
         public async Task<IActionResult> QuizResults(int lessonId)
         {
             // Optimisé: Charger tout en une requête

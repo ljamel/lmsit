@@ -64,6 +64,8 @@ namespace CrudDemo.Controllers
                 .Where(c => c.Id == id)
                 .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
                 .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
+                .ThenInclude(l => l.Quizzes)
+                .ThenInclude(q => q.Options)
                 .FirstOrDefaultAsync();
                 
             if (course == null) return NotFound();
@@ -338,6 +340,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         public async Task<IActionResult> CreateQuiz(int lessonId)
         {
             var lesson = await _context.Lessons
+                .Include(l => l.Module)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(l => l.Id == lessonId);
 
@@ -354,7 +357,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateQuiz(int lessonId, Quiz quiz, string[] optionTexts, bool[] optionCorrects)
+        public async Task<IActionResult> CreateQuiz(int lessonId, IFormCollection form)
         {
             var lesson = await _context.Lessons
                 .Include(l => l.Module)
@@ -365,51 +368,108 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             {
                 ModelState.AddModelError("", "Leçon introuvable.");
                 ViewBag.LessonId = lessonId;
+                ViewBag.Lesson = null;
                 return View();
             }
 
-            if (!ModelState.IsValid || string.IsNullOrEmpty(quiz.Question))
+            if (!ModelState.IsValid)
             {
                 ViewBag.LessonId = lessonId;
                 ViewBag.Lesson = lesson;
                 return View();
             }
 
-            // Validation: au moins 2 options avec 1 correcte
-            if (optionTexts == null || optionTexts.Length < 2)
+            var questionTexts = form["questionTexts"].ToArray();
+            var questionDescriptions = form["questionDescriptions"].ToArray();
+            var questionPoints = form["questionPoints"].ToArray();
+
+            if (questionTexts.Length == 0)
             {
-                ModelState.AddModelError("", "Minimum 2 options requises.");
+                ModelState.AddModelError("", "Ajoutez au moins une question.");
                 ViewBag.LessonId = lessonId;
                 ViewBag.Lesson = lesson;
                 return View();
             }
 
-            if (!optionCorrects.Any(c => c))
-            {
-                ModelState.AddModelError("", "Au moins une option correcte requise.");
-                ViewBag.LessonId = lessonId;
-                ViewBag.Lesson = lesson;
-                return View();
-            }
+            var quizzesToCreate = new System.Collections.Generic.List<Quiz>();
 
-            quiz.LessonId = lessonId;
-            quiz.CreatedAt = DateTime.UtcNow;
-            quiz.Points = quiz.Points > 0 ? quiz.Points : 1;
-
-            // Ajouter les options
-            for (int i = 0; i < optionTexts.Length; i++)
+            for (int questionIndex = 0; questionIndex < questionTexts.Length; questionIndex++)
             {
-                if (!string.IsNullOrWhiteSpace(optionTexts[i]))
+                var questionText = questionTexts[questionIndex]?.Trim();
+                if (string.IsNullOrWhiteSpace(questionText))
+                {
+                    continue;
+                }
+
+                var optionTextsForQuestion = form[$"optionTexts_{questionIndex}"]
+                    .Select(o => o?.Trim())
+                    .Where(o => !string.IsNullOrWhiteSpace(o))
+                    .ToList();
+
+                if (optionTextsForQuestion.Count < 2)
+                {
+                    ModelState.AddModelError("", $"La question #{questionIndex + 1} doit avoir au moins 2 options.");
+                    ViewBag.LessonId = lessonId;
+                    ViewBag.Lesson = lesson;
+                    return View();
+                }
+
+                var correctIndexesRaw = form[$"correctIndexes_{questionIndex}"].FirstOrDefault() ?? string.Empty;
+                var correctIndexes = correctIndexesRaw
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(value => int.TryParse(value, out var idx) ? idx : -1)
+                    .Where(idx => idx >= 0 && idx < optionTextsForQuestion.Count)
+                    .Distinct()
+                    .ToHashSet();
+
+                if (correctIndexes.Count == 0)
+                {
+                    ModelState.AddModelError("", $"La question #{questionIndex + 1} doit avoir au moins une réponse correcte.");
+                    ViewBag.LessonId = lessonId;
+                    ViewBag.Lesson = lesson;
+                    return View();
+                }
+
+                var points = 1;
+                if (questionIndex < questionPoints.Length && int.TryParse(questionPoints[questionIndex], out var parsedPoints) && parsedPoints > 0)
+                {
+                    points = parsedPoints;
+                }
+
+                var description = questionIndex < questionDescriptions.Length
+                    ? questionDescriptions[questionIndex]
+                    : null;
+
+                var quiz = new Quiz
+                {
+                    LessonId = lessonId,
+                    Question = questionText,
+                    Description = description,
+                    Points = points,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                for (int optionIndex = 0; optionIndex < optionTextsForQuestion.Count; optionIndex++)
                 {
                     quiz.Options.Add(new QuizOption
                     {
-                        Text = optionTexts[i].Trim(),
-                        IsCorrect = i < optionCorrects.Length && optionCorrects[i]
+                        Text = optionTextsForQuestion[optionIndex]!,
+                        IsCorrect = correctIndexes.Contains(optionIndex)
                     });
                 }
+
+                quizzesToCreate.Add(quiz);
             }
 
-            _context.Quizzes.Add(quiz);
+            if (quizzesToCreate.Count == 0)
+            {
+                ModelState.AddModelError("", "Ajoutez au moins une question valide.");
+                ViewBag.LessonId = lessonId;
+                ViewBag.Lesson = lesson;
+                return View();
+            }
+
+            _context.Quizzes.AddRange(quizzesToCreate);
             await _context.SaveChangesAsync();
 
             if (lesson?.Module?.CourseId > 0)
@@ -536,6 +596,16 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         // -----------------------------
         // USERS MANAGEMENT
         // -----------------------------
+        private sealed class UserTrackingSummary
+        {
+            public int CoursesTracked { get; set; }
+            public int QuizAttempts { get; set; }
+            public int QuizCorrectAnswers { get; set; }
+            public int QuizLessonsTracked { get; set; }
+            public int CommentsCount { get; set; }
+            public DateTime? LastActivityAt { get; set; }
+        }
+
         public async Task<IActionResult> Users(string? search)
         {
             var activeSubscriptions = await _context.Subscriptions
@@ -548,34 +618,147 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             var users = await _context.Users
                 .AsNoTracking()
                 .ToListAsync();
+
             var subscriptions = await _context.Subscriptions
                 .AsNoTracking()
                 .OrderByDescending(s => s.StartDate)
                 .ToListAsync();
+
+            var quizActivityRows = await (
+                from result in _context.UserQuizResults.AsNoTracking()
+                join quiz in _context.Quizzes.AsNoTracking() on result.QuizId equals quiz.Id
+                join lesson in _context.Lessons.AsNoTracking() on quiz.LessonId equals lesson.Id
+                join module in _context.Modules.AsNoTracking() on lesson.ModuleId equals module.Id
+                select new
+                {
+                    result.UserId,
+                    result.IsCorrect,
+                    result.AttemptedAt,
+                    LessonId = lesson.Id,
+                    CourseId = module.CourseId
+                }
+            ).ToListAsync();
+
+            var commentActivityRows = await _context.Comments
+                .AsNoTracking()
+                .Select(comment => new
+                {
+                    comment.UserId,
+                    comment.CourseId,
+                    comment.CreatedAt
+                })
+                .ToListAsync();
+
+            var quizByUserId = quizActivityRows
+                .GroupBy(row => row.UserId)
+                .ToDictionary(group => group.Key, group => group.ToList());
+
+            var commentsByUserEmail = commentActivityRows
+                .GroupBy(row => row.UserId)
+                .ToDictionary(group => group.Key, group => group.ToList());
+
+            var quizStatsByUserId = quizByUserId.ToDictionary(
+                pair => pair.Key,
+                pair => new
+                {
+                    QuizAttempts = pair.Value.Count,
+                    QuizCorrectAnswers = pair.Value.Count(row => row.IsCorrect),
+                    QuizLessonsTracked = pair.Value.Select(row => row.LessonId).Distinct().Count(),
+                    CourseIds = pair.Value.Select(row => row.CourseId).Distinct().ToHashSet(),
+                    LastQuizActivityAt = pair.Value.Max(row => row.AttemptedAt)
+                });
+
+            var commentStatsByUserEmail = commentsByUserEmail.ToDictionary(
+                pair => pair.Key,
+                pair => new
+                {
+                    CommentsCount = pair.Value.Count,
+                    CourseIds = pair.Value.Select(row => row.CourseId).Distinct().ToHashSet(),
+                    LastCommentActivityAt = pair.Value.Max(row => row.CreatedAt)
+                });
             
-            var userSubscriptions = users.Select(user => new
+            var userRows = users.Select(user =>
             {
-                User = user,
-                Subscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email && s.IsActive)
+                var subscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email && s.IsActive);
+                var tracking = BuildTrackingForUser(user.Id, user.Email);
+
+                return new AdminUserRowViewModel
+                {
+                    UserId = user.Email ?? user.Id,
+                    Email = user.Email ?? string.Empty,
+                    UserName = user.UserName,
+                    HasSubscription = subscription != null,
+                    IsActiveSubscription = subscription?.IsActive ?? false,
+                    SubscriptionStatus = subscription?.Status,
+                    SubscriptionStartDate = subscription?.StartDate,
+                    StripeSubscriptionId = subscription?.StripeSubscriptionId,
+                    CoursesTracked = tracking.CoursesTracked,
+                    QuizAttempts = tracking.QuizAttempts,
+                    QuizCorrectAnswers = tracking.QuizCorrectAnswers,
+                    QuizLessonsTracked = tracking.QuizLessonsTracked,
+                    CommentsCount = tracking.CommentsCount,
+                    LastActivityAt = tracking.LastActivityAt
+                };
             })
-            .OrderByDescending(us => us.Subscription?.StartDate ?? DateTime.MinValue)
+            .OrderByDescending(us => us.LastActivityAt ?? us.SubscriptionStartDate ?? DateTime.MinValue)
             .ToList();
             
             // Filtrage par recherche si présent
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchLower = search.ToLower();
-                userSubscriptions = userSubscriptions
+                userRows = userRows
                     .Where(us => 
-                        (us.User.Email != null && us.User.Email.ToLower().Contains(searchLower)) ||
-                        (us.User.UserName != null && us.User.UserName.ToLower().Contains(searchLower))
+                        (!string.IsNullOrWhiteSpace(us.Email) && us.Email.ToLower().Contains(searchLower)) ||
+                        (!string.IsNullOrWhiteSpace(us.UserName) && us.UserName.ToLower().Contains(searchLower))
                     )
                     .ToList();
             }
             
-            ViewBag.UserSubscriptions = userSubscriptions;
+            ViewBag.TotalUsers = userRows.Count;
+            ViewBag.ActiveSubscriptions = userRows.Count(us => us.IsActiveSubscription);
+            ViewBag.WithoutSubscription = userRows.Count(us => !us.IsActiveSubscription);
             ViewBag.SearchQuery = search;
-            return View();
+            return View(userRows);
+
+            UserTrackingSummary BuildTrackingForUser(string userId, string? userEmail)
+            {
+                quizStatsByUserId.TryGetValue(userId, out var quizStats);
+                commentStatsByUserEmail.TryGetValue(userEmail ?? string.Empty, out var commentStats);
+
+                var courseIds = new System.Collections.Generic.HashSet<int>();
+                if (quizStats != null)
+                {
+                    courseIds.UnionWith(quizStats.CourseIds);
+                }
+
+                if (commentStats != null)
+                {
+                    courseIds.UnionWith(commentStats.CourseIds);
+                }
+
+                var lastActivityAt = new[]
+                {
+                    quizStats != null ? (DateTime?)quizStats.LastQuizActivityAt : null,
+                    commentStats != null ? (DateTime?)commentStats.LastCommentActivityAt : null
+                }
+                .Where(date => date.HasValue)
+                .Select(date => date!.Value)
+                .DefaultIfEmpty()
+                .Max();
+
+                DateTime? normalizedLastActivity = lastActivityAt == default ? null : lastActivityAt;
+
+                return new UserTrackingSummary
+                {
+                    CoursesTracked = courseIds.Count,
+                    QuizAttempts = quizStats?.QuizAttempts ?? 0,
+                    QuizCorrectAnswers = quizStats?.QuizCorrectAnswers ?? 0,
+                    QuizLessonsTracked = quizStats?.QuizLessonsTracked ?? 0,
+                    CommentsCount = commentStats?.CommentsCount ?? 0,
+                    LastActivityAt = normalizedLastActivity
+                };
+            }
         }
 
         [HttpPost]

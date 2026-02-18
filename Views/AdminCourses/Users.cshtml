@@ -1,6 +1,11 @@
+@model IEnumerable<CrudDemo.Models.AdminUserRowViewModel>
+
 @{
     ViewData["Title"] = "Utilisateurs Inscrits";
-    var userSubscriptions = ViewBag.UserSubscriptions as IEnumerable<dynamic>;
+    var userRows = Model ?? Enumerable.Empty<CrudDemo.Models.AdminUserRowViewModel>();
+    var totalUsers = (int?)ViewBag.TotalUsers ?? 0;
+    var activeSubscriptions = (int?)ViewBag.ActiveSubscriptions ?? 0;
+    var withoutSubscription = (int?)ViewBag.WithoutSubscription ?? 0;
 }
 
 
@@ -64,7 +69,7 @@
                     <i class="fas fa-user-check"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions!.Count()</h3>
+                    <h3>@totalUsers</h3>
                     <p>Total Utilisateurs</p>
                 </div>
             </div>
@@ -73,7 +78,7 @@
                     <i class="fas fa-crown"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions!.Count(us => us.Subscription != null && ((dynamic)us.Subscription).IsActive)</h3>
+                    <h3>@activeSubscriptions</h3>
                     <p>Abonnements Actifs</p>
                 </div>
             </div>
@@ -82,7 +87,7 @@
                     <i class="fas fa-user-times"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>@userSubscriptions!.Count(us => us.Subscription == null || !((dynamic)us.Subscription).IsActive)</h3>
+                    <h3>@withoutSubscription</h3>
                     <p>Sans Abonnement</p>
                 </div>
             </div>
@@ -95,6 +100,12 @@
                         <th><i class="fas fa-user me-2"></i>Email</th>
                         <th><i class="fas fa-shield-alt me-2"></i>Statut Abonnement</th>
                         <th><i class="fas fa-calendar-alt me-2"></i>Date Début</th>
+                        <th><i class="fas fa-graduation-cap me-2"></i>Cours Suivis</th>
+                        <th><i class="fas fa-tasks me-2"></i>Leçons Quiz</th>
+                        <th><i class="fas fa-question-circle me-2"></i>Tentatives Quiz</th>
+                        <th><i class="fas fa-check-circle me-2"></i>Bonnes Réponses</th>
+                        <th><i class="fas fa-comments me-2"></i>Commentaires</th>
+                        <th><i class="fas fa-clock me-2"></i>Dernière Activité</th>
                         <th><i class="fas fa-credit-card me-2"></i>ID Stripe</th>
                         <th><i class="fas fa-user-slash me-2"></i>Action</th>
                     </tr>
@@ -103,18 +114,16 @@
                     @{
                         #pragma warning disable CS8602
                     }
-                    @foreach (var item in userSubscriptions)
+                    @foreach (var item in userRows)
                     {
-                        var user = item.User;
-                        dynamic? subscriptionObj = item.Subscription;
-                        bool hasSubscription = subscriptionObj != null;
-                        var hasActiveSubscription = hasSubscription && subscriptionObj.IsActive;
+                        bool hasSubscription = item.HasSubscription;
+                        var hasActiveSubscription = item.IsActiveSubscription;
                         
                         <tr class="@(hasActiveSubscription ? "active-user" : "inactive-user")">
                             <td>
                                 <div class="user-email">
                                     <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
-                                    @user!.Email
+                                    @item.Email
                                 </div>
                             </td>
                             <td>
@@ -122,7 +131,7 @@
                                 {
                                     <span class="badge-active">
                                         <i class="fas fa-check-circle me-1"></i>
-                                        @subscriptionObj!.Status
+                                        @item.SubscriptionStatus
                                     </span>
                                 }
                                 else
@@ -137,8 +146,33 @@
                                 @if (hasSubscription)
                                 {
                                     <span class="date-info">
-                                        @subscriptionObj!.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                        @item.SubscriptionStartDate?.ToString("dd/MM/yyyy HH:mm")
                                     </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge-active">@item.CoursesTracked</span>
+                            </td>
+                            <td>
+                                <span class="date-info">@item.QuizLessonsTracked</span>
+                            </td>
+                            <td>
+                                <span class="date-info">@item.QuizAttempts</span>
+                            </td>
+                            <td>
+                                <span class="date-info">@item.QuizCorrectAnswers</span>
+                            </td>
+                            <td>
+                                <span class="date-info">@item.CommentsCount</span>
+                            </td>
+                            <td>
+                                @if (item.LastActivityAt != null)
+                                {
+                                    <span class="date-info">@item.LastActivityAt?.ToString("dd/MM/yyyy HH:mm")</span>
                                 }
                                 else
                                 {
@@ -147,9 +181,9 @@
                             </td>
 
                             <td>
-                                @if (hasSubscription && !string.IsNullOrEmpty(subscriptionObj.StripeSubscriptionId))
+                                @if (hasSubscription && !string.IsNullOrEmpty(item.StripeSubscriptionId))
                                 {
-                                    <code class="stripe-id">@subscriptionObj!.StripeSubscriptionId!.Substring(0, Math.Min(20, subscriptionObj!.StripeSubscriptionId.Length))...</code>
+                                    <code class="stripe-id">@item.StripeSubscriptionId!.Substring(0, Math.Min(20, item.StripeSubscriptionId.Length))...</code>
                                 }
                                 else
                                 {
@@ -159,7 +193,7 @@
                             <td>
                                 <form asp-action="DeactivateMember" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="userId" value="@user!.Email" />
+                                    <input type="hidden" name="userId" value="@item.UserId" />
                                     <button type="submit" class="btn-deactivate" @(hasActiveSubscription ? "" : "disabled")>
                                         <i class="fas fa-user-slash me-1"></i>Desactiver
                                     </button>
@@ -174,7 +208,7 @@
             </table>
         </div>
 
-        @if (!userSubscriptions.Any())
+        @if (!userRows.Any())
         {
             <div class="alert-custom">
                 <i class="fas fa-info-circle me-2"></i>

@@ -1,5 +1,3 @@
-@model CrudDemo.Models.Quiz
-
 @{
     ViewData["Title"] = "Créer un Quiz";
     var lesson = ViewBag.Lesson as CrudDemo.Models.Lesson;
@@ -16,10 +14,8 @@
 
         <div class="card shadow-lg animated-card">
             <div class="card-header gradient-header">
-                <h2 class="mb-0">
-                    <i class="fas fa-plus-circle"></i> Créer un Quiz
-                </h2>
-                <small class="text-muted">@lesson?.Title</small>
+                <h2 class="mb-0"><i class="fas fa-plus-circle"></i> Créer un Quiz</h2>
+                <small class="text-white">@lesson?.Title</small>
             </div>
 
             <div class="card-body">
@@ -35,93 +31,22 @@
                     </div>
                 }
 
-                <form asp-action="CreateQuiz" method="post" class="needs-validation">
+                <form asp-action="CreateQuiz" method="post" id="quizForm">
                     <input type="hidden" name="lessonId" value="@lessonId" />
-                    
-                    <div class="form-group mb-3">
-                        <label for="question" class="form-label">
-                            <i class="fas fa-edit"></i> Question
-                        </label>
-                        <textarea class="form-control animated-input" id="question" name="quiz.question" 
-                                  placeholder="Entrez votre question..." 
-                                  rows="3" required maxlength="500"></textarea>
-                        <small class="form-text text-muted">Maximum 500 caractères</small>
+
+                    <div id="questionsContainer"></div>
+
+                    <div class="d-flex gap-2 mb-4">
+                        <button type="button" class="btn btn-outline-primary" id="addQuestionBtn">
+                            <i class="fas fa-plus"></i> Ajouter une question
+                        </button>
                     </div>
-
-                    <div class="form-group mb-3">
-                        <label for="description" class="form-label">
-                            <i class="fas fa-file-alt"></i> Description (optionnel)
-                        </label>
-                        <textarea class="form-control animated-input" id="description" name="quiz.description" 
-                                  placeholder="Ajoutez une description ou une explication..." 
-                                  rows="2" maxlength="1000"></textarea>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="points" class="form-label">
-                            <i class="fas fa-star"></i> Points
-                        </label>
-                        <input type="number" class="form-control animated-input" id="points" 
-                               name="quiz.points" value="1" min="1" max="100" required>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="mb-3">
-                        <i class="fas fa-list"></i> Options de Réponse
-                    </h5>
-                    <p class="text-muted small">
-                        <i class="fas fa-info-circle"></i> Ajoutez au moins 2 options et cochez la ou les réponses correctes.
-                    </p>
-
-                    <div id="optionsContainer">
-                        <!-- Options initiales (2 minimum) -->
-                        <div class="option-item mb-3 animated-option" data-option="0">
-                            <div class="input-group">
-                                <input type="text" class="form-control animated-input" 
-                                       name="optionTexts" placeholder="Option 1" required>
-                                <div class="input-group-text">
-                                    <input type="checkbox" class="form-check-input" 
-                                           name="optionCorrects" value="true" aria-label="Correcte">
-                                    <label class="ms-2 mb-0">Correcte</label>
-                                </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm remove-option" 
-                                        style="visibility:hidden;">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="option-item mb-3 animated-option" data-option="1">
-                            <div class="input-group">
-                                <input type="text" class="form-control animated-input" 
-                                       name="optionTexts" placeholder="Option 2" required>
-                                <div class="input-group-text">
-                                    <input type="checkbox" class="form-check-input" 
-                                           name="optionCorrects" value="true" aria-label="Correcte">
-                                    <label class="ms-2 mb-0">Correcte</label>
-                                </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm remove-option" 
-                                        style="visibility:hidden;">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn btn-outline-primary mt-3" id="addOptionBtn">
-                        <i class="fas fa-plus"></i> Ajouter une Option
-                    </button>
-
-                    <hr class="my-4">
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success btn-lg animated-btn">
-                            <i class="fas fa-check"></i> Créer le Quiz
+                            <i class="fas fa-check"></i> Enregistrer le quiz
                         </button>
-                        
-                        <a asp-action="Details" asp-route-id="@lesson?.Module?.CourseId" 
-                           class="btn btn-secondary btn-lg">
+                        <a asp-action="Details" asp-route-id="@lesson?.Module?.CourseId" class="btn btn-secondary btn-lg">
                             <i class="fas fa-times"></i> Annuler
                         </a>
                     </div>
@@ -184,9 +109,9 @@
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
 
-    .option-item .input-group-text {
-        background-color: #f8f9fa;
-    }
+    .question-card { border: 1px solid #e0e0e0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+    .question-title { font-weight: 600; color: #667eea; }
+    .option-item .input-group-text { background-color: #f8f9fa; }
 
     @@keyframes slideUp {
         from {
@@ -219,87 +144,139 @@
 </style>
 
 <script>
-    let optionCount = 2;
+    const questionsContainer = document.getElementById('questionsContainer');
+    const addQuestionBtn = document.getElementById('addQuestionBtn');
+    const quizForm = document.getElementById('quizForm');
+    let questionCount = 0;
 
-    document.getElementById('addOptionBtn').addEventListener('click', function () {
-        const container = document.getElementById('optionsContainer');
-        const newOption = document.createElement('div');
-        newOption.className = 'option-item mb-3 animated-option';
-        newOption.dataset.option = optionCount;
-        newOption.innerHTML = `
+    function buildOptionRow(questionIndex, optionIndex) {
+        const row = document.createElement('div');
+        row.className = 'option-item mb-2';
+        row.innerHTML = `
             <div class="input-group">
-                <input type="text" class="form-control animated-input" 
-                       name="optionTexts" placeholder="Option ${optionCount + 1}" required>
+                <input type="text" class="form-control animated-input option-text" name="optionTexts_${questionIndex}" placeholder="Option ${optionIndex + 1}" required>
                 <div class="input-group-text">
-                    <input type="checkbox" class="form-check-input" 
-                           name="optionCorrects" value="true" aria-label="Correcte">
+                    <input type="checkbox" class="form-check-input option-correct" data-question-index="${questionIndex}" data-option-index="${optionIndex}">
                     <label class="ms-2 mb-0">Correcte</label>
                 </div>
-                <button type="button" class="btn btn-outline-danger btn-sm remove-option">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm remove-option"><i class="fas fa-trash"></i></button>
             </div>
         `;
-        container.appendChild(newOption);
-        optionCount++;
-        updateRemoveButtons();
-
-        // Attach remove handler
-        newOption.querySelector('.remove-option').addEventListener('click', removeOption);
-    });
-
-    function removeOption(e) {
-        e.preventDefault();
-        const optionItem = e.target.closest('.option-item');
-        optionItem.style.animation = 'slideOut 0.3s ease-out forwards';
-        setTimeout(() => {
-            optionItem.remove();
-            updateRemoveButtons();
-        }, 300);
+        return row;
     }
 
-    function updateRemoveButtons() {
-        const options = document.querySelectorAll('.option-item');
-        options.forEach((option, index) => {
-            const removeBtn = option.querySelector('.remove-option');
-            if (options.length <= 2) {
-                removeBtn.style.visibility = 'hidden';
-            } else {
-                removeBtn.style.visibility = 'visible';
-            }
+    function updateOptionIndexes(questionCard) {
+        const questionIndex = Number(questionCard.dataset.questionIndex);
+        const options = questionCard.querySelectorAll('.option-item');
+        options.forEach((item, optionIndex) => {
+            const input = item.querySelector('.option-text');
+            const checkbox = item.querySelector('.option-correct');
+            input.placeholder = `Option ${optionIndex + 1}`;
+            checkbox.dataset.questionIndex = questionIndex;
+            checkbox.dataset.optionIndex = optionIndex;
         });
     }
 
-    // Attach remove handlers to existing options
-    document.querySelectorAll('.remove-option').forEach(btn => {
-        btn.addEventListener('click', removeOption);
-    });
+    function addOption(questionCard) {
+        const questionIndex = Number(questionCard.dataset.questionIndex);
+        const optionsContainer = questionCard.querySelector('.question-options');
+        const optionIndex = optionsContainer.querySelectorAll('.option-item').length;
+        const row = buildOptionRow(questionIndex, optionIndex);
+        optionsContainer.appendChild(row);
 
-    // Form validation
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const checkboxes = document.querySelectorAll('input[name="optionCorrects"]:checked');
-        if (checkboxes.length === 0) {
-            e.preventDefault();
-            alert('Veuillez cocher au moins une réponse correcte.');
-            return false;
-        }
-
-        const inputs = document.querySelectorAll('input[name="optionTexts"]');
-        if (inputs.length < 2) {
-            e.preventDefault();
-            alert('Veuillez ajouter au moins 2 options.');
-            return false;
-        }
-
-        for (let input of inputs) {
-            if (input.value.trim() === '') {
-                e.preventDefault();
-                alert('Toutes les options doivent avoir un texte.');
-                return false;
+        row.querySelector('.remove-option').addEventListener('click', () => {
+            const options = optionsContainer.querySelectorAll('.option-item');
+            if (options.length <= 2) {
+                return;
             }
+            row.remove();
+            updateOptionIndexes(questionCard);
+        });
+    }
+
+    function addQuestion() {
+        const questionIndex = questionCount++;
+        const card = document.createElement('div');
+        card.className = 'question-card animated-option';
+        card.dataset.questionIndex = questionIndex;
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="question-title"><i class="fas fa-question-circle"></i> Question ${questionIndex + 1}</div>
+            </div>
+
+            <input type="hidden" name="correctIndexes_${questionIndex}" class="correct-indexes" value="">
+
+            <div class="form-group mb-3">
+                <label class="form-label">Texte de la question</label>
+                <textarea class="form-control animated-input" name="questionTexts" rows="2" maxlength="500" required></textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Description (optionnel)</label>
+                <textarea class="form-control animated-input" name="questionDescriptions" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Points</label>
+                <input type="number" class="form-control animated-input" name="questionPoints" value="1" min="1" max="100" required>
+            </div>
+
+            <h6 class="mb-2"><i class="fas fa-list"></i> Options de réponse</h6>
+            <div class="question-options"></div>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2 add-option-btn"><i class="fas fa-plus"></i> Ajouter une option</button>
+        `;
+
+        const optionsContainer = card.querySelector('.question-options');
+        optionsContainer.appendChild(buildOptionRow(questionIndex, 0));
+        optionsContainer.appendChild(buildOptionRow(questionIndex, 1));
+
+        card.querySelectorAll('.remove-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const options = optionsContainer.querySelectorAll('.option-item');
+                if (options.length <= 2) {
+                    return;
+                }
+                e.target.closest('.option-item').remove();
+                updateOptionIndexes(card);
+            });
+        });
+
+        card.querySelector('.add-option-btn').addEventListener('click', () => addOption(card));
+        questionsContainer.appendChild(card);
+    }
+
+    addQuestionBtn.addEventListener('click', addQuestion);
+
+    quizForm.addEventListener('submit', function (e) {
+        const questionCards = questionsContainer.querySelectorAll('.question-card');
+        if (questionCards.length === 0) {
+            e.preventDefault();
+            alert('Ajoutez au moins une question.');
+            return;
+        }
+
+        for (const card of questionCards) {
+            const options = Array.from(card.querySelectorAll('.option-item'));
+            const validOptions = options
+                .map((option, idx) => ({ idx, value: option.querySelector('.option-text').value.trim(), checked: option.querySelector('.option-correct').checked }))
+                .filter(option => option.value.length > 0);
+
+            if (validOptions.length < 2) {
+                e.preventDefault();
+                alert('Chaque question doit avoir au moins 2 options non vides.');
+                return;
+            }
+
+            const correctIndexes = validOptions.filter(o => o.checked).map(o => o.idx);
+            if (correctIndexes.length === 0) {
+                e.preventDefault();
+                alert('Chaque question doit avoir au moins une bonne réponse.');
+                return;
+            }
+
+            card.querySelector('.correct-indexes').value = correctIndexes.join(',');
         }
     });
 
-    // Initialize button visibility
-    updateRemoveButtons();
+    addQuestion();
 </script>
