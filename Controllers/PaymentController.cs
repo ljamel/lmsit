@@ -59,7 +59,7 @@ namespace CrudDemo.Controllers
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = "Accès complet à tous les cours de la plateforme",
                             },
-                            UnitAmount = 1000, // 10 EUR en centimes
+                            UnitAmount = 1900, // 19 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -156,7 +156,7 @@ namespace CrudDemo.Controllers
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = "Accès complet à tous les cours de la plateforme",
                             },
-                            UnitAmount = 1000, // 10 EUR en centimes
+                            UnitAmount = 1900, // 19 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -214,7 +214,7 @@ namespace CrudDemo.Controllers
                             userId, 
                             userId.Split('@')[0], 
                             "Abonnement Mensuel - Accès Illimité", 
-                            10.00m);
+                            19.00m);
                     }
                     catch (Exception ex)
                     {
