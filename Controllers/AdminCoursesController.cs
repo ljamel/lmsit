@@ -606,17 +606,44 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             public DateTime? LastActivityAt { get; set; }
         }
 
-        public async Task<IActionResult> Users(string? search)
+        public async Task<IActionResult> Users(string? search, int page = 1)
         {
+            const int pageSize = 15;
+            if (page < 1)
+            {
+                page = 1;
+            }
+
             var activeSubscriptions = await _context.Subscriptions
                 .Where(s => s.IsActive)
                 .ToListAsync();
 
             await SyncStripeSubscriptionsAsync(activeSubscriptions);
 
-            // Optimise: AsNoTracking pour lecture seule, trie par date d'inscription
-            var users = await _context.Users
+            var usersQuery = _context.Users
                 .AsNoTracking()
+                .OrderByDescending(u => u.Id)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = $"%{search.Trim()}%";
+                usersQuery = usersQuery.Where(u =>
+                    (u.Email != null && EF.Functions.Like(u.Email, searchTerm)) ||
+                    (u.UserName != null && EF.Functions.Like(u.UserName, searchTerm))
+                );
+            }
+
+            var totalUsers = await usersQuery.CountAsync();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalUsers / (double)pageSize));
+            if (page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            var users = await usersQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             var subscriptions = await _context.Subscriptions
@@ -700,25 +727,16 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     LastActivityAt = tracking.LastActivityAt
                 };
             })
-            .OrderByDescending(us => us.LastActivityAt ?? us.SubscriptionStartDate ?? DateTime.MinValue)
             .ToList();
-            
-            // Filtrage par recherche si présent
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var searchLower = search.ToLower();
-                userRows = userRows
-                    .Where(us => 
-                        (!string.IsNullOrWhiteSpace(us.Email) && us.Email.ToLower().Contains(searchLower)) ||
-                        (!string.IsNullOrWhiteSpace(us.UserName) && us.UserName.ToLower().Contains(searchLower))
-                    )
-                    .ToList();
-            }
-            
-            ViewBag.TotalUsers = userRows.Count;
+
+            ViewBag.TotalUsers = totalUsers;
             ViewBag.ActiveSubscriptions = userRows.Count(us => us.IsActiveSubscription);
             ViewBag.WithoutSubscription = userRows.Count(us => !us.IsActiveSubscription);
             ViewBag.SearchQuery = search;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
+
             return View(userRows);
 
             UserTrackingSummary BuildTrackingForUser(string userId, string? userEmail)

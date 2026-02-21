@@ -48,7 +48,7 @@ iframe.ql-video {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.4s ease;
     animation: slideInLeft 0.5s ease-out;
-    max-width: 290px;
+    max-width: 386px;
     font-size: 14px;
 }
 
