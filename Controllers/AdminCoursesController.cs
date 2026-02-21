@@ -620,28 +620,39 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
 
             await SyncStripeSubscriptionsAsync(activeSubscriptions);
 
-            var usersQuery = _context.Users
+            var filteredUsersQuery = _context.Users
                 .AsNoTracking()
-                .OrderByDescending(u => u.Id)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = $"%{search.Trim()}%";
-                usersQuery = usersQuery.Where(u =>
+                filteredUsersQuery = filteredUsersQuery.Where(u =>
                     (u.Email != null && EF.Functions.Like(u.Email, searchTerm)) ||
                     (u.UserName != null && EF.Functions.Like(u.UserName, searchTerm))
                 );
             }
 
-            var totalUsers = await usersQuery.CountAsync();
+            var activeUserIdsQuery = _context.Subscriptions
+                .AsNoTracking()
+                .Where(s => s.IsActive)
+                .Select(s => s.UserId)
+                .Distinct();
+
+            var totalUsers = await filteredUsersQuery.CountAsync();
+            var totalActiveSubscriptions = await filteredUsersQuery
+                .Where(u => u.Email != null && activeUserIdsQuery.Contains(u.Email))
+                .CountAsync();
+
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalUsers / (double)pageSize));
             if (page > totalPages)
             {
                 page = totalPages;
             }
 
-            var users = await usersQuery
+            var users = await filteredUsersQuery
+                .OrderByDescending(u => u.Email != null && activeUserIdsQuery.Contains(u.Email))
+                .ThenByDescending(u => u.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -730,8 +741,8 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             .ToList();
 
             ViewBag.TotalUsers = totalUsers;
-            ViewBag.ActiveSubscriptions = userRows.Count(us => us.IsActiveSubscription);
-            ViewBag.WithoutSubscription = userRows.Count(us => !us.IsActiveSubscription);
+            ViewBag.ActiveSubscriptions = totalActiveSubscriptions;
+            ViewBag.WithoutSubscription = totalUsers - totalActiveSubscriptions;
             ViewBag.SearchQuery = search;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
