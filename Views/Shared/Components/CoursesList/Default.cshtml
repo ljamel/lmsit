@@ -112,25 +112,31 @@
                                         .ToList();
                                 }
 
-                                if (lessons.Any())
-                                {
-                                    <ul class="list-unstyled ms-3 mt-2">
-                                        @foreach (var lesson in lessons.OrderBy(l => l.OrderIndex))
-                                        {
-                                            if (hasLessonSearch)
+                                <div class="ms-3 mt-2">
+                                    <div class="fw-semibold text-muted">
+                                        <i class="fas fa-folder-open"></i> @m.Title
+                                    </div>
+
+                                    @if (lessons.Any())
+                                    {
+                                        <ul class="list-unstyled ms-3 mt-2">
+                                            @foreach (var lesson in lessons.OrderBy(l => l.OrderIndex))
                                             {
-                                                hasAnyLessonMatch = true;
+                                                if (hasLessonSearch)
+                                                {
+                                                    hasAnyLessonMatch = true;
+                                                }
+
+                                                <li class="mb-2">
+                                                    <a asp-action="Lesson" asp-route-id="@lesson.Id">
+                                                        <i class="fas fa-play-circle"></i> @lesson.Title
+                                                    </a>
+                                                </li>
+
                                             }
-
-                                            <li class="mb-2">
-                                                <a asp-action="Lesson" asp-route-id="@lesson.Id">
-                                                    <i class="fas fa-play-circle"></i> @lesson.Title
-                                                </a>
-                                            </li>
-
-                                        }
-                                    </ul>
-                                }
+                                        </ul>
+                                    }
+                                </div>
                             }
 
 

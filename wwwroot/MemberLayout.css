@@ -40,6 +40,10 @@ iframe.ql-video {
   margin-top: 0;
 }
 
+.fw-semibold.text-muted {
+  margin: 10px;
+}
+
 /* ========== DASHBOARD MENU ========== */
 .menu-dashboard {
     background: linear-gradient(135deg, #434c5e 0%, #2c3142 100%);
