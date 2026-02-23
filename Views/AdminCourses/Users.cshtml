@@ -9,6 +9,8 @@
     var currentPage = (int?)ViewBag.CurrentPage ?? 1;
     var totalPages = (int?)ViewBag.TotalPages ?? 1;
     var searchQuery = (string?)ViewBag.SearchQuery;
+    var competencyRows = ViewBag.QuizCompetencyRows as IEnumerable<CrudDemo.Models.AdminUserQuizResultRowViewModel>
+        ?? Enumerable.Empty<CrudDemo.Models.AdminUserQuizResultRowViewModel>();
 }
 
 
@@ -94,6 +96,11 @@
                     <p>Sans Abonnement</p>
                 </div>
             </div>
+        </div>
+
+        <div class="mb-3" style="color: rgba(255,255,255,0.8); font-family: 'Rajdhani', sans-serif;">
+            <i class="fas fa-sort-amount-down me-1" style="color:#00B2FF;"></i>
+            Tri des utilisateurs par date (abonnement puis activité récente)
         </div>
 
         <div class="table-container">
@@ -218,7 +225,86 @@
                 Aucun utilisateur inscrit pour le moment.
             </div>
         }
-        else if (totalPages > 1)
+
+        <div class="table-container mt-4">
+            <h3 style="color:#00B2FF; margin-bottom: 1rem;">
+                <i class="fas fa-chart-line me-2"></i>Tableau de compétence (par utilisateur / quiz)
+            </h3>
+
+            @if (competencyRows.Any())
+            {
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user me-2"></i>Utilisateur</th>
+                            <th><i class="fas fa-book me-2"></i>Cours</th>
+                            <th><i class="fas fa-list me-2"></i>Leçon</th>
+                            <th><i class="fas fa-question-circle me-2"></i>Quiz</th>
+                            <th><i class="fas fa-redo me-2"></i>Tentatives</th>
+                            <th><i class="fas fa-check me-2"></i>Bonnes réponses</th>
+                            <th><i class="fas fa-percentage me-2"></i>Taux de réussite</th>
+                            <th><i class="fas fa-signal me-2"></i>Niveau</th>
+                            <th><i class="fas fa-clock me-2"></i>Dernier essai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in competencyRows)
+                    {
+                        var badgeClass = row.SuccessRate >= 80
+                            ? "badge-advanced"
+                            : row.SuccessRate >= 50
+                                ? "badge-intermediate"
+                                : row.SuccessRate > 0
+                                    ? "badge-beginner"
+                                    : "badge-none";
+
+                        <tr>
+                            <td>
+                                <div class="user-email">
+                                    <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
+                                    @row.UserEmail
+                                </div>
+                            </td>
+                            <td><span class="date-info">@row.CourseTitle</span></td>
+                            <td><span class="date-info">@row.LessonTitle</span></td>
+                            <td>
+                                <span class="date-info" title="@row.QuizQuestion">
+                                    @(row.QuizQuestion.Length > 80 ? row.QuizQuestion.Substring(0, 80) + "..." : row.QuizQuestion)
+                                </span>
+                            </td>
+                            <td><span class="date-info">@row.Attempts</span></td>
+                            <td><span class="date-info">@row.CorrectAnswers</span></td>
+                            <td><span class="date-info">@row.SuccessRate.ToString("0.0")%</span></td>
+                            <td>
+                                <span class="@badgeClass">
+                                    @row.CompetencyLevel
+                                </span>
+                            </td>
+                            <td>
+                                @if (row.LastAttemptAt != null)
+                                {
+                                    <span class="date-info">@row.LastAttemptAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert-custom">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Aucun résultat de quiz trouvé pour les utilisateurs affichés.
+                </div>
+            }
+        </div>
+
+        @if (totalPages > 1)
         {
             <nav aria-label="Pagination utilisateurs" class="mt-4 d-flex justify-content-center">
                 <ul class="pagination pagination-custom">
@@ -273,6 +359,34 @@
         border-color: rgba(255, 94, 0, 0.6);
         box-shadow: 0 0 30px rgba(255, 94, 0, 0.3);
         transform: translateY(-5px);
+    }
+
+    .badge-advanced,
+    .badge-intermediate,
+    .badge-beginner {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .badge-advanced {
+        color: #00FF88;
+        background: rgba(0, 255, 136, 0.15);
+        border: 1px solid rgba(0, 255, 136, 0.45);
+    }
+
+    .badge-intermediate {
+        color: #FFC107;
+        background: rgba(255, 193, 7, 0.15);
+        border: 1px solid rgba(255, 193, 7, 0.45);
+    }
+
+    .badge-beginner {
+        color: #FF6B6B;
+        background: rgba(255, 107, 107, 0.15);
+        border: 1px solid rgba(255, 107, 107, 0.45);
     }
 
     .pagination-custom .page-link {

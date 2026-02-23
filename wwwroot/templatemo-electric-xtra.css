@@ -244,6 +244,23 @@ https://templatemo.com/tm-596-electric-xtra
             opacity: 0.7;
         }
 
+        .links2 a {
+            color: #ffffff;
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            display: block;
+        }
+        .links2 {
+            list-style: none;
+        }
+
         .nav-links a.active {
             opacity: 1;
             color: #FF5E00;
@@ -1167,7 +1184,7 @@ https://templatemo.com/tm-596-electric-xtra
         }
 
         .advantage-icon {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             margin-bottom: 20px;
             filter: drop-shadow(0 0 20px rgba(255, 94, 0, 0.5));
         }

@@ -66,6 +66,19 @@ iframe.ql-video {
     letter-spacing: 0.5px;
 }
 
+.menu-dashboard .lesson-link {
+    padding: 8px 10px;
+    border-left: 4px solid transparent;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.menu-dashboard .lesson-link.menu-item-active {
+    background: rgba(255, 255, 255, 0.2);
+    border-left-color: #00B2FF;
+    font-weight: 700;
+}
+
 .mb-2 {
   list-style: none;
 }

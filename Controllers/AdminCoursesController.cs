@@ -639,6 +639,15 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 .Select(s => s.UserId)
                 .Distinct();
 
+            var latestSubscriptionDateByUserQuery = _context.Subscriptions
+                .AsNoTracking()
+                .GroupBy(s => s.UserId)
+                .Select(group => new
+                {
+                    UserId = group.Key,
+                    LatestSubscriptionStartDate = group.Max(s => s.StartDate)
+                });
+
             var totalUsers = await filteredUsersQuery.CountAsync();
             var totalActiveSubscriptions = await filteredUsersQuery
                 .Where(u => u.Email != null && activeUserIdsQuery.Contains(u.Email))
@@ -650,12 +659,21 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 page = totalPages;
             }
 
-            var users = await filteredUsersQuery
-                .OrderByDescending(u => u.Email != null && activeUserIdsQuery.Contains(u.Email))
-                .ThenByDescending(u => u.Id)
+            var users = await (
+                from user in filteredUsersQuery
+                join latestSubscription in latestSubscriptionDateByUserQuery
+                    on user.Email equals latestSubscription.UserId into latestSubscriptionJoin
+                from latestSubscription in latestSubscriptionJoin.DefaultIfEmpty()
+                orderby (user.Email != null && activeUserIdsQuery.Contains(user.Email)) descending,
+                    latestSubscription.LatestSubscriptionStartDate descending,
+                    user.Id descending
+                select user
+            )
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+            var pagedUserIds = users.Select(user => user.Id).ToList();
 
             var subscriptions = await _context.Subscriptions
                 .AsNoTracking()
@@ -719,6 +737,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             {
                 var subscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email && s.IsActive);
                 var tracking = BuildTrackingForUser(user.Id, user.Email);
+                var sortDate = subscription?.StartDate ?? tracking.LastActivityAt;
 
                 return new AdminUserRowViewModel
                 {
@@ -735,10 +754,73 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     QuizCorrectAnswers = tracking.QuizCorrectAnswers,
                     QuizLessonsTracked = tracking.QuizLessonsTracked,
                     CommentsCount = tracking.CommentsCount,
-                    LastActivityAt = tracking.LastActivityAt
+                    LastActivityAt = tracking.LastActivityAt,
+                    SortDate = sortDate
                 };
             })
+            .OrderByDescending(row => row.SortDate)
+            .ThenBy(row => row.Email)
             .ToList();
+
+            var quizCompetencyRowsRaw = await (
+                from result in _context.UserQuizResults.AsNoTracking()
+                join user in _context.Users.AsNoTracking() on result.UserId equals user.Id
+                join quiz in _context.Quizzes.AsNoTracking() on result.QuizId equals quiz.Id
+                join lesson in _context.Lessons.AsNoTracking() on quiz.LessonId equals lesson.Id
+                join module in _context.Modules.AsNoTracking() on lesson.ModuleId equals module.Id
+                join course in _context.Courses.AsNoTracking() on module.CourseId equals course.Id
+                where pagedUserIds.Contains(result.UserId)
+                group new { result, user, quiz, lesson, course } by new
+                {
+                    result.UserId,
+                    user.Email,
+                    user.UserName,
+                    QuizId = quiz.Id,
+                    QuizQuestion = quiz.Question,
+                    LessonTitle = lesson.Title,
+                    CourseTitle = course.Title
+                }
+                into grouped
+                select new
+                {
+                    grouped.Key.UserId,
+                    grouped.Key.Email,
+                    grouped.Key.UserName,
+                    grouped.Key.QuizId,
+                    grouped.Key.QuizQuestion,
+                    grouped.Key.LessonTitle,
+                    grouped.Key.CourseTitle,
+                    Attempts = grouped.Count(),
+                    CorrectAnswers = grouped.Count(x => x.result.IsCorrect),
+                    LastAttemptAt = grouped.Max(x => x.result.AttemptedAt)
+                }
+            )
+            .ToListAsync();
+
+            var quizCompetencyRows = quizCompetencyRowsRaw
+                .Select(row =>
+                {
+                    var successRate = row.Attempts == 0 ? 0 : (row.CorrectAnswers * 100.0) / row.Attempts;
+                    return new AdminUserQuizResultRowViewModel
+                    {
+                        UserId = row.UserId,
+                        UserEmail = row.Email ?? string.Empty,
+                        UserName = row.UserName,
+                        QuizId = row.QuizId,
+                        QuizQuestion = row.QuizQuestion,
+                        LessonTitle = row.LessonTitle,
+                        CourseTitle = row.CourseTitle,
+                        Attempts = row.Attempts,
+                        CorrectAnswers = row.CorrectAnswers,
+                        SuccessRate = Math.Round(successRate, 1),
+                        LastAttemptAt = row.LastAttemptAt,
+                        CompetencyLevel = GetCompetencyLevel(successRate)
+                    };
+                })
+                .OrderBy(row => row.UserEmail)
+                .ThenByDescending(row => row.LastAttemptAt)
+                .ThenBy(row => row.QuizId)
+                .ToList();
 
             ViewBag.TotalUsers = totalUsers;
             ViewBag.ActiveSubscriptions = totalActiveSubscriptions;
@@ -747,6 +829,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.PageSize = pageSize;
+            ViewBag.QuizCompetencyRows = quizCompetencyRows;
 
             return View(userRows);
 
@@ -787,6 +870,26 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     CommentsCount = commentStats?.CommentsCount ?? 0,
                     LastActivityAt = normalizedLastActivity
                 };
+            }
+
+            static string GetCompetencyLevel(double successRate)
+            {
+                if (successRate >= 80)
+                {
+                    return "Avancé";
+                }
+
+                if (successRate >= 50)
+                {
+                    return "Intermédiaire";
+                }
+
+                if (successRate > 0)
+                {
+                    return "Débutant";
+                }
+
+                return "Non évalué";
             }
         }
 

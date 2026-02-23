@@ -5,7 +5,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
-<body>
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var currentUserName = User.Identity?.Name ?? string.Empty;
+}
+<body data-authenticated="@(isAuthenticated.ToString().ToLowerInvariant())" data-user="@currentUserName">
     <div class="member-container">
         @RenderBody()
     </div>
@@ -33,6 +37,8 @@
             highlightText(document.body);
         })();
     </script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)
 

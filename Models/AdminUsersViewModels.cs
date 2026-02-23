@@ -1,5 +1,21 @@
 namespace CrudDemo.Models
 {
+    public class AdminUserQuizResultRowViewModel
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
+        public string? UserName { get; set; }
+        public int QuizId { get; set; }
+        public string QuizQuestion { get; set; } = string.Empty;
+        public string CourseTitle { get; set; } = string.Empty;
+        public string LessonTitle { get; set; } = string.Empty;
+        public int Attempts { get; set; }
+        public int CorrectAnswers { get; set; }
+        public double SuccessRate { get; set; }
+        public DateTime? LastAttemptAt { get; set; }
+        public string CompetencyLevel { get; set; } = "Non évalué";
+    }
+
     public class AdminUserRowViewModel
     {
         public string UserId { get; set; } = string.Empty;
@@ -18,5 +34,6 @@ namespace CrudDemo.Models
         public int QuizLessonsTracked { get; set; }
         public int CommentsCount { get; set; }
         public DateTime? LastActivityAt { get; set; }
+        public DateTime? SortDate { get; set; }
     }
 }

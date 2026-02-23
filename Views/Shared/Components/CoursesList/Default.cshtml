@@ -40,6 +40,9 @@
         var lessonSearchTerm = (Context.Request.Query["lessonSearch"].ToString() ?? string.Empty).Trim();
         var hasLessonSearch = !string.IsNullOrEmpty(lessonSearchTerm);
         var hasAnyLessonMatch = false;
+        var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty).Trim();
+        var currentIdRaw = (ViewContext.RouteData.Values["id"]?.ToString() ?? string.Empty).Trim();
+        var hasCurrentId = int.TryParse(currentIdRaw, out var currentId);
     }
 
     <form method="get" asp-controller="Courses" asp-action="Index" class="mb-3">
@@ -127,8 +130,12 @@
                                                     hasAnyLessonMatch = true;
                                                 }
 
+                                                var isSelectedLesson = currentAction.Equals("Lesson", StringComparison.OrdinalIgnoreCase)
+                                                    && hasCurrentId
+                                                    && currentId == lesson.Id;
+
                                                 <li class="mb-2">
-                                                    <a asp-action="Lesson" asp-route-id="@lesson.Id">
+                                                    <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
                                                         <i class="fas fa-play-circle"></i> @lesson.Title
                                                     </a>
                                                 </li>
