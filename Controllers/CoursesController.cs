@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CrudDemo.Controllers
@@ -122,6 +123,7 @@ namespace CrudDemo.Controllers
                 .AsNoTracking()
                 .Include(c => c.Modules)
                     .ThenInclude(m => m.Lessons)
+                .AsSplitQuery()
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
 
@@ -134,8 +136,107 @@ namespace CrudDemo.Controllers
                 .ToListAsync();
 
             ViewBag.Comments = comments;
+            ViewBag.OrientationRole = TempData["OrientationRole"] as string;
+            ViewBag.OrientationDescription = TempData["OrientationDescription"] as string;
+            ViewBag.OrientationCourse = TempData["OrientationCourse"] as string;
 
             return View(courses);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OrientationQuiz(int q1, int q2, int q3, int q4, int q5)
+        {
+            var answers = new[] { q1, q2, q3, q4, q5 };
+            if (answers.Any(a => a < 1 || a > 3))
+            {
+                TempData["Error"] = "Veuillez répondre à toutes les questions du quiz d’orientation.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var offensiveScore = 0;
+            var defensiveScore = 0;
+            var governanceScore = 0;
+
+            void AddScores(int answer, int offensiveWeight, int defensiveWeight, int governanceWeight)
+            {
+                if (answer == 1) offensiveScore += offensiveWeight;
+                if (answer == 2) defensiveScore += defensiveWeight;
+                if (answer == 3) governanceScore += governanceWeight;
+            }
+
+            AddScores(q1, 2, 2, 2);
+            AddScores(q2, 3, 3, 3);
+            AddScores(q3, 2, 3, 3);
+            AddScores(q4, 3, 3, 3);
+            AddScores(q5, 2, 2, 3);
+
+            string role;
+            string description;
+            string course;
+
+            if (offensiveScore >= defensiveScore && offensiveScore >= governanceScore)
+            {
+                role = "Pentester / Red Team";
+                description = "Vous aimez explorer, tester et attaquer les systèmes pour identifier les failles avant les attaquants.";
+                course = "Parcours conseillé: Introduction à la Cybersécurité (Introduction au hacking, Comprendre les failles, Les bases) → Bien débuter (outils, SSH, Hydra, wordlists) → Phase de reconnaissance (Nmap avancé, NSE, Curl CLI) → Hacking de données (SQL Injection 101, SQLMap, Google dork) → Metasploit recon→exploit (WordPress XML-RPC, fichiers .rc) → Réseaux/Wifi (Wireshark, Bettercap MITM, Aircrack-ng) → Programmation (XSS, Python pour le hacking) → BLACKHAT offensive (offensive security, rootkit) → Challenges (CTF/HTB).";
+            }
+            else if (defensiveScore >= offensiveScore && defensiveScore >= governanceScore)
+            {
+                role = "Analyste SOC / Blue Team";
+                description = "Vous avez un profil orienté surveillance, détection et réponse aux incidents.";
+                course = "Parcours conseillé: Introduction à la Cybersécurité (bases, termes techniques, métiers cyber) → Cryptanalyse (chiffrement, encodage, hashage) → Analyst SOC (analyse des LOGs, qualification d’événements) → Monitoring SIEM/IDS/HIDS (Suricata, Wazuh agent, Splunk + Syslog Linux) → Réseaux (Wireshark, détection MITM Bettercap) → Windows serveur (installation, AD, lab) → IA et cyber (Gemini CLI, usages IA en SOC).";
+            }
+            else
+            {
+                role = "GRC / Conformité Cyber";
+                description = "Vous êtes orienté gestion des risques, gouvernance, politiques sécurité et conformité réglementaire.";
+                course = "Parcours conseillé: Introduction à la Cybersécurité (bases + métiers) → Réglementations & Standards » (ISO 27001 27002 27005, RGPD, NIST, PCI-DSS…) → Monitoring SIEM/IDS/HIDS (vision gouvernance opérationnelle: Suricata/Wazuh/Splunk) → Windows serveur (AD, organisation des accès)";
+            }
+
+            TempData["OrientationRole"] = role;
+            TempData["OrientationDescription"] = description;
+            TempData["OrientationCourse"] = course;
+
+            var userId = _userManager.GetUserId(User);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                const string orientationClaimType = "cyber_orientation_result";
+                var claimValue = JsonSerializer.Serialize(new
+                {
+                    role,
+                    description,
+                    course,
+                    updatedAtUtc = DateTime.UtcNow
+                });
+
+                var existingClaim = await _context.UserClaims
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.ClaimType == orientationClaimType);
+
+                if (existingClaim == null)
+                {
+                    _context.UserClaims.Add(new IdentityUserClaim<string>
+                    {
+                        UserId = userId,
+                        ClaimType = orientationClaimType,
+                        ClaimValue = claimValue
+                    });
+                }
+                else
+                {
+                    existingClaim.ClaimValue = claimValue;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            return Redirect($"{Url.Action(nameof(Index), "Courses")}#resultjobs");
+        }
+
+        [HttpGet]
+        public IActionResult OrientationQuiz()
+        {
+            return RedirectToAction(nameof(Index));
         }
 
 
@@ -164,6 +265,7 @@ namespace CrudDemo.Controllers
                 .Where(c => c.Id == id)
                 .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
                     .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
+                .AsSplitQuery()
                 .FirstOrDefaultAsync();
 
             if (course == null)

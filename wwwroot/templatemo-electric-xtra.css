@@ -25,6 +25,24 @@ https://templatemo.com/tm-596-electric-xtra
             font-weight: 400;
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #code {
+            width: 650px;
+        }
+
         /* Animated background with hexagon pattern */
         .grid-bg {
             position: fixed;

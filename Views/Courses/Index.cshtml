@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Mes Cours";
     var comments = ViewBag.Comments as List<CrudDemo.Models.Comment> ?? new List<CrudDemo.Models.Comment>();
+    var orientationRole = ViewBag.OrientationRole as string;
+    var orientationDescription = ViewBag.OrientationDescription as string;
+    var orientationCourse = ViewBag.OrientationCourse as string;
 }
 
 <div class="container mt-4">
@@ -32,5 +35,236 @@
         </li>
     </ul>
     <p>A vous de choisir votre camp !</p>
+
+
+<style>
+    .orientation-quiz-card {
+        border-radius: 1rem;
+    }
+
+    .quiz-question {
+        border: 1px solid var(--bs-border-color);
+        border-radius: .75rem;
+        padding: 1rem;
+        background-color: var(--bs-light-bg-subtle);
+    }
+
+    .quiz-option {
+        display: flex;
+        align-items: flex-start;
+        gap: .5rem;
+        margin-bottom: .5rem;
+    }
+
+    .quiz-option .form-check-input {
+        margin-top: .25rem;
+        flex-shrink: 0;
+    }
+
+    .quiz-result-card {
+        border-radius: 1rem;
+    }
+
+    .form-check {
+        text-align: center;
+        padding: 14px;
+        max-width: 173px;
+    }
+
+    .confetti-wrapper {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1055;
+    }
+
+    .confetti-piece {
+        position: absolute;
+        top: -20px;
+        width: 10px;
+        height: 16px;
+        opacity: .9;
+        animation-name: confetti-fall;
+        animation-timing-function: ease-out;
+        animation-fill-mode: forwards;
+        transform: rotate(0deg);
+    }
+
+    @@keyframes confetti-fall {
+        0% {
+            transform: translateY(-20px) rotate(0deg);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(110vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+</style>
+    <hr class="my-4" />
+
+    <h2 class="mb-3" id="orientation1">Quiz d’orientation métier cyber</h2>
+    <p class="text-muted">Répondez rapidement pour découvrir le métier cyber qui vous correspond le mieux.</p>
+
+<style>
+    /* Conteneur principal */
+    .quiz-wrapper {
+        max-width: 700px;
+        margin: 2rem auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Style des blocs de questions */
+    .question-group {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .question-title {
+        font-size: 1.1rem;
+        color: #2d3436;
+        margin-bottom: 1.2rem;
+        display: block;
+    }
+
+    /* Masquer le bouton radio d'origine */
+    .option-input {
+        display: none;
+    }
+
+    /* Transformer le label en bouton large */
+    .option-label {
+        display: block;
+        padding: 1rem 1.2rem;
+        margin-bottom: 0.8rem;
+        background-color: #f8f9fa;
+        border: 2px solid #f1f2f6;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        color: #4b4b4b;
+    }
+
+    .option-label:hover {
+        background-color: #e9ecef;
+        border-color: #dfe4ea;
+    }
+
+    /* Style quand l'option est cochée */
+    .option-input:checked + .option-label {
+        background-color: #e7f1ff;
+        border-color: #0d6efd;
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    /* Bouton de validation */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+        border: none;
+        color: white;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+    }
+</style>
+
+<div class="quiz-wrapper">
+    <form asp-action="OrientationQuiz" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="question-group">
+            <label class="question-title fw-bold">1) Qu’est-ce qui vous motive le plus ?</label>
+            
+            <input class="option-input" type="radio" name="q1" id="q1a" value="1" required>
+            <label class="option-label" for="q1a">🔍 Trouver des failles techniques</label>
+
+            <input class="option-input" type="radio" name="q1" id="q1b" value="2">
+            <label class="option-label" for="q1b">🛡️ Détecter et stopper des attaques</label>
+
+            <input class="option-input" type="radio" name="q1" id="q1c" value="3">
+            <label class="option-label" for="q1c">🏢 Structurer la sécurité d’une entreprise</label>
+        </div>
+
+        <div class="question-group">
+            <label class="question-title fw-bold">2) Quel type de missions vous attire ?</label>
+            
+            <input class="option-input" type="radio" name="q2" id="q2a" value="1" required>
+            <label class="option-label" for="q2a">⚔️ Simulations d’attaque (pentest)</label>
+
+            <input class="option-input" type="radio" name="q2" id="q2b" value="2">
+            <label class="option-label" for="q2b">🚨 Surveillance SOC et réponse à incident</label>
+
+            <input class="option-input" type="radio" name="q2" id="q2c" value="3">
+            <label class="option-label" for="q2c">📋 Audit, conformité et gestion du risque</label>
+        </div>
+
+        <div class="question-group">
+            <label class="question-title fw-bold">3) Dans un incident cyber, vous préférez :</label>
+            
+            <input class="option-input" type="radio" name="q3" id="q3a" value="1" required>
+            <label class="option-label" for="q3a">🧪 Comprendre le vecteur d’attaque utilisé</label>
+
+            <input class="option-input" type="radio" name="q3" id="q3b" value="2">
+            <label class="option-label" for="q3b">🚑 Contenir, éradiquer et rétablir le service</label>
+
+            <input class="option-input" type="radio" name="q3" id="q3c" value="3">
+            <label class="option-label" for="q3c">📝 Formaliser un plan d’action et les contrôles</label>
+        </div>
+
+        <div class="question-group">
+            <label class="question-title fw-bold">4) Votre point fort actuel :</label>
+            
+            <input class="option-input" type="radio" name="q4" id="q4a" value="1" required>
+            <label class="option-label" for="q4a">💻 Technique offensive (réseau, web, scripts)</label>
+
+            <input class="option-input" type="radio" name="q4" id="q4b" value="2">
+            <label class="option-label" for="q4b">📊 Analyse de logs et investigation</label>
+
+            <input class="option-input" type="radio" name="q4" id="q4c" value="3">
+            <label class="option-label" for="q4c">📂 Organisation, procédures et normes</label>
+        </div>
+
+        <div class="question-group">
+            <label class="question-title fw-bold">5) Votre objectif à 2 ans :</label>
+            
+            <input class="option-input" type="radio" name="q5" id="q5a" value="1" required>
+            <label class="option-label" for="q5a">🎯 Mener des audits offensifs complets</label>
+
+            <input class="option-input" type="radio" name="q5" id="q5b" value="2">
+            <label class="option-label" for="q5b">🕵️ Devenir analyste SOC confirmé</label>
+
+            <input class="option-input" type="radio" name="q5" id="q5c" value="3">
+            <label class="option-label" for="q5c">📈 Piloter la gouvernance cyber d’une équipe</label>
+        </div>
+
+        <button type="submit" class="btn-submit shadow">
+            VOIR MON ORIENTATION
+        </button>
+    </form>
+</div>
+
+    @if (!string.IsNullOrWhiteSpace(orientationRole))
+    {
+        <div class="alert alert-success" role="alert" id="resultjobs">
+            <h4 class="alert-heading mb-2">Orientation recommandée : @orientationRole</h4>
+            <p class="mb-1">@orientationDescription</p>
+            <p class="mb-0"><strong>Parcours conseillé :</strong> @orientationCourse</p>
+        </div>
+    }
 
 </div>

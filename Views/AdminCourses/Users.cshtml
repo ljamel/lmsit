@@ -237,6 +237,7 @@
                     <thead>
                         <tr>
                             <th><i class="fas fa-user me-2"></i>Utilisateur</th>
+                            <th><i class="fas fa-compass me-2"></i>Orientation</th>
                             <th><i class="fas fa-book me-2"></i>Cours</th>
                             <th><i class="fas fa-list me-2"></i>Leçon</th>
                             <th><i class="fas fa-question-circle me-2"></i>Quiz</th>
@@ -264,6 +265,16 @@
                                     <i class="fas fa-envelope me-2" style="color: #00B2FF;"></i>
                                     @row.UserEmail
                                 </div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(row.OrientationRole))
+                                {
+                                    <span class="date-info">@row.OrientationRole</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
                             </td>
                             <td><span class="date-info">@row.CourseTitle</span></td>
                             <td><span class="date-info">@row.LessonTitle</span></td>

@@ -5,6 +5,7 @@ namespace CrudDemo.Models
         public string UserId { get; set; } = string.Empty;
         public string UserEmail { get; set; } = string.Empty;
         public string? UserName { get; set; }
+        public string? OrientationRole { get; set; }
         public int QuizId { get; set; }
         public string QuizQuestion { get; set; } = string.Empty;
         public string CourseTitle { get; set; } = string.Empty;

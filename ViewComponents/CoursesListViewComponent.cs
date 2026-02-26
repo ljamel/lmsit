@@ -19,6 +19,7 @@ public class CoursesListViewComponent : ViewComponent
             .AsNoTracking()
             .Include(c => c.Modules.OrderBy(m => m.OrderIndex))
                 .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
+            .AsSplitQuery()
             .ToListAsync();
 
         return View(courses);

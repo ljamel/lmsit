@@ -10,6 +10,7 @@ using Stripe;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CrudDemo.Controllers
@@ -66,6 +67,7 @@ namespace CrudDemo.Controllers
                 .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
                 .ThenInclude(l => l.Quizzes)
                 .ThenInclude(q => q.Options)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync();
                 
             if (course == null) return NotFound();
@@ -797,15 +799,33 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             )
             .ToListAsync();
 
+            const string orientationClaimType = "cyber_orientation_result";
+            var orientationClaims = await _context.UserClaims
+                .AsNoTracking()
+                .Where(claim => pagedUserIds.Contains(claim.UserId) && claim.ClaimType == orientationClaimType)
+                .ToListAsync();
+
+            var orientationRoleByUserId = orientationClaims
+                .GroupBy(claim => claim.UserId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => ExtractOrientationRole(group
+                        .OrderByDescending(claim => claim.Id)
+                        .Select(claim => claim.ClaimValue)
+                        .FirstOrDefault()));
+
             var quizCompetencyRows = quizCompetencyRowsRaw
                 .Select(row =>
                 {
                     var successRate = row.Attempts == 0 ? 0 : (row.CorrectAnswers * 100.0) / row.Attempts;
+                    orientationRoleByUserId.TryGetValue(row.UserId, out var orientationRole);
+
                     return new AdminUserQuizResultRowViewModel
                     {
                         UserId = row.UserId,
                         UserEmail = row.Email ?? string.Empty,
                         UserName = row.UserName,
+                        OrientationRole = orientationRole,
                         QuizId = row.QuizId,
                         QuizQuestion = row.QuizQuestion,
                         LessonTitle = row.LessonTitle,
@@ -890,6 +910,29 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 }
 
                 return "Non évalué";
+            }
+
+            static string? ExtractOrientationRole(string? claimValue)
+            {
+                if (string.IsNullOrWhiteSpace(claimValue))
+                {
+                    return null;
+                }
+
+                try
+                {
+                    using var document = JsonDocument.Parse(claimValue);
+                    if (document.RootElement.TryGetProperty("role", out var roleElement))
+                    {
+                        var role = roleElement.GetString();
+                        return string.IsNullOrWhiteSpace(role) ? null : role;
+                    }
+                }
+                catch (JsonException)
+                {
+                }
+
+                return null;
             }
         }
 

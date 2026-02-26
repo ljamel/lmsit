@@ -1,0 +1,241 @@
+﻿@{
+    ViewData["Title"] = "Quiz d'orientation cyber";
+    var orientationRole = ViewBag.OrientationRole as string;
+    var orientationDescription = ViewBag.OrientationDescription as string;
+}
+
+<section class="features">
+<h1>@ViewData["Title"]</h1>
+
+
+    <style>
+        .quiz-wrapper {
+            max-width: 920px;
+            margin: 2rem auto 0;
+        }
+
+        .orientation-quiz-card {
+            border-radius: 1rem;
+            border: 2px solid var(--bs-primary-border-subtle);
+            background-color: var(--bs-body-bg);
+        }
+
+        .quiz-question {
+            border: 2px solid var(--bs-border-color);
+            border-radius: .75rem;
+            padding: 1rem;
+            background-color: var(--bs-light-bg-subtle);
+        }
+
+        .quiz-question-title {
+            display: block;
+            text-align: center;
+            margin-bottom: .75rem;
+        }
+
+        .quiz-options {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: flex-start;
+            gap: .5rem;
+            margin-bottom: .5rem;
+            border: 1px solid var(--bs-border-color-translucent);
+            border-radius: .5rem;
+            padding: .5rem .75rem;
+            background-color: var(--bs-body-bg);
+        }
+
+        .confetti-wrapper {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1055;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -20px;
+            width: 10px;
+            height: 16px;
+            opacity: .9;
+            animation-name: confetti-fall;
+            animation-timing-function: ease-out;
+            animation-fill-mode: forwards;
+            transform: rotate(0deg);
+        }
+
+        @@keyframes confetti-fall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <div class="quiz-wrapper">
+        <hr class="my-4" />
+
+        <h2 class="mb-2 text-center"><i class="fas fa-compass"></i> Quiz d’orientation métier cyber</h2>
+        <p class="text-muted text-center mb-4">Répondez rapidement pour découvrir le métier cyber qui vous correspond le mieux.</p>
+
+        <form asp-action="OutilsOrientationQuiz" method="post" class="card card-body shadow-sm mb-4 orientation-quiz-card">
+            @Html.AntiForgeryToken()
+
+            <div class="quiz-question mb-3">
+                <label class="form-label fw-bold quiz-question-title">1) Qu’est-ce qui vous motive le plus ?</label>
+                <div class="quiz-options">
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q1" id="q1a" value="1" required>
+                        <label class="form-check-label" for="q1a">Trouver des failles techniques</label>
+                    </div>
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q1" id="q1b" value="2" required>
+                        <label class="form-check-label" for="q1b">Détecter et stopper des attaques</label>
+                    </div>
+                    <div class="form-check quiz-option mb-0">
+                        <input class="form-check-input mt-1" type="radio" name="q1" id="q1c" value="3" required>
+                        <label class="form-check-label" for="q1c">Structurer la sécurité d’une entreprise</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question mb-3">
+                <label class="form-label fw-bold quiz-question-title">2) Quel type de missions vous attire ?</label>
+                <div class="quiz-options">
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q2" id="q2a" value="1" required>
+                        <label class="form-check-label" for="q2a">Simulations d’attaque (pentest)</label>
+                    </div>
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q2" id="q2b" value="2" required>
+                        <label class="form-check-label" for="q2b">Surveillance SOC et réponse à incident</label>
+                    </div>
+                    <div class="form-check quiz-option mb-0">
+                        <input class="form-check-input mt-1" type="radio" name="q2" id="q2c" value="3" required>
+                        <label class="form-check-label" for="q2c">Audit, conformité et gestion du risque</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question mb-3">
+                <label class="form-label fw-bold quiz-question-title">3) Dans un incident cyber, vous préférez :</label>
+                <div class="quiz-options">
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q3" id="q3a" value="1" required>
+                        <label class="form-check-label" for="q3a">Comprendre le vecteur d’attaque utilisé</label>
+                    </div>
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q3" id="q3b" value="2" required>
+                        <label class="form-check-label" for="q3b">Contenir, éradiquer et rétablir le service</label>
+                    </div>
+                    <div class="form-check quiz-option mb-0">
+                        <input class="form-check-input mt-1" type="radio" name="q3" id="q3c" value="3" required>
+                        <label class="form-check-label" for="q3c">Formaliser un plan d’action et les contrôles</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question mb-3">
+                <label class="form-label fw-bold quiz-question-title">4) Votre point fort actuel :</label>
+                <div class="quiz-options">
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q4" id="q4a" value="1" required>
+                        <label class="form-check-label" for="q4a">Technique offensive (réseau, web, scripts)</label>
+                    </div>
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q4" id="q4b" value="2" required>
+                        <label class="form-check-label" for="q4b">Analyse de logs et investigation</label>
+                    </div>
+                    <div class="form-check quiz-option mb-0">
+                        <input class="form-check-input mt-1" type="radio" name="q4" id="q4c" value="3" required>
+                        <label class="form-check-label" for="q4c">Organisation, procédures et normes</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question mb-3">
+                <label class="form-label fw-bold quiz-question-title">5) Votre objectif à 2 ans :</label>
+                <div class="quiz-options">
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q5" id="q5a" value="1" required>
+                        <label class="form-check-label" for="q5a">Mener des audits offensifs complets</label>
+                    </div>
+                    <div class="form-check quiz-option">
+                        <input class="form-check-input mt-1" type="radio" name="q5" id="q5b" value="2" required>
+                        <label class="form-check-label" for="q5b">Devenir analyste SOC confirmé</label>
+                    </div>
+                    <div class="form-check quiz-option mb-0">
+                        <input class="form-check-input mt-1" type="radio" name="q5" id="q5c" value="3" required>
+                        <label class="form-check-label" for="q5c">Piloter la gouvernance cyber d’une équipe</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid d-sm-flex justify-content-sm-center mt-2">
+                <button type="submit" class="btn btn-primary px-4">Voir mon orientation</button>
+            </div>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(orientationRole))
+        {
+            <section class="advantages" id="resultjobs" aria-live="polite">
+                <h2 class="section-title">Orientation recommandée</h2>
+                <div class="advantages-container" style="margin-top: 30px; grid-template-columns: minmax(320px, 760px); justify-content: center;">
+                    <div class="advantage-item">
+                        <div class="advantage-icon">🧭 @orientationRole</div>
+                        <h3>Votre profil cyber</h3>
+                        <p class="mb-0">@orientationDescription</p>
+                    </div>
+                </div>
+            </section>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const hasResult = @(string.IsNullOrWhiteSpace(orientationRole) ? "false" : "true");
+            if (!hasResult) {
+                return;
+            }
+
+            const result = document.getElementById('resultjobs');
+            if (result) {
+                result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'confetti-wrapper';
+            document.body.appendChild(wrapper);
+
+            const palette = ['bg-primary', 'bg-success', 'bg-warning', 'bg-danger', 'bg-info'];
+            const total = 120;
+
+            for (let index = 0; index < total; index++) {
+                const piece = document.createElement('span');
+                const colorClass = palette[index % palette.length];
+                piece.className = `confetti-piece ${colorClass}`;
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.animationDuration = `${2.2 + Math.random() * 1.8}s`;
+                piece.style.animationDelay = `${Math.random() * 0.45}s`;
+                piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                wrapper.appendChild(piece);
+            }
+
+            window.setTimeout(() => {
+                wrapper.remove();
+            }, 4200);
+        })();
+    </script>
+}
