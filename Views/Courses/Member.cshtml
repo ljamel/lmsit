@@ -1,13 +1,16 @@
-@model CrudDemo.Models.Subscription?
+@model CrudDemo.Models.MemberProfileViewModel
 
 @{
     ViewData["Title"] = "Espace Membre";
+    var subscription = Model.Subscription;
+    var isActiveSubscription = subscription?.IsActive == true && subscription.Status == "active";
 }
 
 <div class="container mt-4">
     <div class="card shadow-sm mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h1 class="h4 mb-0"><i class="fas fa-user-shield"></i> Espace Membre</h1>
+            <span class="badge bg-primary">Profil</span>
         </div>
         <div class="card-body">
             @if (TempData["Success"] != null)
@@ -20,11 +23,39 @@
                 <div class="alert alert-danger">@TempData["Error"]</div>
             }
 
-            <p><strong>Email :</strong> @User.Identity?.Name</p>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Email</div>
+                        <div class="fw-semibold">@Model.Email</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Prix abonnement actuel</div>
+                        <div class="fw-semibold">@Model.CurrentSubscriptionPriceEur.ToString("0.00") € / mois</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Statut abonnement</div>
+                        <div class="fw-semibold">
+                            @if (isActiveSubscription)
+                            {
+                                <span class="badge bg-success">Actif</span>
+                            }
+                            else
+                            {
+                                <span>Inactif</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            @if (Model == null)
+            @if (subscription == null)
             {
-                <div class="alert alert-warning">
+                <div class="alert alert-warning mb-3">
                     Vous n'avez pas encore d'abonnement actif.
                 </div>
 
@@ -34,27 +65,24 @@
             }
             else
             {
-                var isActive = Model.IsActive && Model.Status == "active";
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Date de début</div>
+                            <div class="fw-semibold">@subscription.StartDate.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Date d'annulation</div>
+                            <div class="fw-semibold">
+                                @(subscription.CanceledAt.HasValue ? subscription.CanceledAt.Value.ToString("dd/MM/yyyy HH:mm") : "-")
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <p>
-                    <strong>Statut :</strong>
-                    @if (isActive)
-                    {
-                        <span class="badge bg-success">Actif</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger">Inactif</span>
-                    }
-                </p>
-                <p><strong>Début :</strong> @Model.StartDate.ToString("dd/MM/yyyy HH:mm")</p>
-
-                @if (Model.CanceledAt.HasValue)
-                {
-                    <p><strong>Annulé le :</strong> @Model.CanceledAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
-                }
-
-                @if (isActive)
+                @if (isActiveSubscription)
                 {
                     <form asp-controller="Courses" asp-action="CancelSubscription" method="post" onsubmit="return confirm('Confirmer l\'annulation de votre abonnement ?');">
                         @Html.AntiForgeryToken()
@@ -69,6 +97,66 @@
                         <i class="fas fa-credit-card"></i> Réactiver un abonnement
                     </a>
                 }
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0"><i class="fas fa-chart-bar"></i> Résultats Quiz</h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <div class="text-muted small">Tentatives</div>
+                        <div class="h4 mb-0">@Model.QuizAttempts</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <div class="text-muted small">Bonnes réponses</div>
+                        <div class="h4 mb-0">@Model.QuizCorrectAnswers</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <div class="text-muted small">Taux de réussite</div>
+                        <div class="h4 mb-0">@Model.QuizSuccessRate.ToString("0.0")%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <div class="text-muted small">Dernier quiz</div>
+                        <div class="fw-semibold">@(Model.LastQuizAttemptAt.HasValue ? Model.LastQuizAttemptAt.Value.ToString("dd/MM/yyyy") : "-")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0"><i class="fas fa-compass"></i> Orientation Métier</h2>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(Model.OrientationRole))
+            {
+                <p class="mb-2"><strong>Orientation :</strong> @Model.OrientationRole</p>
+                @if (!string.IsNullOrWhiteSpace(Model.OrientationDescription))
+                {
+                    <p class="mb-2">@Model.OrientationDescription</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.OrientationCourse))
+                {
+                    <p class="mb-0"><strong>Parcours conseillé :</strong> @Model.OrientationCourse</p>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    Aucun résultat d'orientation enregistré pour le moment.
+                </div>
             }
         </div>
     </div>

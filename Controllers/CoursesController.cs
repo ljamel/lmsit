@@ -38,13 +38,101 @@ namespace CrudDemo.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            var userId = _userManager.GetUserId(User);
+
             var subscription = await _context.Subscriptions
                 .AsNoTracking()
                 .Where(s => s.UserId == userEmail)
                 .OrderByDescending(s => s.StartDate)
                 .FirstOrDefaultAsync();
 
-            return View(subscription);
+            var currentSubscriptionPriceEur = 19m;
+
+            var quizAttempts = 0;
+            var quizCorrectAnswers = 0;
+            DateTime? lastQuizAttemptAt = null;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var quizStats = await _context.UserQuizResults
+                    .AsNoTracking()
+                    .Where(r => r.UserId == userId)
+                    .GroupBy(_ => 1)
+                    .Select(group => new
+                    {
+                        Attempts = group.Count(),
+                        CorrectAnswers = group.Count(x => x.IsCorrect),
+                        LastAttemptAt = group.Max(x => x.AttemptedAt)
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (quizStats != null)
+                {
+                    quizAttempts = quizStats.Attempts;
+                    quizCorrectAnswers = quizStats.CorrectAnswers;
+                    lastQuizAttemptAt = quizStats.LastAttemptAt;
+                }
+            }
+
+            string? orientationRole = null;
+            string? orientationDescription = null;
+            string? orientationCourse = null;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                const string orientationClaimType = "cyber_orientation_result";
+                var orientationClaim = await _context.UserClaims
+                    .AsNoTracking()
+                    .Where(c => c.UserId == userId && c.ClaimType == orientationClaimType)
+                    .OrderByDescending(c => c.Id)
+                    .Select(c => c.ClaimValue)
+                    .FirstOrDefaultAsync();
+
+                if (!string.IsNullOrWhiteSpace(orientationClaim))
+                {
+                    try
+                    {
+                        using var document = JsonDocument.Parse(orientationClaim);
+                        var root = document.RootElement;
+
+                        if (root.TryGetProperty("role", out var roleElement))
+                        {
+                            orientationRole = roleElement.GetString();
+                        }
+
+                        if (root.TryGetProperty("description", out var descriptionElement))
+                        {
+                            orientationDescription = descriptionElement.GetString();
+                        }
+
+                        if (root.TryGetProperty("course", out var courseElement))
+                        {
+                            orientationCourse = courseElement.GetString();
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                    }
+                }
+            }
+
+            var successRate = quizAttempts == 0 ? 0 : (quizCorrectAnswers * 100.0) / quizAttempts;
+
+            var memberProfile = new MemberProfileViewModel
+            {
+                Subscription = subscription,
+                Email = userEmail,
+                CurrentSubscriptionPriceEur = currentSubscriptionPriceEur,
+                OrientationRole = orientationRole,
+                OrientationDescription = orientationDescription,
+                OrientationCourse = orientationCourse,
+                QuizAttempts = quizAttempts,
+                QuizCorrectAnswers = quizCorrectAnswers,
+                QuizSuccessRate = Math.Round(successRate, 1),
+                LastQuizAttemptAt = lastQuizAttemptAt
+            };
+
+            return View(memberProfile);
         }
 
         [HttpPost]
