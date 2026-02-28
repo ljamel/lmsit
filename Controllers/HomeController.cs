@@ -1,19 +1,34 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CrudDemo.Models;
+using CrudDemo.Services;
 using System.ServiceModel.Syndication;
 using System.Xml;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace CrudDemo.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(
+        ILogger<HomeController> logger,
+        IEmailService emailService,
+        IConfiguration configuration,
+        UserManager<IdentityUser> userManager)
     {
         _logger = logger;
+        _emailService = emailService;
+        _configuration = configuration;
+        _userManager = userManager;
     }
+
+    private const string CyberResourceUrl = "https://docs.google.com/document/d/125qy1y56yMGLpjicOo6iudWR0a42itXenYFop2bqfdo/edit?tab=t.0";
 
     public IActionResult Index()
     {
@@ -147,6 +162,73 @@ public class HomeController : Controller
 
     public IActionResult Recruting(){
         return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CaptureCyberResourceEmail(string email, string? captchaAnswer)
+    {
+        if (string.IsNullOrWhiteSpace(captchaAnswer) || captchaAnswer.Trim() != "5")
+        {
+            TempData["Error"] = "Réponse anti-bot invalide.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            TempData["Error"] = "Veuillez saisir un email valide.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var normalizedEmail = email.Trim();
+        var emailValidator = new EmailAddressAttribute();
+        if (!emailValidator.IsValid(normalizedEmail))
+        {
+            TempData["Error"] = "Veuillez saisir un email valide.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(normalizedEmail);
+            if (existingUser == null)
+            {
+                var leadUser = new IdentityUser
+                {
+                    UserName = normalizedEmail,
+                    Email = normalizedEmail,
+                    EmailConfirmed = false
+                };
+
+                var createResult = await _userManager.CreateAsync(leadUser);
+                if (!createResult.Succeeded)
+                {
+                    _logger.LogWarning(
+                        "Impossible d'enregistrer le lead {Email} dans AspNetUsers. Erreurs: {Errors}",
+                        normalizedEmail,
+                        string.Join(" | ", createResult.Errors.Select(error => error.Description)));
+                }
+            }
+
+            var recipient = _configuration["Marketing:LeadCaptureRecipient"]
+                ?? _configuration["EmailSettings:FromEmail"]
+                ?? "djamallamri@yahoo.fr";
+
+            var subject = "Nouveau lead - Ressource cyber (Exit Popup)";
+            var body = $@"
+<p><strong>Nouvelle capture email depuis la page d'accueil.</strong></p>
+<p><strong>Email:</strong> {normalizedEmail}</p>
+<p><strong>Date:</strong> {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC</p>
+<p><strong>Page:</strong> /Home/Index</p>";
+
+            await _emailService.SendEmailAsync(recipient, subject, body, isHtml: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de la capture email pour la ressource cyber.");
+        }
+
+        return Redirect(CyberResourceUrl);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

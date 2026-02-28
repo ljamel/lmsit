@@ -123,6 +123,30 @@
     </div>
 </section>
 
+<!-- For Who Section -->
+<section class="about" id="for-who">
+    <h2 class="section-title">Pour qui / Pas pour qui</h2>
+    <div class="about-content">
+        <div class="about-text">
+            <h2>Cette formation n’est pas pour :</h2>
+            <ul class="feature-list">
+                <li>Ceux qui cherchent des résultats sans pratiquer</li>
+                <li>Ceux qui veulent des solutions toutes faites</li>
+                <li>Ceux qui ne veulent pas s’impliquer</li>
+            </ul>
+        </div>
+        <div class="about-text">
+            <h2>À l’issue du programme, vous serez capable de :</h2>
+            <ul class="feature-list">
+                <li>Identifier des vulnérabilités courantes</li>
+                <li>Utiliser des outils de scan réseau</li>
+                <li>Comprendre les bases du pentesting légal</li>
+                <li>Rédiger un rapport simple d’analyse</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
 <!-- Testimonials Section -->
 <section class="testimonials" id="testimonials">
     <h2 class="section-title">Témoignages de nos étudiants</h2>
@@ -355,6 +379,172 @@
     </div>
 </section>
 
+<style>
+    #exitLeadOverlay {
+        z-index: 5000;
+        background: rgba(3, 8, 20, 0.86);
+        backdrop-filter: blur(4px);
+    }
+
+
+    .exit-lead-modal {
+        max-width: 620px;
+        width: 100%;
+        border-radius: 18px;
+        border: 1px solid rgba(0, 178, 255, 0.45);
+        background: linear-gradient(160deg, #0a132a 0%, #111a32 55%, #0a132a 100%);
+        box-shadow: 0 24px 70px rgba(0, 178, 255, 0.25);
+        color: #fff;
+        overflow: hidden;
+    }
+
+    .exit-lead-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 178, 255, 0.14);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .exit-lead-close {
+        border: none;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.6rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .exit-lead-close:hover {
+        color: #fff;
+    }
+
+    .exit-lead-badge {
+        display: inline-block;
+        font-size: 0.76rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.35);
+        color: #dff4ff;
+        margin-bottom: 8px;
+    }
+
+    .exit-lead-title {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .exit-lead-body {
+        padding: 24px;
+    }
+
+    .exit-lead-text {
+        margin-bottom: 16px;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 1.02rem;
+    }
+
+    #exitLeadEmail,
+    #exitLeadCaptcha {
+        height: 48px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+    }
+
+    #exitLeadEmail::placeholder,
+    #exitLeadCaptcha::placeholder {
+        color: rgba(255,255,255,0.6);
+    }
+
+    #exitLeadEmail:focus,
+    #exitLeadCaptcha:focus {
+        border-color: #00B2FF;
+        box-shadow: 0 0 0 0.18rem rgba(0, 178, 255, 0.25);
+    }
+
+    .exit-lead-actions .btn {
+        min-width: 165px;
+        height: 46px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .exit-lead-actions .btn-primary {
+        border: none;
+        background: linear-gradient(135deg, #00B2FF 0%, #0077ff 100%);
+    }
+
+    .exit-lead-actions .btn-primary:hover {
+        filter: brightness(1.07);
+    }
+
+    @@media (max-width: 576px) {
+        .exit-lead-modal {
+            max-width: 96%;
+        }
+
+        .exit-lead-title {
+            font-size: 1.45rem;
+        }
+
+        .exit-lead-actions {
+            flex-direction: column;
+        }
+
+        .exit-lead-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div id="exitLeadOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100">
+    <div class="d-flex align-items-center justify-content-center h-100 p-3">
+        <div class="exit-lead-modal">
+            <div class="exit-lead-header">
+                <div>
+                    <span class="exit-lead-badge">Ressource offerte</span>
+                    <h3 class="exit-lead-title">Avant de partir, récupérez votre guide cyber</h3>
+                </div>
+                <button type="button" id="closeExitLeadPopup" class="exit-lead-close" aria-label="Fermer">×</button>
+            </div>
+
+            <div class="exit-lead-body">
+                <p class="exit-lead-text">J’offre une ressource concrète pour progresser rapidement en cybersécurité. Entrez votre email pour y accéder maintenant.</p>
+
+                <form asp-controller="Home" asp-action="CaptureCyberResourceEmail" method="post" id="exitLeadForm" target="_blank">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="exitLeadEmail" class="form-label">Votre email</label>
+                        <input id="exitLeadEmail" name="email" type="email" class="form-control" placeholder="exemple@email.com" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="exitLeadCaptcha" class="form-label">2 + 3 = ?</label>
+                        <input id="exitLeadCaptcha" name="captchaAnswer" type="text" class="form-control" inputmode="numeric" placeholder="Votre réponse" required />
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end exit-lead-actions">
+                        <button type="submit" class="btn btn-primary">Recevoir la ressource</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -372,3 +562,61 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=302873625407792&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+
+<script>
+    (function () {
+        const popupKey = 'exitLeadPopupShown';
+        const overlay = document.getElementById('exitLeadOverlay');
+        const closeButton = document.getElementById('closeExitLeadPopup');
+        const form = document.getElementById('exitLeadForm');
+
+        if (!overlay || sessionStorage.getItem(popupKey) === '1') {
+            return;
+        }
+
+        let popupVisible = false;
+
+        function showPopup() {
+            if (popupVisible) {
+                return;
+            }
+            popupVisible = true;
+            sessionStorage.setItem(popupKey, '1');
+            overlay.style.display = 'block';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '50%';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translate(-50%, -50%)';
+            overlay.classList.remove('d-none');
+            document.body.style.overflow = 'hidden';
+            const emailInput = document.getElementById('exitLeadEmail');
+            if (emailInput) {
+                emailInput.focus();
+            }
+        }
+
+        function hidePopup() {
+            overlay.style.display = 'none';
+            overlay.classList.add('d-none');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('mouseout', function (event) {
+            if (event.relatedTarget === null && event.clientY <= 0) {
+                showPopup();
+            }
+        });
+
+        closeButton?.addEventListener('click', hidePopup);
+
+        overlay.addEventListener('click', function (event) {
+            if (event.target === overlay) {
+                hidePopup();
+            }
+        });
+
+        form?.addEventListener('submit', function () {
+            sessionStorage.setItem(popupKey, '1');
+        });
+    })();
+</script>

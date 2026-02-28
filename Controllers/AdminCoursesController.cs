@@ -738,6 +738,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             var userRows = users.Select(user =>
             {
                 var subscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email && s.IsActive);
+                var latestSubscription = subscriptions.FirstOrDefault(s => s.UserId == user.Email);
                 var tracking = BuildTrackingForUser(user.Id, user.Email);
                 var sortDate = subscription?.StartDate ?? tracking.LastActivityAt;
 
@@ -749,7 +750,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     HasSubscription = subscription != null,
                     IsActiveSubscription = subscription?.IsActive ?? false,
                     SubscriptionStatus = subscription?.Status,
-                    SubscriptionStartDate = subscription?.StartDate,
+                    SubscriptionStartDate = subscription?.StartDate ?? latestSubscription?.StartDate,
                     StripeSubscriptionId = subscription?.StripeSubscriptionId,
                     CoursesTracked = tracking.CoursesTracked,
                     QuizAttempts = tracking.QuizAttempts,

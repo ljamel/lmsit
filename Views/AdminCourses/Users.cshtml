@@ -153,16 +153,10 @@
                                 }
                             </td>
                             <td>
-                                @if (hasSubscription)
-                                {
-                                    <span class="date-info">
-                                        @item.SubscriptionStartDate?.ToString("dd/MM/yyyy HH:mm")
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">-</span>
-                                }
+                                <span class="date-info">
+                                    @item.SubscriptionStartDate?.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+
                             </td>
                             <td>
                                 <span class="badge-active">@item.CoursesTracked</span>
