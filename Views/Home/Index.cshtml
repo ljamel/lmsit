@@ -528,7 +528,7 @@
                     @Html.AntiForgeryToken()
                     <div class="mb-3">
                         <label for="exitLeadEmail" class="form-label">Votre email</label>
-                        <input id="exitLeadEmail" name="email" type="email" class="form-control" placeholder="exemple@email.com" required />
+                        <input value=" " id="exitLeadEmail" name="email" type="email" class="form-control" placeholder="exemple@email.com" required />
                     </div>
 
                     <div class="mb-3">
@@ -619,4 +619,39 @@ src="https://www.facebook.com/tr?id=302873625407792&ev=PageView&noscript=1"
             sessionStorage.setItem(popupKey, '1');
         });
     })();
+
+</script>
+
+<script>
+(function () {
+
+  const form = document.getElementById("exitLeadForm");
+  if (!form) return;
+
+  let userInteracted = false;
+  let formSubmitted = false;
+
+  // Les navigateurs exigent une interaction utilisateur
+  window.addEventListener("click", () => userInteracted = true);
+  window.addEventListener("keydown", () => userInteracted = true);
+
+  // Si le formulaire est envoyé, on autorise la sortie
+  form.addEventListener("submit", function () {
+    formSubmitted = true;
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+
+    // Si pas d'interaction → aucun blocage possible
+    if (!userInteracted) return;
+
+    // Si formulaire invalide ET non soumis → on bloque
+    if (!form.checkValidity() && !formSubmitted) {
+      e.preventDefault();
+      e.returnValue = ""; // obligatoire pour Chrome
+    }
+
+  });
+
+})();
 </script>
