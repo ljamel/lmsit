@@ -321,6 +321,83 @@ namespace CrudDemo.Controllers
             return Redirect($"{Url.Action(nameof(Index), "Courses")}#resultjobs");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OrientationQuizV2(int q1, int q2, int q3, int q4, int q5)
+        {
+            var answers = new[] { q1, q2, q3, q4, q5 };
+            if (answers.Any(a => a < 1 || a > 3))
+            {
+                TempData["Error"] = "Veuillez répondre à toutes les questions du quiz d’orientation.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var offensiveScore = answers.Count(a => a == 1);
+            var defensiveScore = answers.Count(a => a == 2);
+            var governanceScore = answers.Count(a => a == 3);
+
+            string role;
+            string description;
+            string course;
+
+            if (offensiveScore >= defensiveScore && offensiveScore >= governanceScore)
+            {
+                role = "Pentester / Attaquant";
+                description = "Vous avez un profil curieux et explorateur : vous aimez comprendre les failles et tester la sécurité des systèmes.";
+                course = "Parcours conseillé: Introduction au Hacking → Bien débuter (outils, SSH, Hydra, wordlists) → Reconnaissance (Nmap, NSE, Curl CLI) → Hacking de données (SQLi, SQLMap, Google dork) → Metasploit recon→exploit → Réseaux/Wifi (Wireshark, Bettercap, Aircrack-ng) → Challenges (CTF/HTB).";
+            }
+            else if (defensiveScore >= offensiveScore && defensiveScore >= governanceScore)
+            {
+                role = "Analyste SOC / Défenseur";
+                description = "Vous avez un profil défense et réaction : vous gardez votre calme, détectez les attaques et rétablissez rapidement les services.";
+                course = "Parcours conseillé: Introduction à la Cybersécurité → Analyst SOC (analyse des logs, qualification d’événements) → Monitoring SIEM/IDS/HIDS (Suricata, Wazuh, Splunk) → Réseaux (Wireshark, détection MITM) → Réponse à incident et amélioration continue.";
+            }
+            else
+            {
+                role = "GRC / Droit informatique";
+                description = "Vous avez un profil organisation et stratégie : vous aimez structurer, prévenir les risques et améliorer durablement la sécurité.";
+                course = "Parcours conseillé: Introduction à la Cybersécurité (bases + métiers) → Réglementations & standards (ISO 27001/27002/27005, RGPD, NIST, PCI-DSS) → Gestion des risques → Gouvernance sécurité → Pilotage de plans d’action et contrôles.";
+            }
+
+            TempData["OrientationRole"] = role;
+            TempData["OrientationDescription"] = description;
+            TempData["OrientationCourse"] = course;
+
+            var userId = _userManager.GetUserId(User);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                const string orientationClaimType = "cyber_orientation_result";
+                var claimValue = JsonSerializer.Serialize(new
+                {
+                    role,
+                    description,
+                    course,
+                    updatedAtUtc = DateTime.UtcNow
+                });
+
+                var existingClaim = await _context.UserClaims
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.ClaimType == orientationClaimType);
+
+                if (existingClaim == null)
+                {
+                    _context.UserClaims.Add(new IdentityUserClaim<string>
+                    {
+                        UserId = userId,
+                        ClaimType = orientationClaimType,
+                        ClaimValue = claimValue
+                    });
+                }
+                else
+                {
+                    existingClaim.ClaimValue = claimValue;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            return Redirect($"{Url.Action(nameof(Index), "Courses")}#resultjobs");
+        }
+
         [HttpGet]
         public IActionResult OrientationQuiz()
         {

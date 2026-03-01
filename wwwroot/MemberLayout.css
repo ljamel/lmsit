@@ -44,6 +44,233 @@ iframe.ql-video {
   margin: 10px;
 }
 
+/* =========== quiz ============ */
+
+
+/* Conteneur principal */
+
+.quiz-wrapper {
+
+    max-width: 700px;
+
+    margin: 2rem auto;
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+
+/* Style des blocs de questions */
+
+.question-group {
+
+    background: #ffffff;
+
+    border-radius: 15px;
+
+    padding: 1.5rem;
+
+    margin-bottom: 2rem;
+
+    border: 1px solid #e9ecef;
+
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+}
+
+
+.question-title {
+
+    font-size: 1.1rem;
+
+    color: #2d3436;
+
+    margin-bottom: 1.2rem;
+
+    display: block;
+
+}
+
+
+/* Masquer le bouton radio d'origine */
+
+.option-input {
+
+    display: none;
+
+}
+
+
+/* Transformer le label en bouton large */
+
+.option-label {
+
+    display: block;
+
+    padding: 1rem 1.2rem;
+
+    margin-bottom: 0.8rem;
+
+    background-color: #f8f9fa;
+
+    border: 2px solid #f1f2f6;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease-in-out;
+
+    color: #4b4b4b;
+
+}
+
+
+.option-label:hover {
+
+    background-color: #e9ecef;
+
+    border-color: #dfe4ea;
+
+}
+
+
+/* Style quand l'option est cochée */
+
+.option-input:checked + .option-label {
+
+    background-color: #e7f1ff;
+
+    border-color: #0d6efd;
+
+    color: #0d6efd;
+
+    font-weight: 600;
+
+}
+
+
+/* Bouton de validation */
+
+.btn-submit {
+
+    width: 100%;
+
+    padding: 1rem;
+
+    font-size: 1.1rem;
+
+    font-weight: bold;
+
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+
+    border: none;
+
+    color: white;
+
+    transition: transform 0.2s ease;
+
+}
+
+
+.btn-submit:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+
+}
+
+/* Intégration d'une police plus moderne (optionnel mais recommandé) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+#resultjobs.quiz-result-card {
+    font-family: 'Poppins', sans-serif; /* Application de la police */
+    border: none;
+    border-radius: 20px; /* Bords très arrondis */
+    overflow: hidden;
+    background: #ffffff;
+    
+    /* Ombre portée "Néon" colorée et douce */
+    box-shadow: 0 15px 35px rgba(108, 99, 255, 0.2), 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+    
+    transition: all 0.3s ease-in-out;
+    position: relative;
+}
+
+/* Effet de survol discret */
+#resultjobs.quiz-result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(108, 99, 255, 0.3), 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Header Flashy avec dégradé vif */
+#resultjobs .quiz-result-header {
+    /* Dégradé Violet Fluo -> Rose Fluo */
+    background: linear-gradient(135deg, #6c63ff 0%, #ff65a3 100%);
+    color: white !important;
+    padding: 1.5rem 2rem !important; /* Plus d'espace */
+    position: relative;
+}
+
+/* Petit motif décoratif en fond du header */
+#resultjobs .quiz-result-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
+    opacity: 0.6;
+}
+
+/* Style du sur-titre */
+#resultjobs .quiz-result-header .text-muted {
+    color: rgba(255, 255, 255, 0.9) !important; /* Blanc cassé, pas gris */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-bottom: 8px !important;
+    display: block;
+}
+
+/* Style du Titre Principal (Le Rôle) */
+#resultjobs .quiz-result-header h2.h4 {
+    font-weight: 800; /* Très gras */
+    font-size: 1.8rem; /* Plus grand */
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15); /* Légère ombre sur le texte */
+}
+
+/* Corps de la carte */
+#resultjobs .px-4.py-3 {
+    padding: 2rem !important; /* Plus d'espace intérieur */
+}
+
+/* Description principale */
+#resultjobs .quiz-result-header + div > p:first-child {
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.7;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Bannière d'information du bas */
+#resultjobs .fw-semibold {
+    background-color: #f0f0ff; /* Fond bleu très clair */
+    color: #5a52ff; /* Texte assorti au dégradé */
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 5px solid #6c63ff; /* Barre latérale "flashy" */
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: block;
+}
+
+
+
 /* ========== DASHBOARD MENU ========== */
 .menu-dashboard {
     background: linear-gradient(135deg, #434c5e 0%, #2c3142 100%);

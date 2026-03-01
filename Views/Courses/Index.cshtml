@@ -63,6 +63,25 @@
 
     .quiz-result-card {
         border-radius: 1rem;
+        border: 1px solid var(--bs-success-border-subtle);
+        background-color: var(--bs-success-bg-subtle);
+        overflow: hidden;
+    }
+
+    .quiz-result-header {
+        border-bottom: 1px solid var(--bs-success-border-subtle);
+        background-color: var(--bs-body-bg);
+    }
+
+    .quiz-result-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bs-success-bg-subtle);
+        border: 1px solid var(--bs-success-border-subtle);
     }
 
     .form-check {
@@ -108,148 +127,74 @@
     <h2 class="mb-3" id="orientation1">Quiz d’orientation métier cyber</h2>
     <p class="text-muted">Répondez rapidement pour découvrir le métier cyber qui vous correspond le mieux.</p>
 
-<style>
-    /* Conteneur principal */
-    .quiz-wrapper {
-        max-width: 700px;
-        margin: 2rem auto;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
 
-    /* Style des blocs de questions */
-    .question-group {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid #e9ecef;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
-
-    .question-title {
-        font-size: 1.1rem;
-        color: #2d3436;
-        margin-bottom: 1.2rem;
-        display: block;
-    }
-
-    /* Masquer le bouton radio d'origine */
-    .option-input {
-        display: none;
-    }
-
-    /* Transformer le label en bouton large */
-    .option-label {
-        display: block;
-        padding: 1rem 1.2rem;
-        margin-bottom: 0.8rem;
-        background-color: #f8f9fa;
-        border: 2px solid #f1f2f6;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        color: #4b4b4b;
-    }
-
-    .option-label:hover {
-        background-color: #e9ecef;
-        border-color: #dfe4ea;
-    }
-
-    /* Style quand l'option est cochée */
-    .option-input:checked + .option-label {
-        background-color: #e7f1ff;
-        border-color: #0d6efd;
-        color: #0d6efd;
-        font-weight: 600;
-    }
-
-    /* Bouton de validation */
-    .btn-submit {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
-        border: none;
-        color: white;
-        transition: transform 0.2s ease;
-    }
-
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
-    }
-</style>
-
-<div class="quiz-wrapper">
-    <form asp-action="OrientationQuiz" method="post">
+<div class="quiz-wrapper @(string.IsNullOrWhiteSpace(orientationRole) ? "" : "d-none")" style="@(string.IsNullOrWhiteSpace(orientationRole) ? "" : "display:none;")">
+    <form asp-action="OrientationQuizV2" method="post">
         @Html.AntiForgeryToken()
 
         <div class="question-group">
-            <label class="question-title fw-bold">1) Qu’est-ce qui vous motive le plus ?</label>
-            
+            <label class="question-title fw-bold">1️⃣ Qu’est-ce qui vous attire le plus ?</label>
+
             <input class="option-input" type="radio" name="q1" id="q1a" value="1" required>
-            <label class="option-label" for="q1a">🔍 Trouver des failles techniques</label>
+            <label class="option-label" for="q1a">A) Comprendre comment les systèmes peuvent être piratés</label>
 
             <input class="option-input" type="radio" name="q1" id="q1b" value="2">
-            <label class="option-label" for="q1b">🛡️ Détecter et stopper des attaques</label>
+            <label class="option-label" for="q1b">B) Protéger les gens et réagir quand il y a un problème</label>
 
             <input class="option-input" type="radio" name="q1" id="q1c" value="3">
-            <label class="option-label" for="q1c">🏢 Structurer la sécurité d’une entreprise</label>
+            <label class="option-label" for="q1c">C) Organiser les choses pour éviter les problèmes</label>
         </div>
 
         <div class="question-group">
-            <label class="question-title fw-bold">2) Quel type de missions vous attire ?</label>
-            
+            <label class="question-title fw-bold">2️⃣ Dans un jeu vidéo ou un film, vous êtes plutôt :</label>
+
             <input class="option-input" type="radio" name="q2" id="q2a" value="1" required>
-            <label class="option-label" for="q2a">⚔️ Simulations d’attaque (pentest)</label>
+            <label class="option-label" for="q2a">A) Celui qui trouve les passages secrets et teste les failles</label>
 
             <input class="option-input" type="radio" name="q2" id="q2b" value="2">
-            <label class="option-label" for="q2b">🚨 Surveillance SOC et réponse à incident</label>
+            <label class="option-label" for="q2b">B) Celui qui défend la base et réagit aux attaques</label>
 
             <input class="option-input" type="radio" name="q2" id="q2c" value="3">
-            <label class="option-label" for="q2c">📋 Audit, conformité et gestion du risque</label>
+            <label class="option-label" for="q2c">C) Celui qui planifie la stratégie et coordonne l’équipe</label>
         </div>
 
         <div class="question-group">
-            <label class="question-title fw-bold">3) Dans un incident cyber, vous préférez :</label>
-            
+            <label class="question-title fw-bold">3️⃣ Face à un problème informatique, vous préférez :</label>
+
             <input class="option-input" type="radio" name="q3" id="q3a" value="1" required>
-            <label class="option-label" for="q3a">🧪 Comprendre le vecteur d’attaque utilisé</label>
+            <label class="option-label" for="q3a">A) Chercher d’où vient la faille</label>
 
             <input class="option-input" type="radio" name="q3" id="q3b" value="2">
-            <label class="option-label" for="q3b">🚑 Contenir, éradiquer et rétablir le service</label>
+            <label class="option-label" for="q3b">B) Réparer rapidement pour que tout refonctionne</label>
 
             <input class="option-input" type="radio" name="q3" id="q3c" value="3">
-            <label class="option-label" for="q3c">📝 Formaliser un plan d’action et les contrôles</label>
+            <label class="option-label" for="q3c">C) Mettre en place des règles pour que ça ne se reproduise plus</label>
         </div>
 
         <div class="question-group">
-            <label class="question-title fw-bold">4) Votre point fort actuel :</label>
-            
+            <label class="question-title fw-bold">4️⃣ Ce qui vous ressemble le plus :</label>
+
             <input class="option-input" type="radio" name="q4" id="q4a" value="1" required>
-            <label class="option-label" for="q4a">💻 Technique offensive (réseau, web, scripts)</label>
+            <label class="option-label" for="q4a">A) Curieux(se), aimez tester et bidouiller</label>
 
             <input class="option-input" type="radio" name="q4" id="q4b" value="2">
-            <label class="option-label" for="q4b">📊 Analyse de logs et investigation</label>
+            <label class="option-label" for="q4b">B) Calme sous pression, réactif(ve)</label>
 
             <input class="option-input" type="radio" name="q4" id="q4c" value="3">
-            <label class="option-label" for="q4c">📂 Organisation, procédures et normes</label>
+            <label class="option-label" for="q4c">C) Organisé(e), méthodique, aimez structurer</label>
         </div>
 
         <div class="question-group">
-            <label class="question-title fw-bold">5) Votre objectif à 2 ans :</label>
-            
+            <label class="question-title fw-bold">5️⃣ Ce qui vous motive le plus dans un futur métier :</label>
+
             <input class="option-input" type="radio" name="q5" id="q5a" value="1" required>
-            <label class="option-label" for="q5a">🎯 Mener des audits offensifs complets</label>
+            <label class="option-label" for="q5a">A) Tester la sécurité des systèmes</label>
 
             <input class="option-input" type="radio" name="q5" id="q5b" value="2">
-            <label class="option-label" for="q5b">🕵️ Devenir analyste SOC confirmé</label>
+            <label class="option-label" for="q5b">B) Défendre une entreprise contre les cyberattaques</label>
 
             <input class="option-input" type="radio" name="q5" id="q5c" value="3">
-            <label class="option-label" for="q5c">📈 Piloter la gouvernance cyber d’une équipe</label>
+            <label class="option-label" for="q5c">C) Améliorer l’organisation et la sécurité globale</label>
         </div>
 
         <button type="submit" class="btn-submit shadow">
@@ -260,11 +205,59 @@
 
     @if (!string.IsNullOrWhiteSpace(orientationRole))
     {
-        <div class="alert alert-success" role="alert" id="resultjobs">
-            <h4 class="alert-heading mb-2">Orientation recommandée : @orientationRole</h4>
-            <p class="mb-1">@orientationDescription</p>
-            <p class="mb-0"><strong>Parcours conseillé :</strong> @orientationCourse</p>
+        <div class="alert quiz-result-card shadow-sm p-0 mt-4" role="alert" id="resultjobs" aria-live="polite">
+            <div class="quiz-result-header px-4 py-3 d-flex align-items-center gap-3">
+                <span class="quiz-result-icon" aria-hidden="true">🎯</span>
+                <div>
+                    <p class="mb-1 text-muted">Résultat du quiz</p>
+                    <h2 class="h4 mb-0">Orientation recommandée : @orientationRole</h2>
+                </div>
+            </div>
+
+            <div class="px-4 py-3">
+                <p class="mb-3">@orientationDescription</p>
+                <p class="mb-1 fw-semibold">En suivant les prochains cours, vous aurez une orientation plus précise avec les modules conseillés.</p>
+
+            </div>
         </div>
     }
 
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const hasResult = @(string.IsNullOrWhiteSpace(orientationRole) ? "false" : "true");
+            if (!hasResult) {
+                return;
+            }
+
+            const result = document.getElementById('resultjobs');
+            if (result) {
+                result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'confetti-wrapper';
+            document.body.appendChild(wrapper);
+
+            const palette = ['bg-primary', 'bg-success', 'bg-warning', 'bg-danger', 'bg-info'];
+            const total = 120;
+
+            for (let index = 0; index < total; index++) {
+                const piece = document.createElement('span');
+                const colorClass = palette[index % palette.length];
+                piece.className = `confetti-piece ${colorClass}`;
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.animationDuration = `${2.2 + Math.random() * 1.8}s`;
+                piece.style.animationDelay = `${Math.random() * 0.45}s`;
+                piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                wrapper.appendChild(piece);
+            }
+
+            window.setTimeout(() => {
+                wrapper.remove();
+            }, 4200);
+        })();
+    </script>
+}
