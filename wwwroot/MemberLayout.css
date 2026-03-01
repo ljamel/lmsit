@@ -293,6 +293,7 @@ iframe.ql-video {
     background: rgba(255, 255, 255, 0.2);
     border-left-color: #00B2FF;
     font-weight: 700;
+    padding: 8px;
 }
 
 .mb-2 {

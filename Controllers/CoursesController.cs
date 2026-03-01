@@ -322,14 +322,31 @@ namespace CrudDemo.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> OrientationQuizV2(int q1, int q2, int q3, int q4, int q5)
+        public async Task<IActionResult> OrientationQuizV2(int q1, int q2, int q3, int q4, int q5, string? returnUrl)
         {
+            var fallbackUrl = Url.Action(nameof(Index), "Courses") ?? "/Courses";
+            var refererValue = Request.Headers.Referer.ToString();
+            var refererPath = Uri.TryCreate(refererValue, UriKind.Absolute, out var refererUri)
+                ? refererUri.PathAndQuery
+                : null;
+
+            var targetUrl = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : (!string.IsNullOrWhiteSpace(refererPath) && Url.IsLocalUrl(refererPath)
+                    ? refererPath
+                    : fallbackUrl);
+
+            string BuildAnchorUrl(string url, string anchor)
+            {
+                var baseUrl = url.Split('#')[0];
+                return $"{baseUrl}#{anchor}";
+            }
+
             var answers = new[] { q1, q2, q3, q4, q5 };
             if (answers.Any(a => a < 1 || a > 3))
             {
                 TempData["Error"] = "Veuillez répondre à toutes les questions du quiz d’orientation.";
-                return RedirectToAction(nameof(Index));
+                return LocalRedirect(BuildAnchorUrl(targetUrl, "orientation1"));
             }
 
             var offensiveScore = answers.Count(a => a == 1);
@@ -395,7 +412,24 @@ namespace CrudDemo.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Redirect($"{Url.Action(nameof(Index), "Courses")}#resultjobs");
+            return LocalRedirect(BuildAnchorUrl(targetUrl, "resultjobs"));
+        }
+
+        [HttpGet]
+        public IActionResult OrientationQuizV2()
+        {
+            var fallbackUrl = Url.Action(nameof(Index), "Courses") ?? "/Courses";
+            var refererValue = Request.Headers.Referer.ToString();
+            var refererPath = Uri.TryCreate(refererValue, UriKind.Absolute, out var refererUri)
+                ? refererUri.PathAndQuery
+                : null;
+
+            if (!string.IsNullOrWhiteSpace(refererPath) && Url.IsLocalUrl(refererPath))
+            {
+                return LocalRedirect(refererPath);
+            }
+
+            return LocalRedirect(fallbackUrl);
         }
 
         [HttpGet]
@@ -485,6 +519,7 @@ namespace CrudDemo.Controllers
                     .ThenInclude(m => m!.Course)
                 .Include(l => l.Quizzes)
                     .ThenInclude(q => q.Options)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync();
 
             if (lesson == null)
@@ -513,6 +548,9 @@ namespace CrudDemo.Controllers
 
             ViewBag.Comments = comments;
             ViewBag.CourseId = courseId;
+            ViewBag.OrientationRole = TempData["OrientationRole"] as string;
+            ViewBag.OrientationDescription = TempData["OrientationDescription"] as string;
+            ViewBag.OrientationCourse = TempData["OrientationCourse"] as string;
 
             if (!string.IsNullOrWhiteSpace(lessonSearch))
             {

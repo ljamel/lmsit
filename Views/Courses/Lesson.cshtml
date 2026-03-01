@@ -4,6 +4,9 @@
     ViewData["Title"] = "Leçon: " + Model.Title;
     var comments = ViewBag.Comments as List<CrudDemo.Models.Comment> ?? new List<CrudDemo.Models.Comment>();
     var courseId = ViewBag.CourseId as int? ?? Model.Module!.CourseId;
+    var orientationRole = ViewBag.OrientationRole as string;
+    var orientationDescription = ViewBag.OrientationDescription as string;
+    var orientationCourse = ViewBag.OrientationCourse as string;
 }
 
 <div class="container mt-4">
@@ -29,72 +32,27 @@
                 </div>
             </div>
 
-            @if (Model.Quizzes != null && Model.Quizzes.Any())
-            {
-                <div class="card">
-                    <div class="card-header gradient-header-quiz">
-                        <h5 class="mb-0">
-                            <i class="fas fa-question-circle"></i> Quiz (@Model.Quizzes.Count)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @foreach (var quiz in Model.Quizzes)
-                        {
-                            <div class="mb-4 quiz-item animated-quiz-item">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h4 class="mb-1">
-                                            <i class="fas fa-question"></i> @quiz.Question
-                                        </h4>
-                                        @if (!string.IsNullOrEmpty(quiz.Description))
-                                        {
-                                            <small class="text-muted d-block mb-2">@quiz.Description</small>
-                                        }
-                                    </div>
-                                    <span>
-                                        <i class="fas fa-star"></i> @quiz.Points pts
-                                    </span>
-                                </div>
-                                <div class="mt-3">
-                                    @if (quiz.Options != null && quiz.Options.Any())
-                                    {
-                                        <form asp-action="SubmitQuizAnswer" method="post" class="d-inline">
-                                            <input type="hidden" name="quizId" value="@quiz.Id" />
-                                            <div class="options-list">
-                                                @foreach (var option in quiz.Options)
-                                                {
-                                                    <div class="form-check mb-3 animated-option-item">
-                                                        <input class="form-check-input quiz-radio" type="radio" 
-                                                               name="optionId" id="option_@option.Id" 
-                                                               value="@option.Id" />
-                                                        <label class="form-check-label" for="option_@option.Id">
-                                                            <span class="option-text">@option.Text</span>
-                                                        </label>
-                                                    </div>
-                                                }
-                                            </div>
-                                            <button type="submit" class="btn btn-success animated-btn">
-                                                <i class="fas fa-check"></i> Soumettre
-                                            </button>
-                                        </form>
-                                    }
-                                </div>
-                            </div>
-                        }
-                        <p class="text-center mt-4">
-                            <a asp-action="QuizResults" asp-route-lessonId="@Model.Id" class="btn btn-info animated-btn">
-                                <i class="fas fa-chart-bar"></i> Voir mes résultats
-                            </a>
-                        </p>
-                    </div>
+
+
+    @if (!string.IsNullOrWhiteSpace(orientationRole))
+    {
+        <div class="alert quiz-result-card shadow-sm p-0 mt-4" role="alert" id="resultjobs" aria-live="polite">
+            <div class="quiz-result-header px-4 py-3 d-flex align-items-center gap-3">
+                <div>
+                    <p class="mb-1 text-muted">Résultat du quiz</p>
+                    <h2 class="h4 mb-0">Orientation recommandée : @orientationRole</h2>
                 </div>
-            }
+            </div>
+
+            <div class="px-4 py-3">
+                <p class="mb-3">@orientationDescription</p>
+                <p class="mb-1 fw-semibold">@orientationCourse</p>
+
+            </div>
         </div>
-
-
-    </div>
-
-    <!-- Section Commentaires du cours -->
+    }
+            
+              <!-- Section Commentaires du cours -->
     <div class="col-lg-12 mt-4">
         <div class="card shadow-sm">
             <div>
@@ -180,7 +138,116 @@
             </div>
         </div>
     </div>
-</div>
+
+        </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const hasResult = @(string.IsNullOrWhiteSpace(orientationRole) ? "false" : "true");
+            if (!hasResult) {
+                return;
+            }
+
+            const result = document.getElementById('resultjobs');
+            if (result) {
+                result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'confetti-wrapper';
+            document.body.appendChild(wrapper);
+
+            const palette = ['bg-primary', 'bg-success', 'bg-warning', 'bg-danger', 'bg-info'];
+            const total = 120;
+
+            for (let index = 0; index < total; index++) {
+                const piece = document.createElement('span');
+                const colorClass = palette[index % palette.length];
+                piece.className = `confetti-piece ${colorClass}`;
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.animationDuration = `${2.2 + Math.random() * 1.8}s`;
+                piece.style.animationDelay = `${Math.random() * 0.45}s`;
+                piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                wrapper.appendChild(piece);
+            }
+
+            window.setTimeout(() => {
+                wrapper.remove();
+            }, 4200);
+        })();
+    </script>
+}
+
+
+
+            @if (Model.Quizzes != null && Model.Quizzes.Any())
+            {
+                <div class="card">
+                    <div class="card-header gradient-header-quiz">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle"></i> Quiz (@Model.Quizzes.Count)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var quiz in Model.Quizzes)
+                        {
+                            <div class="mb-4 quiz-item animated-quiz-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h4 class="mb-1">
+                                            <i class="fas fa-question"></i> @quiz.Question
+                                        </h4>
+                                        @if (!string.IsNullOrEmpty(quiz.Description))
+                                        {
+                                            <small class="text-muted d-block mb-2">@quiz.Description</small>
+                                        }
+                                    </div>
+                                    <span>
+                                        <i class="fas fa-star"></i> @quiz.Points pts
+                                    </span>
+                                </div>
+                                <div class="mt-3">
+                                    @if (quiz.Options != null && quiz.Options.Any())
+                                    {
+                                        <form asp-action="SubmitQuizAnswer" method="post" class="d-inline">
+                                            <input type="hidden" name="quizId" value="@quiz.Id" />
+                                            <div class="options-list">
+                                                @foreach (var option in quiz.Options)
+                                                {
+                                                    <div class="form-check mb-3 animated-option-item">
+                                                        <input class="form-check-input quiz-radio" type="radio" 
+                                                               name="optionId" id="option_@option.Id" 
+                                                               value="@option.Id" />
+                                                        <label class="form-check-label" for="option_@option.Id">
+                                                            <span class="option-text">@option.Text</span>
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <button type="submit" class="btn btn-success animated-btn">
+                                                <i class="fas fa-check"></i> Soumettre
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <p class="text-center mt-4">
+                            <a asp-action="QuizResults" asp-route-lessonId="@Model.Id" class="btn btn-info animated-btn">
+                                <i class="fas fa-chart-bar"></i> Voir mes résultats
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+    </div>
+
+  
+
 
 <style>
      /* quiz interacti par niveau */
