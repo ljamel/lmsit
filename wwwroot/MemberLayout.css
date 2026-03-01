@@ -153,32 +153,22 @@ iframe.ql-video {
 /* Bouton de validation */
 
 .btn-submit {
-
     width: 100%;
-
     padding: 1rem;
-
     font-size: 1.1rem;
-
     font-weight: bold;
-
     border-radius: 10px;
-
     background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
-
     border: none;
-
     color: white;
-
     transition: transform 0.2s ease;
-
+    cursor: pointer;
 }
 
 
 .btn-submit:hover {
 
     transform: translateY(-2px);
-
     box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
 
 }
