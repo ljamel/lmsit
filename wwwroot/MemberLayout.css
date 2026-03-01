@@ -137,7 +137,7 @@ iframe.ql-video {
 
 /* Style quand l'option est cochée */
 
-.option-input:checked + .option-label {
+.option-input:checked ~ .option-label {
 
     background-color: #e7f1ff;
 
