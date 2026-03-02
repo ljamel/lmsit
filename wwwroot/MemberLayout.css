@@ -136,19 +136,19 @@ iframe.ql-video {
 
 
 /* Style quand l'option est cochée */
-
-.option-input:checked ~ .option-label {
-
+.option-input:checked + .option-label {
     background-color: #e7f1ff;
-
     border-color: #0d6efd;
-
     color: #0d6efd;
-
     font-weight: 600;
-
 }
 
+.question-group p:has(.option-input:checked) + p .option-label {
+    background-color: #e7f1ff;
+    border-color: #0d6efd;
+    color: #0d6efd;
+    font-weight: 600;
+}
 
 /* Bouton de validation */
 

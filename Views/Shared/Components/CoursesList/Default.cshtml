@@ -1,4 +1,3 @@
-@using NuGet.Versioning
 @model IEnumerable<CrudDemo.Models.Course>
 
 <div class="menu-dashboard">
@@ -125,10 +124,21 @@
                                                 var isSelectedLesson = currentAction.Equals("Lesson", StringComparison.OrdinalIgnoreCase)
                                                     && hasCurrentId
                                                     && currentId == lesson.Id;
+                                                var hasVideo = !string.IsNullOrWhiteSpace(lesson.Description)
+                                                    && (
+                                                        lesson.Description.Contains("<video", StringComparison.OrdinalIgnoreCase)
+                                                        || lesson.Description.Contains("<iframe", StringComparison.OrdinalIgnoreCase)
+                                                        || lesson.Description.Contains("&lt;video", StringComparison.OrdinalIgnoreCase)
+                                                        || lesson.Description.Contains("&lt;iframe", StringComparison.OrdinalIgnoreCase)
+                                                    );
 
                                                 <li class="mb-2">
                                                     <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
-                                                        <i class="fas fa-play-circle"></i> @lesson.Title
+                                                        @if (hasVideo)
+                                                        {
+                                                            <i class="fas fa-play-circle"></i>
+                                                        }
+                                                        @lesson.Title
                                                     </a>
                                                 </li>
 
