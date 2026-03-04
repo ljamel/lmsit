@@ -58,11 +58,10 @@ namespace CrudDemo.Controllers
                             {
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = 
-                                "Accès complet à tous les cours de la plateforme\n" +
-                                "1 heure de visioconférence pour définir et structurer votre parcours.\n" +
-                                "Garantie satisfait ou remboursé.\n" +
-                                "Ajout de contenu personnalisé selon vos demandes.\n" +
-                                "Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
+                                "• 1 heure de visio pour définir votre parcours.\n\n" +
+                                "• Garantie satisfait ou remboursé.\n\n" +
+                                "• Ajout de contenu personnalisé selon vos demandes.\n\n" +
+                                "• Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
                             },
                             UnitAmount = 1900, // 19 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
