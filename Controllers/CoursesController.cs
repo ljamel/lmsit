@@ -176,7 +176,7 @@ namespace CrudDemo.Controllers
             subscription.IsActive = false;
             subscription.Status = "canceled";
             subscription.CanceledAt = DateTime.UtcNow;
-            subscription.EndDate = DateTime.UtcNow;
+            subscription.EndDate = subscription.StartDate.AddMonths(1);
 
             await _context.SaveChangesAsync();
 
@@ -187,6 +187,33 @@ namespace CrudDemo.Controllers
             return RedirectToAction(nameof(Member));
         }
 
+        private async Task<bool> HasCourseAccessAsync(string userEmail)
+        {
+            var subscription = await _context.Subscriptions
+                .AsNoTracking()
+                .Where(s => s.UserId == userEmail)
+                .OrderByDescending(s => s.StartDate)
+                .FirstOrDefaultAsync();
+
+            if (subscription == null)
+            {
+                return false;
+            }
+
+            if (subscription.IsActive && subscription.Status == "active")
+            {
+                return true;
+            }
+
+            if (subscription.Status == "canceled")
+            {
+                var accessUntil = subscription.EndDate ?? subscription.StartDate.AddMonths(1);
+                return DateTime.UtcNow <= accessUntil;
+            }
+
+            return false;
+        }
+
         // List all courses (public view for authenticated users)
         public async Task<IActionResult> Index()
         {
@@ -194,10 +221,7 @@ namespace CrudDemo.Controllers
             if (!User.IsInRole("Admin"))
             {
                 var userId = User.Identity?.Name ?? "";
-                var hasActiveSubscription = await _context.Subscriptions
-                    .AsNoTracking()
-                    .Where(s => s.UserId == userId && s.IsActive && s.Status == "active")
-                    .AnyAsync();
+                var hasActiveSubscription = await HasCourseAccessAsync(userId);
 
                 if (!hasActiveSubscription)
                 {
@@ -446,10 +470,7 @@ namespace CrudDemo.Controllers
             if (!User.IsInRole("Admin"))
             {
                 var userId = User.Identity?.Name ?? "";
-                var hasActiveSubscription = await _context.Subscriptions
-                    .AsNoTracking()
-                    .Where(s => s.UserId == userId && s.IsActive && s.Status == "active")
-                    .AnyAsync();
+                var hasActiveSubscription = await HasCourseAccessAsync(userId);
 
                 if (!hasActiveSubscription)
                 {
@@ -499,10 +520,7 @@ namespace CrudDemo.Controllers
             if (!User.IsInRole("Admin"))
             {
                 var userEmail = User.Identity?.Name ?? "";
-                var hasActiveSubscription = await _context.Subscriptions
-                    .AsNoTracking()
-                    .Where(s => s.UserId == userEmail && s.IsActive && s.Status == "active")
-                    .AnyAsync();
+                var hasActiveSubscription = await HasCourseAccessAsync(userEmail);
 
                 if (!hasActiveSubscription)
                 {
