@@ -58,9 +58,9 @@ namespace CrudDemo.Controllers
                             {
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = 
-                                "• 1 heure de visio pour définir votre parcours.\n" +
-                                "• Garantie satisfait ou remboursé.\n" +
-                                "• Ajout de contenu personnalisé selon vos demandes.\n" +
+                                "• 1 heure de visio pour définir votre parcours.\u2028" +
+                                "• Garantie satisfait ou remboursé.\u2028" +
+                                "• Ajout de contenu personnalisé selon vos demandes.\u2028" +
                                 "• Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
                             },
                             UnitAmount = 1900, // 19 EUR en centimes
