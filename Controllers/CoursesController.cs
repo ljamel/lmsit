@@ -218,7 +218,7 @@ namespace CrudDemo.Controllers
         public async Task<IActionResult> Index()
         {
             // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
-            if (!User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin") && !User.IsInRole("Free"))
             {
                 var userId = User.Identity?.Name ?? "";
                 var hasActiveSubscription = await HasCourseAccessAsync(userId);
@@ -466,8 +466,8 @@ namespace CrudDemo.Controllers
         // View course details with modules and lessons
         public async Task<IActionResult> Details(int id)
         {
-            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
-            if (!User.IsInRole("Admin"))
+            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin ou Free)
+            if (!User.IsInRole("Admin") && !User.IsInRole("Free"))
             {
                 var userId = User.Identity?.Name ?? "";
                 var hasActiveSubscription = await HasCourseAccessAsync(userId);
@@ -744,6 +744,12 @@ namespace CrudDemo.Controllers
 
         public IActionResult Challenges()
 		{
+            if (User.IsInRole("Free"))
+            {
+                TempData["Error"] = "Cette section n'est pas accessible avec le plan Free.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
+
 			return View();
 		}
 
