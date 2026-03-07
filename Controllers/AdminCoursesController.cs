@@ -1,5 +1,6 @@
 using CrudDemo.Data;
 using CrudDemo.Models;
+using CrudDemo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,12 +22,14 @@ namespace CrudDemo.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration)
+        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _env = env;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index()
@@ -851,6 +854,13 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             ViewBag.TotalPages = totalPages;
             ViewBag.PageSize = pageSize;
             ViewBag.QuizCompetencyRows = quizCompetencyRows;
+            ViewBag.BulkEmailModel = new AdminBulkEmailViewModel
+            {
+                Subject = TempData["BulkEmailSubject"] as string ?? string.Empty,
+                Message = TempData["BulkEmailMessage"] as string ?? string.Empty,
+                OnlyActiveSubscribers = bool.TryParse(TempData["BulkEmailOnlyActive"] as string, out var onlyActive)
+                    && onlyActive
+            };
 
             return View(userRows);
 
@@ -939,6 +949,69 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendEmailToAll(AdminBulkEmailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var firstError = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage)
+                    .FirstOrDefault();
+
+                TempData["Error"] = string.IsNullOrWhiteSpace(firstError)
+                    ? "Le formulaire d'email est invalide."
+                    : firstError;
+                TempData["BulkEmailSubject"] = model.Subject;
+                TempData["BulkEmailMessage"] = model.Message;
+                TempData["BulkEmailOnlyActive"] = model.OnlyActiveSubscribers.ToString();
+                return RedirectToAction(nameof(Users));
+            }
+
+            var recipientsQuery = _context.Users
+                .AsNoTracking()
+                .Where(user => user.Email != null && user.Email != string.Empty)
+                .Select(user => user.Email!);
+
+            if (model.OnlyActiveSubscribers)
+            {
+                var activeEmailsQuery = _context.Subscriptions
+                    .AsNoTracking()
+                    .Where(subscription => subscription.IsActive)
+                    .Select(subscription => subscription.UserId)
+                    .Distinct();
+
+                recipientsQuery = recipientsQuery
+                    .Where(email => activeEmailsQuery.Contains(email));
+            }
+
+            var recipients = await recipientsQuery
+                .Distinct()
+                .ToListAsync();
+
+            if (recipients.Count == 0)
+            {
+                TempData["Error"] = "Aucun inscrit avec une adresse email valide.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var subject = model.Subject.Trim();
+            var htmlBody = model.Message
+                .Replace("\r\n", "<br />")
+                .Replace("\n", "<br />");
+
+            foreach (var recipient in recipients)
+            {
+                await _emailService.SendEmailAsync(recipient, subject, htmlBody, isHtml: true);
+            }
+
+            TempData["Success"] = model.OnlyActiveSubscribers
+                ? $"Tentative d'envoi effectuée pour {recipients.Count} abonnés actifs."
+                : $"Tentative d'envoi effectuée pour {recipients.Count} inscrits.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeactivateMember(string userId)
         {
             if (string.IsNullOrWhiteSpace(userId))
@@ -1020,7 +1093,14 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     var isStripeActive = stripeSubscription != null
                         && (stripeSubscription.Status == "active" || stripeSubscription.Status == "trialing");
 
-                    if (!isStripeActive)
+                    if (isStripeActive)
+                    {
+                        subscription.IsActive = true;
+                        subscription.Status = stripeSubscription!.Status;
+                        subscription.CanceledAt = null;
+                        subscription.EndDate = null;
+                    }
+                    else
                     {
                         subscription.IsActive = false;
                         subscription.Status = stripeSubscription?.Status ?? "inactive";

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CrudDemo.Models
 {
     public class AdminUserQuizResultRowViewModel
@@ -36,5 +38,18 @@ namespace CrudDemo.Models
         public int CommentsCount { get; set; }
         public DateTime? LastActivityAt { get; set; }
         public DateTime? SortDate { get; set; }
+    }
+
+    public class AdminBulkEmailViewModel
+    {
+        [Required(ErrorMessage = "L'objet est requis.")]
+        [StringLength(200, ErrorMessage = "L'objet ne peut pas dépasser 200 caractères.")]
+        public string Subject { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Le message est requis.")]
+        [StringLength(5000, ErrorMessage = "Le message ne peut pas dépasser 5000 caractères.")]
+        public string Message { get; set; } = string.Empty;
+
+        public bool OnlyActiveSubscribers { get; set; }
     }
 }

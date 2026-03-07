@@ -40,7 +40,7 @@ namespace CrudDemo.Controllers
         [AllowAnonymous]
         [HttpPost]
         [HttpGet]
-        public IActionResult CreatePreRegistrationSession()
+        public async Task<IActionResult> CreatePreRegistrationSession()
         {
             var domain = $"{Request.Scheme}://{Request.Host}";
             
@@ -74,12 +74,13 @@ namespace CrudDemo.Controllers
                 },
                 Mode = "subscription",
                 BillingAddressCollection = "required",
+                AllowPromotionCodes = true,
                 SuccessUrl = $"{domain}/Payment/PreRegistrationSuccess?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{domain}/Payment/PreRegistrationCancel",
             };
 
             var service = new SessionService();
-            var session = service.Create(options);
+            var session = await service.CreateAsync(options);
 
             return Redirect(session.Url);
         }
@@ -170,6 +171,7 @@ namespace CrudDemo.Controllers
                     },
                 },
                 Mode = "subscription",
+                AllowPromotionCodes = true,
                 SuccessUrl = $"{domain}/Payment/SubscriptionSuccess?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{domain}/Payment/SubscriptionCancel",
                 CustomerEmail = User.Identity?.Name,
@@ -305,6 +307,7 @@ namespace CrudDemo.Controllers
                     },
                 },
                 Mode = "payment",
+                AllowPromotionCodes = true,
                 SuccessUrl = $"{domain}/Payment/Success?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{domain}/Payment/Cancel?courseId={courseId}",
                 ClientReferenceId = courseId.ToString(),
@@ -432,5 +435,6 @@ namespace CrudDemo.Controllers
 
             return View(payments);
         }
+
     }
 }

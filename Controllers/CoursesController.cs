@@ -38,6 +38,8 @@ namespace CrudDemo.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            await SyncUserSubscriptionFromStripeAsync(userEmail);
+
             var userId = _userManager.GetUserId(User);
 
             var subscription = await _context.Subscriptions
@@ -189,6 +191,8 @@ namespace CrudDemo.Controllers
 
         private async Task<bool> HasCourseAccessAsync(string userEmail)
         {
+            await SyncUserSubscriptionFromStripeAsync(userEmail);
+
             var subscription = await _context.Subscriptions
                 .AsNoTracking()
                 .Where(s => s.UserId == userEmail)
@@ -212,6 +216,65 @@ namespace CrudDemo.Controllers
             }
 
             return false;
+        }
+
+        private async Task SyncUserSubscriptionFromStripeAsync(string userEmail)
+        {
+            var localSubscription = await _context.Subscriptions
+                .Where(s => s.UserId == userEmail)
+                .OrderByDescending(s => s.StartDate)
+                .FirstOrDefaultAsync();
+
+            if (localSubscription == null || string.IsNullOrWhiteSpace(localSubscription.StripeSubscriptionId))
+            {
+                return;
+            }
+
+            var secretKey = _configuration["Stripe:SecretKey"];
+            if (string.IsNullOrWhiteSpace(secretKey))
+            {
+                return;
+            }
+
+            try
+            {
+                StripeConfiguration.ApiKey = secretKey;
+                var stripeService = new SubscriptionService();
+                var stripeSubscription = await stripeService.GetAsync(localSubscription.StripeSubscriptionId);
+                var stripeStatus = stripeSubscription?.Status ?? "inactive";
+                var isStripeActive = stripeStatus == "active" || stripeStatus == "trialing";
+
+                var changed = localSubscription.IsActive != isStripeActive
+                    || localSubscription.Status != stripeStatus;
+
+                if (!changed)
+                {
+                    return;
+                }
+
+                localSubscription.IsActive = isStripeActive;
+                localSubscription.Status = stripeStatus;
+
+                if (isStripeActive)
+                {
+                    localSubscription.EndDate = null;
+                    localSubscription.CanceledAt = null;
+                }
+                else
+                {
+                    localSubscription.EndDate ??= DateTime.UtcNow;
+                    if (stripeStatus == "canceled")
+                    {
+                        localSubscription.CanceledAt ??= DateTime.UtcNow;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Sync Stripe impossible pour {UserEmail}", userEmail);
+            }
         }
 
         // List all courses (public view for authenticated users)

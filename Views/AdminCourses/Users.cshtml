@@ -9,6 +9,8 @@
     var currentPage = (int?)ViewBag.CurrentPage ?? 1;
     var totalPages = (int?)ViewBag.TotalPages ?? 1;
     var searchQuery = (string?)ViewBag.SearchQuery;
+    var bulkEmailModel = ViewBag.BulkEmailModel as CrudDemo.Models.AdminBulkEmailViewModel
+        ?? new CrudDemo.Models.AdminBulkEmailViewModel();
     var competencyRows = ViewBag.QuizCompetencyRows as IEnumerable<CrudDemo.Models.AdminUserQuizResultRowViewModel>
         ?? Enumerable.Empty<CrudDemo.Models.AdminUserQuizResultRowViewModel>();
 }
@@ -96,6 +98,60 @@
                     <p>Sans Abonnement</p>
                 </div>
             </div>
+        </div>
+
+        <div class="table-container mb-4">
+            <h3 style="color:#00B2FF; margin-bottom: 1rem;">
+                <i class="fas fa-paper-plane me-2"></i>Email à tous les inscrits
+            </h3>
+
+            <form asp-action="SendEmailToAll" method="post" class="bulk-email-form">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label for="Subject" class="form-label" style="color: rgba(255,255,255,0.9);">Objet</label>
+                    <input
+                        type="text"
+                        id="Subject"
+                        name="Subject"
+                        maxlength="200"
+                        required
+                        class="form-control"
+                        value="@bulkEmailModel.Subject"
+                        style="background: #16213e; border: 1px solid #00B2FF; color: #fff;"
+                    />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Message" class="form-label" style="color: rgba(255,255,255,0.9);">Message</label>
+                    <textarea
+                        id="Message"
+                        name="Message"
+                        rows="6"
+                        maxlength="5000"
+                        required
+                        class="form-control"
+                        style="background: #16213e; border: 1px solid #00B2FF; color: #fff;">@bulkEmailModel.Message</textarea>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="OnlyActiveSubscribers"
+                        name="OnlyActiveSubscribers"
+                        value="true"
+                        @(bulkEmailModel.OnlyActiveSubscribers ? "checked" : "")
+                    />
+                    <label class="form-check-label" for="OnlyActiveSubscribers" style="color: rgba(255,255,255,0.9);">
+                        Envoyer uniquement aux abonnés actifs
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #00B2FF 0%, #0080FF 100%); border: none;">
+                    <i class="fas fa-paper-plane me-1"></i> Envoyer à tous les inscrits
+                </button>
+            </form>
         </div>
 
         <div class="mb-3" style="color: rgba(255,255,255,0.8); font-family: 'Rajdhani', sans-serif;">
