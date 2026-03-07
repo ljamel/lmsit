@@ -619,11 +619,11 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 page = 1;
             }
 
-            var activeSubscriptions = await _context.Subscriptions
-                .Where(s => s.IsActive)
+            var subscriptionsToSync = await _context.Subscriptions
+                .Where(s => s.StripeSubscriptionId != null && s.StripeSubscriptionId != string.Empty)
                 .ToListAsync();
 
-            await SyncStripeSubscriptionsAsync(activeSubscriptions);
+            await SyncStripeSubscriptionsAsync(subscriptionsToSync);
 
             var filteredUsersQuery = _context.Users
                 .AsNoTracking()
