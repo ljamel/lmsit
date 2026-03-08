@@ -63,7 +63,7 @@ namespace CrudDemo.Controllers
                                 "• Ajout de contenu personnalisé selon vos demandes.\u2028" +
                                 "• Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
                             },
-                            UnitAmount = 1900, // 19 EUR en centimes
+                            UnitAmount = 2900, // 29 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -161,7 +161,7 @@ namespace CrudDemo.Controllers
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = "Accès complet à tous les cours de la plateforme",
                             },
-                            UnitAmount = 1900, // 19 EUR en centimes
+                            UnitAmount = 2900, // 29 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -220,7 +220,7 @@ namespace CrudDemo.Controllers
                             userId, 
                             userId.Split('@')[0], 
                             "Abonnement Mensuel - Accès Illimité", 
-                            19.00m);
+                            29.00m);
                     }
                     catch (Exception ex)
                     {

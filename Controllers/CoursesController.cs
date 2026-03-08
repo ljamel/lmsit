@@ -816,5 +816,16 @@ namespace CrudDemo.Controllers
 			return View();
 		}
 
+        public IActionResult Certif1()
+		{
+            if (User.IsInRole("Free"))
+            {
+                TempData["Error"] = "Cette section n'est pas accessible avec le plan Free.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
+
+			return View();
+		}
+
     }
 }

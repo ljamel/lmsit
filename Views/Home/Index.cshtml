@@ -2,12 +2,30 @@
     ViewData["Title"] = "Home Page";
 }
 
+@if (TempData["Error"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-danger" role="alert">
+            @TempData["Error"]
+        </div>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-success" role="alert">
+            @TempData["Success"]
+        </div>
+    </div>
+}
+
 <!-- Hero Section -->
 <section class="hero" id="home">
     <div class="hero-content">
         <div class="text-rotator">
             <div class="text-set active">
-                <h1 class="glitch-text" data-text="DEVENEZ PRO CYBER">Maîtrisez&nbsp; l'art&nbsp; du&nbsp; hacking</h1>
+                <h1 class="glitch-text" data-text="DEVENEZ PRO CYBER">Apprenez&nbsp; la&nbsp; cybersécurité&nbsp; et&nbsp; le&nbsp; hacking&nbsp; éthique&nbsp; pas&nbsp; à&nbsp; pas</h1>
                 <p class="subtitle">Vous avez déjà essayé d'apprendre le hacking mais vous vous êtes perdu</p>
             </div>
             <div class="text-set">
@@ -21,8 +39,8 @@
         </div>
     </div>
     <div class="cta-container">
-        <a  asp-controller="Account" asp-action="Register" class="cta-button cta-primary">Commencer la formation - 19€/mois (valeur<strike>49€</strike>)</a>
-        <a href="#about" class="cta-button cta-secondary">En savoir plus</a>
+        <a  asp-controller="Account" asp-action="Register" class="cta-button cta-primary">FORMATION - 29€/mois</a>
+        <a href="#features" class="cta-button cta-secondary">En savoir plus</a>
     </div>
 </section>
 
@@ -157,13 +175,13 @@
             <div class="testimonial-header">
                 <div class="testimonial-avatar">
                     <div class="avatar-circle">
-                        <i class="fas fa-user-shield"></i>
+                        <img src="https://media.licdn.com/dms/image/v2/D4E03AQEmqYWx47r-tA/profile-displayphoto-scale_200_200/B4EZrCCAVFKkAc-/0/1764191899052?e=1774483200&v=beta&t=IKTdIBOcDyNZGZ-lHnjrC4dTYPBiApaYM8K5Vdxgkc8">
                     </div>
                     <div class="avatar-glow"></div>
                 </div>
                 <div class="testimonial-meta">
-                    <h4 class="testimonial-name">Julien R.</h4>
-                    <p class="testimonial-role">Analyste Sécurité</p>
+                    <h4 class="testimonial-name">Alexandre Bas</h4>
+                    <p class="testimonial-role">système réseaux & cybersécurité</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -178,26 +196,22 @@
                 <p class="testimonial-text">Cette formation m'a permis de passer de débutant à un niveau professionnel. Les labs et exercices sont très réalistes ! La progression est fluide et j'ai pu rapidement mettre en pratique mes nouvelles compétences.</p>
                 <div class="testimonial-badge">
                     <i class="fas fa-certificate"></i>
-                    <span>Certifié CEH</span>
+                    <span class="nav-links"><a href="https://www.linkedin.com/in/alexandre-bas-70b358253/" target="_blank">Profil Linkedin</a></span>
                 </div>
             </div>
         </div>
 
         <div class="testimonial-card featured">
-            <div class="featured-badge">
-                <i class="fas fa-crown"></i>
-                <span>Coup de cœur</span>
-            </div>
             <div class="testimonial-header">
                 <div class="testimonial-avatar">
                     <div class="avatar-circle">
-                        <i class="fas fa-user-secret"></i>
+                        <img src="https://media.licdn.com/dms/image/v2/D4E03AQFSr4xaeSze_Q/profile-displayphoto-shrink_100_100/B4EZbZbAeOHkAY-/0/1747404458754?e=1774483200&amp;v=beta&amp;t=wTjtoxB0ZyF0X4QcUn9XPwVuic3Ytf5yvBWB8kb3DJg">
                     </div>
                     <div class="avatar-glow"></div>
                 </div>
                 <div class="testimonial-meta">
-                    <h4 class="testimonial-name">Amélie D.</h4>
-                    <p class="testimonial-role">Pentesteuse Junior</p>
+                    <h4 class="testimonial-name">Benjamin Bacle</h4>
+                    <p class="testimonial-role">Ingénieur DevSecOps chez Stancer</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -209,10 +223,10 @@
             </div>
             <div class="testimonial-body">
                 <i class="quote-icon fas fa-quote-left"></i>
-                <p class="testimonial-text">Les formateurs sont pro et très pédagogues. J'ai décroché mon premier emploi en cybersécurité grâce à CYBER by Ingenius. Le contenu va bien au-delà de la théorie, c'est du concret !</p>
+                <p class="testimonial-text">Monsieur Lamri a été mon professeur du module Linux cette année, et il a su montrer que les connaissances pures se développent avec le temps et la régularité. Il a apporté à ma classe une véritable richesse et une grande fraîcheur, (avec une petite touche d’humour pas déplaisante 😆) qui a su rapprocher les étudiants et susciter l’intérêt de toute la classe. Les cours étaient dynamiques, avec des TD vraiment intéressants et agréables à réaliser. Il a su faire l’unanimité. Bravo et merci 🙏 </p>
                 <div class="testimonial-badge">
                     <i class="fas fa-briefcase"></i>
-                    <span>Embauché en 3 mois</span>
+                    <span class="nav-links"><a href="https://www.linkedin.com/in/bbenjamin28/" target="_blank">Profil Linkedin</a></span>
                 </div>
             </div>
         </div>
@@ -221,13 +235,13 @@
             <div class="testimonial-header">
                 <div class="testimonial-avatar">
                     <div class="avatar-circle">
-                        <i class="fas fa-user-tie"></i>
+                        <img src="https://media.licdn.com/dms/image/v2/C5603AQE0z7JkKgeT0Q/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1517251007126?e=1774483200&v=beta&t=DPOjWHC4uNb5T7p8kBm7YrpNOfXNNiggptrBXDPFPJo" >
                     </div>
                     <div class="avatar-glow"></div>
                 </div>
                 <div class="testimonial-meta">
-                    <h4 class="testimonial-name">Marc L.</h4>
-                    <p class="testimonial-role">Consultant Sécurité</p>
+                    <h4 class="testimonial-name">Deschamps Gaëlle</h4>
+                    <p class="testimonial-role">Ingénieur d'études et de développement chez CGI</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -239,10 +253,10 @@
             </div>
             <div class="testimonial-body">
                 <i class="quote-icon fas fa-quote-left"></i>
-                <p class="testimonial-text">Le contenu est clair, structuré et les certifications proposées donnent un vrai avantage sur le marché du travail. J'ai pu augmenter mon salaire de 40% après la formation.</p>
+                <p class="testimonial-text">Jamal a toujours pris le temps de répondre à nos questions et de reformuler ses explications lorsque nous avions du mal à comprendre. Il est très patient et très organisé ce qui permet de donner un bon rythme à la formation.</p>
                 <div class="testimonial-badge">
                     <i class="fas fa-chart-line"></i>
-                    <span>+40% de salaire</span>
+                    <span class="nav-links"><a href="https://www.linkedin.com/in/ga%C3%ABlle-deschamps-b73096105/" target="_blank">Profil Linkedin</a></span>
                 </div>
             </div>
         </div>
@@ -267,14 +281,14 @@
             <div class="stat-icon">
                 <i class="fas fa-briefcase"></i>
             </div>
-            <h3 class="stat-number" data-target="87">80</h3>
+            <h3 class="stat-number" data-target="87">87</h3>
             <p class="stat-label">% d'embauche</p>
         </div>
         <div class="stat-item">
             <div class="stat-icon">
                 <i class="fas fa-certificate"></i>
             </div>
-            <h3 class="stat-number" data-target="650">90</h3>
+            <h3 class="stat-number" data-target="90">90</h3>
             <p class="stat-label">% de satisfaction</p>
         </div>
     </div>
@@ -351,6 +365,8 @@
             <p>Mettez en pratique vos connaissances avec un suivi personnalisé.</p>
         </div>
     </div>
+
+    <a  asp-controller="Account" asp-action="Register" class="cta-button cta-primary section-title">COMMENCER LA FORMATION - 29€/mois</a>
 </section>
 
 <!-- Contact Section -->
@@ -449,6 +465,38 @@
         margin-bottom: 16px;
         color: rgba(255, 255, 255, 0.92);
         font-size: 1.02rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #exitLeadConfetti {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6;
+    }
+
+    .exit-confetti-piece {
+        position: absolute;
+        top: -16px;
+        width: 10px;
+        height: 16px;
+        border-radius: 2px;
+        opacity: 0;
+        animation-name: exitConfettiFall;
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+    }
+
+    @@keyframes exitConfettiFall {
+        0% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translate3d(var(--confetti-x, 0px), 360px, 0) rotate(540deg);
+            opacity: 0;
+        }
     }
 
     #exitLeadEmail,
@@ -507,12 +555,56 @@
         .exit-lead-actions .btn {
             width: 100%;
         }
+        .about {
+            display: none;
+        }
+        .features {
+            padding: 0px;
+        }
+        .testimonials {
+            padding: 0px;
+        }
+        .section-title {
+            font-size: 2rem;
+        }
+        .hero {
+            min-height: 63vh;
+            display: block;
+            margin-top: 16px;
+        }
+
+    }
+
+    .avatar-circle {
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #fff;
+    }
+
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Empêche l'image d'être déformée */
+    }
+
+    /* Optionnel : Style pour l'icône FontAwesome en superposition */
+    .avatar-circle i {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #333;
+        color: white;
+        padding: 5px;
+        border-radius: 50%;
+        font-size: 12px;
+        border: 2px solid #fff;
     }
 </style>
 
 <div id="exitLeadOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100">
     <div class="d-flex align-items-center justify-content-center h-100 p-3">
         <div class="exit-lead-modal">
+            <div id="exitLeadConfetti" aria-hidden="true"></div>
             <div class="exit-lead-header">
                 <div>
                     <span class="exit-lead-badge">Ressource offerte</span>
@@ -536,8 +628,10 @@
                         <input id="exitLeadCaptcha" name="captchaAnswer" type="text" class="form-control" inputmode="numeric" placeholder="Votre réponse" required />
                     </div>
 
+                    <div id="exitLeadMessage" class="small mb-2"></div>
+
                     <div class="d-flex gap-2 justify-content-end exit-lead-actions">
-                        <button type="submit" class="btn btn-primary">Recevoir la ressource</button>
+                        <button type="submit" id="exitLeadSubmit" class="btn btn-primary">Recevoir la ressource</button>
                     </div>
                 </form>
             </div>
@@ -545,23 +639,6 @@
     </div>
 </div>
 
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '302873625407792');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=302873625407792&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
 
 <script>
     (function () {
@@ -569,6 +646,15 @@ src="https://www.facebook.com/tr?id=302873625407792&ev=PageView&noscript=1"
         const overlay = document.getElementById('exitLeadOverlay');
         const closeButton = document.getElementById('closeExitLeadPopup');
         const form = document.getElementById('exitLeadForm');
+        const emailInput = document.getElementById('exitLeadEmail');
+        const submitButton = document.getElementById('exitLeadSubmit');
+        const messageBox = document.getElementById('exitLeadMessage');
+        const confettiContainer = document.getElementById('exitLeadConfetti');
+        const checkEmailUrl = '@Url.Action("CheckCyberResourceEmail", "Home")';
+        const submitAjaxUrl = '@Url.Action("CaptureCyberResourceEmailAjax", "Home")';
+        const submitButtonDefaultText = submitButton?.textContent || 'Recevoir la ressource';
+        let isAlreadyRegistered = false;
+        let isSubmitting = false;
 
         if (!overlay || sessionStorage.getItem(popupKey) === '1') {
             return;
@@ -589,7 +675,6 @@ src="https://www.facebook.com/tr?id=302873625407792&ev=PageView&noscript=1"
             overlay.style.transform = 'translate(-50%, -50%)';
             overlay.classList.remove('d-none');
             document.body.style.overflow = 'hidden';
-            const emailInput = document.getElementById('exitLeadEmail');
             if (emailInput) {
                 emailInput.focus();
             }
@@ -615,9 +700,247 @@ src="https://www.facebook.com/tr?id=302873625407792&ev=PageView&noscript=1"
             }
         });
 
-        form?.addEventListener('submit', function () {
+        function setMessage(text, type) {
+            if (!messageBox) {
+                return;
+            }
+
+            messageBox.textContent = text || '';
+            messageBox.classList.remove('text-danger', 'text-success', 'text-muted');
+
+            if (type === 'error') {
+                messageBox.classList.add('text-danger');
+            } else if (type === 'success') {
+                messageBox.classList.add('text-success');
+            } else {
+                messageBox.classList.add('text-muted');
+            }
+        }
+
+        function setSubmitDisabled(disabled) {
+            if (!submitButton) {
+                return;
+            }
+
+            submitButton.disabled = !!disabled;
+        }
+
+        function refreshSubmitState() {
+            setSubmitDisabled(isAlreadyRegistered || isSubmitting);
+        }
+
+        function setSubmitLoading(loading) {
+            isSubmitting = !!loading;
+
+            if (submitButton) {
+                if (loading) {
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Envoi...';
+                } else {
+                    submitButton.textContent = submitButtonDefaultText;
+                }
+            }
+
+            refreshSubmitState();
+        }
+
+        function launchConfetti() {
+            if (!confettiContainer) {
+                return;
+            }
+
+            confettiContainer.innerHTML = '';
+            const palette = [
+                'var(--bs-warning)',
+                'var(--bs-info)',
+                'var(--bs-success)',
+                'var(--bs-primary)',
+                'var(--bs-danger)'
+            ];
+
+            for (let i = 0; i < 34; i++) {
+                const piece = document.createElement('span');
+                piece.className = 'exit-confetti-piece';
+                piece.style.left = `${Math.random() * 100}%`;
+                piece.style.backgroundColor = palette[Math.floor(Math.random() * palette.length)];
+                piece.style.animationDuration = `${900 + Math.random() * 800}ms`;
+                piece.style.animationDelay = `${Math.random() * 180}ms`;
+                piece.style.setProperty('--confetti-x', `${-120 + Math.random() * 240}px`);
+                confettiContainer.appendChild(piece);
+            }
+
+            setTimeout(function () {
+                confettiContainer.innerHTML = '';
+            }, 2200);
+        }
+
+        let checkEmailTimeout;
+        emailInput?.addEventListener('input', function () {
+            const email = (emailInput.value || '').trim();
+            isAlreadyRegistered = false;
+            refreshSubmitState();
+
+            if (checkEmailTimeout) {
+                clearTimeout(checkEmailTimeout);
+            }
+
+            if (!email) {
+                setMessage('', 'info');
+                return;
+            }
+
+            checkEmailTimeout = setTimeout(async function () {
+                try {
+                    const response = await fetch(`${checkEmailUrl}?email=${encodeURIComponent(email)}`, {
+                        method: 'GET',
+                        credentials: 'same-origin'
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (data.exists) {
+                        isAlreadyRegistered = true;
+                        setMessage('Vous êtes déjà inscrit.', 'error');
+                    } else {
+                        isAlreadyRegistered = false;
+                        setMessage('', 'info');
+                    }
+
+                    refreshSubmitState();
+                } catch {
+                }
+            }, 350);
+        });
+
+        form?.addEventListener('submit', async function (event) {
+            event.preventDefault();
             sessionStorage.setItem(popupKey, '1');
+
+            if (!form) {
+                return;
+            }
+
+            if (submitButton?.disabled) {
+                setMessage('Vous êtes déjà inscrit. Vérifieer votre mail', 'error');
+                return;
+            }
+
+            setSubmitLoading(true);
+
+            try {
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                for (const [key, value] of formData.entries()) {
+                    if (typeof value === 'string') {
+                        params.append(key, value);
+                    }
+                }
+
+                const response = await fetch(submitAjaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: params.toString()
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    setMessage(data.message || 'Une erreur est survenue. Veuillez réessayer.', 'error');
+                    isAlreadyRegistered = !!data.alreadyRegistered;
+                    setSubmitLoading(false);
+                    return;
+                }
+
+                setMessage('Merci ! Votre inscription est bien enregistrée.', 'success');
+                launchConfetti();
+                setSubmitLoading(false);
+
+                setTimeout(function () {
+                    if (data.redirectUrl) {
+                        window.open(data.redirectUrl, '_blank');
+                    }
+                    hidePopup();
+                }, 1200);
+            } catch {
+                setMessage('Une erreur est survenue. Veuillez réessayer.', 'error');
+                isAlreadyRegistered = false;
+                setSubmitLoading(false);
+            }
         });
     })();
 
+
+
+
+
+
+(function() {
+    // --- INITIALISATION DU JEU ---
+    // On cache discrètement le jeton du niveau 2 dans le Local Storage du navigateur
+    // "cGFzc3dvcmRfYWRtaW5fMTMzNw==" est l'encodage Base64 de "password_admin_1337"
+    localStorage.setItem('cyber_flag_lvl2', 'cGFzc3dvcmRfYWRtaW5fMTMzNw==');
+
+    // Styles pour la console
+    const styleTitre = "color: #00ff00; font-size: 24px; font-weight: bold; background: #000; padding: 10px; border-radius: 5px;";
+    const styleTexte = "color: #00ff00; font-size: 14px; background: #000; padding: 5px;";
+    const styleSucces = "color: gold; font-size: 20px; font-weight: bold; background: #333; padding: 10px;";
+    const stylePromo = "color: white; font-size: 24px; font-weight: bold; background: red; padding: 5px; border-radius: 3px;";
+
+    // Message d'accueil
+    console.log("%c Défi hacker Activé ! ", styleTitre);
+    console.log("%cTu cherches un bon de réduction ? Prouve que tu as l'âme d'un hacker.", styleTexte);
+    console.log("Niveau 1 : Trouve la fonction 'dechiffrerPromo()'. Elle prend un nombre en paramètre : la réponse à la grande question sur la vie, l'univers et le reste.");
+
+    // --- NIVEAU 1 ---
+    window.dechiffrerPromo = function(motDePasse) {
+        if (motDePasse === 42) {
+            console.log("%c🔓 NIVEAU 1 VALIDÉ !", styleSucces);
+            console.log("%cMais ce n'est pas fini... Le pare-feu bloque l'accès au code promo.", styleTexte);
+            console.log("NIVEAU 2 : J'ai injecté un jeton secret dans le 'Local Storage' de ton navigateur sous la clé 'cyber_flag_lvl2'.");
+            console.log("Trouve-le, décode-le (indice: Base64), et utilise la fonction secrète bypassFirewall(jeton_decode).");
+            return "Passe au Niveau 2.";
+        } else if (motDePasse === undefined) {
+            console.warn("Il manque le mot de passe ! Exemple : dechiffrerPromo(123)");
+        } else {
+            console.error("Accès refusé. Mauvais mot de passe.");
+        }
+        return "Échec du piratage...";
+    };
+
+    // --- NIVEAU 2 ---
+    window.bypassFirewall = function(jeton) {
+        // Le joueur doit passer la version DÉCODÉE du jeton
+        if (jeton === 'password_admin_1337') {
+            // Le code promo final encodé en Base64 
+            const codeEncode = "U1VQRVI1MA==";
+            
+            try {
+                const codePromo = atob(codeEncode);
+                console.log("%cBINGO ! SYSTÈME COMPROMIS 🎉", styleSucces);
+                console.log("Félicitations, tu as déjoué la sécurité ! Voici ton code de réduction :");
+                console.log("%c" + codePromo, stylePromo);
+                
+                // Optionnel : on nettoie les traces
+                localStorage.removeItem('cyber_flag_lvl2');
+                
+                return "Quête accomplie. Inscrit toi !";
+            } catch (e) {
+                console.error("Erreur système.");
+            }
+        } else if (jeton === 'cGFzc3dvcmRfYWRtaW5fMTMzNw==') {
+            console.warn("Presque ! Tu as trouvé le jeton, mais tu as oublié de le décoder. (Indice : cherche un décodeur Base64 en ligne ou utilise la fonction atob() du navigateur).");
+        } else if (jeton === undefined) {
+            console.warn("Il faut fournir le jeton décodé en paramètre !");
+        } else {
+            console.error("Alerte Intrusion ! Mauvais jeton.");
+        }
+        return "Le pare-feu tient bon...";
+    };
+})();
 </script>

@@ -1,0 +1,217 @@
+﻿@page
+@model IEnumerable<CrudDemo.Models.Lesson>
+
+
+
+    <style>
+        :root {
+            --primary-color: #1a3a5f;
+            --accent-color: #0078d4;
+            --text-color: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Style du bouton imprimer --- */
+        .no-print-zone {
+            padding: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .btn-print {
+            padding: 12px 25px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-print:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* --- Structure du Certificat (A4 Paysage) --- */
+        .certificate-page {
+            width: 297mm;
+            height: 210mm;
+            background-color: white;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding-top: 15px;
+        }
+
+        .border-outer {
+            width: 280mm;
+            height: 190mm;
+            border: 5px solid var(--primary-color);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .border-inner {
+            width: 275mm;
+            height: 185mm;
+            border: 2px solid var(--accent-color);
+            padding: 40px;
+            text-align: center;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 55px;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+        }
+
+        .header p {
+            font-size: 20px;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .content .present { font-style: italic; font-size: 22px; }
+        .content .name {
+            font-size: 50px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 2px solid #ccc;
+            display: inline-block;
+            margin: 15px 0;
+            padding: 0 60px;
+        }
+
+        .content .course { font-size: 24px; margin-top: 25px; }
+        .course-title { font-weight: bold; color: var(--accent-color); }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+            padding: 0 50px;
+        }
+
+        .signature-block { width: 220px; text-align: center; }
+        .signature-line { border-top: 1px solid #333; margin-bottom: 8px; }
+
+        .badge {
+            width: 110px; height: 110px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 13px;
+            text-align: center;
+            border: 4px double white;
+            box-shadow: 0 0 0 4px var(--primary-color);
+        }
+
+   
+/* --- CONFIGURATION IMPRESSION --- */
+    @@media print {
+            /* On cache tout ce qui n'est pas le certificat */
+            body { background: white; padding: 0; }
+            .no-print-zone { display: none !important; }
+            
+            .certificate-page {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+            }
+            .menu-dashboard {
+                display: none;
+            }
+
+            /* Force les couleurs de fond à l'impression */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            @@page {
+                size: A4 landscape;
+                margin: 0;
+            }
+        }
+   
+    </style>
+
+    <div class="no-print-zone">
+        <button class="btn-print" onclick="window.print()">
+            🖨️ Imprimer le certificat
+        </button>
+    </div>
+
+    <div class="certificate-page">
+        <div class="border-outer">
+            <div class="border-inner">
+                
+                <div class="header">
+                    <h1>CERTIFICAT</h1>
+                    <p>DE RÉUSSITE</p>
+                </div>
+
+                <div class="content">
+                    <p class="present">Ce document est fièrement décerné à</p>
+                    <div class="name">NOM DE L'APPRENANT</div>
+                    <p class="course">
+                        Pour avoir complété avec succès le module d'initiation :<br>
+                        <span class="course-title">CYBER BASE - LES FONDAMENTAUX</span>
+                    </p>
+                    <p style="font-size: 16px; color: #666; margin-top: 20px;">
+                        Fait le : <strong>07 Mars 2026</strong>
+                    </p>
+                </div>
+
+                <div class="footer">
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <span>Le Formateur</span>
+                    </div>
+
+                    <div class="badge">
+                        CYBER<br>BASE<br>2026
+                    </div>
+
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <span>Direction</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
