@@ -44,11 +44,8 @@
             </svg>
             <span class="logo-text">INGENIUS</span>
         </a>
-        <a asp-controller="Account" asp-action="Register" class="cta-button cta-primary" >Inscription</a>
+        
         <ul class="nav-links" id="navLinks">
-            <li>
-                <a href="/#home" class="nav-link">Accueil</a>
-            </li>
             <li>
                 <a asp-area="" asp-controller="Home" asp-action="Outils" class="nav-link">Outils</a>
             </li>
@@ -95,6 +92,7 @@
 
         </ul>
         <div class="menu-toggle" id="menuToggle">
+            <a asp-controller="Account" asp-action="Register" class="cta-button cta-primary" >Inscription</a>
             <span></span><span></span><span></span>
         </div>
     </div>
