@@ -53,27 +53,32 @@ namespace CrudDemo.Controllers
             var quizAttempts = 0;
             var quizCorrectAnswers = 0;
             DateTime? lastQuizAttemptAt = null;
+            var totalQuizCount = await _context.Quizzes.AsNoTracking().CountAsync();
+            var completedQuizCount = 0;
 
             if (!string.IsNullOrEmpty(userId))
             {
-                var quizStats = await _context.UserQuizResults
+                var userQuizResults = await _context.UserQuizResults
                     .AsNoTracking()
                     .Where(r => r.UserId == userId)
-                    .GroupBy(_ => 1)
-                    .Select(group => new
-                    {
-                        Attempts = group.Count(),
-                        CorrectAnswers = group.Count(x => x.IsCorrect),
-                        LastAttemptAt = group.Max(x => x.AttemptedAt)
-                    })
-                    .FirstOrDefaultAsync();
+                    .Select(r => new { r.QuizId, r.IsCorrect, r.AttemptedAt })
+                    .ToListAsync();
 
-                if (quizStats != null)
+                var latestResultsByQuiz = userQuizResults
+                    .GroupBy(r => r.QuizId)
+                    .Select(group => group
+                        .OrderByDescending(x => x.AttemptedAt)
+                        .First())
+                    .ToList();
+
+                if (latestResultsByQuiz.Count > 0)
                 {
-                    quizAttempts = quizStats.Attempts;
-                    quizCorrectAnswers = quizStats.CorrectAnswers;
-                    lastQuizAttemptAt = quizStats.LastAttemptAt;
+                    quizAttempts = latestResultsByQuiz.Count;
+                    quizCorrectAnswers = latestResultsByQuiz.Count(x => x.IsCorrect);
+                    lastQuizAttemptAt = latestResultsByQuiz.Max(x => x.AttemptedAt);
                 }
+
+                completedQuizCount = latestResultsByQuiz.Count;
             }
 
             string? orientationRole = null;
@@ -119,6 +124,9 @@ namespace CrudDemo.Controllers
             }
 
             var successRate = quizAttempts == 0 ? 0 : (quizCorrectAnswers * 100.0) / quizAttempts;
+            var isCertificateEligible = totalQuizCount > 0
+                && completedQuizCount == totalQuizCount
+                && successRate > 80;
 
             var memberProfile = new MemberProfileViewModel
             {
@@ -131,7 +139,10 @@ namespace CrudDemo.Controllers
                 QuizAttempts = quizAttempts,
                 QuizCorrectAnswers = quizCorrectAnswers,
                 QuizSuccessRate = Math.Round(successRate, 1),
-                LastQuizAttemptAt = lastQuizAttemptAt
+                LastQuizAttemptAt = lastQuizAttemptAt,
+                TotalQuizCount = totalQuizCount,
+                CompletedQuizCount = completedQuizCount,
+                IsCertificateEligible = isCertificateEligible
             };
 
             return View(memberProfile);

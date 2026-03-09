@@ -112,6 +112,25 @@
             padding: 0 60px;
         }
 
+        .content .name .name-input {
+            width: 100%;
+            min-width: 420px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 50px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .content .name .name-input::placeholder {
+            color: #7f8c9a;
+            opacity: 1;
+            text-transform: none;
+        }
+
         .content .course { font-size: 24px; margin-top: 25px; }
         .course-title { font-weight: bold; color: var(--accent-color); }
 
@@ -186,10 +205,17 @@
 
                 <div class="content">
                     <p class="present">Ce document est fièrement décerné à</p>
-                    <div class="name">NOM DE L'APPRENANT</div>
+                    <div class="name">
+                        <input
+                            id="learner-name"
+                            class="name-input"
+                            type="text"
+                            maxlength="80"
+                            placeholder="Entrez votre nom complet" />
+                    </div>
                     <p class="course">
                         Pour avoir complété avec succès le module d'initiation :<br>
-                        <span class="course-title">CYBER BASE - LES FONDAMENTAUX</span>
+                        <span class="course-title">CYBER - LES FONDAMENTAUX</span>
                     </p>
                     <p style="font-size: 16px; color: #666; margin-top: 20px;">
                         Fait le : <strong>07 Mars 2026</strong>
@@ -197,19 +223,11 @@
                 </div>
 
                 <div class="footer">
-                    <div class="signature-block">
-                        <div class="signature-line"></div>
-                        <span>Le Formateur</span>
-                    </div>
 
                     <div class="badge">
-                        CYBER<br>BASE<br>2026
+                        INGENIUS<br>>2026
                     </div>
 
-                    <div class="signature-block">
-                        <div class="signature-line"></div>
-                        <span>Direction</span>
-                    </div>
                 </div>
 
             </div>

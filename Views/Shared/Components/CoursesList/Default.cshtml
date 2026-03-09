@@ -16,17 +16,60 @@
         <span class="logo-text">INGENIUS</span>
     </a>
 
-    <h2>APPLICATIONS</h2>
+    <div id="applications-onboarding-section" data-app-onboarding="section">
+        <h2>APPLICATIONS</h2>
 
-    <a href="https://discord.gg/ZJGDPfVwMt" target="_blank"><i class="fas fa-comments"></i> ENTRAIDE</a>
+        <div class="onboarding-arrow-indicator" aria-hidden="true">
+            <span class="onboarding-arrow-track"></span>
+            <span class="onboarding-arrow-shape">⬅</span>
+        </div>
 
-    <a href="http://ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/" target="_blank"><i class="fas fa-comments"></i> KALI LINUX SANDBOX</a>
-    <a asp-controller="Courses" asp-action="Event"><i class="fas fa-comments"></i> Evenement (live, chall, new)</a>
-    <a asp-area="" asp-controller="Courses" asp-action="Member"><i class="fa-regular fa-circle-user"></i> Profil</a>
-    <a href="http://13.38.113.143:8000"  target="_blank"><i class="fa-solid fa-hat-cowboy"></i> CTF guidé</a>
-    <a asp-controller="Courses" asp-action="Challenges">🎁 Challenges</a>
+        <div id="applications-onboarding" data-app-onboarding="box" class="alert alert-primary py-3 px-3 mt-2 mb-3 d-none" role="dialog" aria-modal="true" aria-label="Onboarding applications">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="onboarding-heading">Tour rapide des applications 👋 <span class="onboarding-live-badge">GUIDE</span></strong>
+                <span id="applications-onboarding-step" data-app-onboarding="step" class="badge text-bg-light">Étape 1/9</span>
+            </div>
 
-    <h2>COURS</h2>
+            <div class="progress mb-2" style="height: 6px;">
+                <div
+                    id="applications-onboarding-progress"
+                    data-app-onboarding="progress"
+                    class="progress-bar progress-bar-striped progress-bar-animated"
+                    role="progressbar"
+                    style="width: 11.11%;"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="11">
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-1 mb-2" data-app-onboarding="chips"></div>
+
+            <div class="mb-2">
+                <p id="applications-onboarding-title" data-app-onboarding="title" class="mb-1 fw-semibold">ENTRAIDE</p>
+                <p id="applications-onboarding-description" data-app-onboarding="description" class="mb-0">Pose des questions et échange avec la communauté sur Discord.</p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <small class="text-muted" data-app-onboarding="hint">Le lien en cours est mis en évidence dans la liste.</small>
+                <div class="d-flex gap-2">
+                    <button id="applications-onboarding-open" data-app-onboarding="open" type="button" class="btn btn-sm btn-outline-dark d-none">Ouvrir</button>
+                    <button id="applications-onboarding-skip" data-app-onboarding="skip" type="button" class="btn btn-sm btn-outline-secondary">Passer</button>
+                    <button id="applications-onboarding-prev" data-app-onboarding="prev" type="button" class="btn btn-sm btn-outline-primary" disabled>Précédent</button>
+                    <button id="applications-onboarding-next" data-app-onboarding="next" type="button" class="btn btn-sm btn-primary onboarding-next-cta">Suivant</button>
+                </div>
+            </div>
+        </div>
+        <a data-onboarding-app="entraide" href="https://discord.gg/ZJGDPfVwMt" target="_blank"><i class="fas fa-comments"></i> ENTRAIDE</a>
+
+        <a data-onboarding-app="kali" href="http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/" target="_blank"><i class="fas fa-comments"></i> KALI LINUX SANDBOX</a>
+        <a data-onboarding-app="event" asp-controller="Courses" asp-action="Event"><i class="fas fa-comments"></i> Evenement (live, chall, new)</a>
+        <a data-onboarding-app="profil" asp-area="" asp-controller="Courses" asp-action="Member"><i class="fa-regular fa-circle-user"></i> Profil</a>
+        <a data-onboarding-app="ctf" href="http://13.38.113.143:8000"  target="_blank"><i class="fa-solid fa-hat-cowboy"></i> CTF guidé</a>
+        <a data-onboarding-app="challenges" asp-controller="Courses" asp-action="Challenges">🎁 Challenges</a>
+    </div>
+
+    <h2 data-onboarding-app="cours">COURS</h2>
 
     @{
         var lessonSearchTerm = (Context.Request.Query["lessonSearch"].ToString() ?? string.Empty).Trim();
@@ -40,6 +83,7 @@
     <form method="get" asp-controller="Courses" asp-action="Index" class="mb-3">
         <div class="input-group">
             <input
+                data-onboarding-app="champ-recherche"
                 id="lesson-search"
                 name="lessonSearch"
                 type="search"
@@ -47,7 +91,7 @@
                 placeholder="Ex: sécurité, réseau, injection"
                 value="@lessonSearchTerm"
                 aria-label="Chercher une leçon"/><br/>
-            <button class="btn btn-primary" type="submit">Rechercher</button>
+            <button data-onboarding-app="rechercher" class="btn btn-primary" type="submit">Rechercher</button>
             @if (hasLessonSearch)
             {
                 <a class="btn btn-outline-secondary" asp-controller="Courses" asp-action="Index">Effacer</a>
@@ -164,5 +208,518 @@
         }
     }
 </div>
+
+<style>
+    .app-onboarding-active {
+        overflow: auto;
+    }
+
+    .onboarding-arrow-indicator {
+        display: none;
+        position: fixed;
+        top: 7vh;
+        width: min(35vw, 1250px);
+        z-index: 1080;
+        opacity: 0;
+        animation: onboardingArrowTraverse 0.1s ease-out forwards;
+    }
+
+    .app-onboarding-active .onboarding-arrow-indicator,
+    [data-app-onboarding="section"].onboarding-active .onboarding-arrow-indicator {
+        display: inline-flex;
+    }
+
+    .onboarding-arrow-text {
+        font-size: 1.08rem;
+        font-weight: 900;
+        background: rgba(12, 16, 28, 0.92);
+        color: rgba(var(--bs-warning-rgb), 1);
+        border: 2px solid rgba(var(--bs-warning-rgb), 0.95);
+        border-radius: 999px;
+        padding: 0.28rem 0.72rem;
+        animation: onboardingArrowAttention 1s ease-in-out infinite;
+    }
+
+    .onboarding-arrow-track {
+        flex: 1;
+        height: 0;
+        border-top: 10px solid rgba(var(--bs-warning-rgb), 1);
+        box-shadow: 0 0 22px rgba(var(--bs-warning-rgb), 0.95);
+        animation: onboardingTrackGlow 0.9s ease-in-out infinite;
+    }
+
+    .onboarding-arrow-shape {
+        font-size: 7.2rem;
+        line-height: 1;
+        display: inline-block;
+        color: rgba(var(--bs-warning-rgb), 1);
+        filter: drop-shadow(0 0 20px rgba(var(--bs-warning-rgb), 0.95));
+        animation: onboardingArrowNudge 0.55s ease-in-out infinite;
+    }
+
+    [data-app-onboarding="box"] {
+        position: sticky;
+        top: 12px;
+        z-index: 1060;
+        border: 1px solid rgba(var(--bs-primary-rgb), 0.45);
+        border-radius: 0.95rem;
+        background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.2), rgba(var(--bs-primary-rgb), 0.04));
+        box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.18);
+        overflow: hidden;
+    }
+
+    [data-app-onboarding="box"].onboarding-live {
+        animation: onboardingHeroPulse 1.8s ease-in-out infinite;
+    }
+
+    [data-app-onboarding="box"].onboarding-live::after {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 1rem;
+        pointer-events: none;
+        box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0.35);
+        animation: onboardingRing 1.6s ease-out infinite;
+    }
+
+    .onboarding-focus {
+        position: relative;
+        z-index: 1050;
+        border: 1px solid rgba(var(--bs-primary-rgb), 0.35);
+        border-radius: 0.5rem;
+        background-color: rgba(var(--bs-primary-rgb), 0.08);
+        padding-left: 0.5rem;
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.15);
+        transition: all 0.2s ease-in-out;
+        animation: onboardingPulse 1.7s ease-in-out infinite;
+    }
+
+    .onboarding-focus-soft {
+        position: relative;
+        z-index: 1050;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.15);
+        transition: all 0.2s ease-in-out;
+        animation: onboardingPulse 1.7s ease-in-out infinite;
+    }
+
+    .onboarding-chip {
+        border: 1px solid rgba(var(--bs-primary-rgb), 0.25);
+        background: rgba(var(--bs-primary-rgb), 0.06);
+        color: inherit;
+        border-radius: 999px;
+        padding: 0.15rem 0.55rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .onboarding-chip:hover {
+        transform: translateY(-1px);
+    }
+
+    .onboarding-chip.active {
+        background: rgba(var(--bs-primary-rgb), 0.22);
+        border-color: rgba(var(--bs-primary-rgb), 0.55);
+        font-weight: 600;
+        animation: onboardingChipPop 0.35s ease;
+    }
+
+    .onboarding-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 1.02rem;
+    }
+
+    .onboarding-live-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        letter-spacing: 0.04em;
+        padding: 0.1rem 0.4rem;
+        border-radius: 999px;
+        background: rgba(var(--bs-warning-rgb), 0.95);
+        color: #1f2937;
+        animation: onboardingBadgeBlink 1.2s ease-in-out infinite;
+    }
+
+    .onboarding-next-cta {
+        font-weight: 700;
+        position: relative;
+        animation: onboardingCtaBounce 1s ease-in-out infinite;
+    }
+
+    .onboarding-next-cta::after {
+        content: "→";
+        margin-left: 0.28rem;
+        display: inline-block;
+        animation: onboardingArrowMove 0.8s ease-in-out infinite;
+    }
+
+    @@keyframes onboardingPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+    }
+
+    @@keyframes onboardingHeroPulse {
+        0%,
+        100% {
+            transform: translateY(0);
+            box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.15), 0 0 0 0 rgba(var(--bs-primary-rgb), 0.35);
+        }
+        50% {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(var(--bs-primary-rgb), 0.2), 0 0 0 8px rgba(var(--bs-primary-rgb), 0.08);
+        }
+    }
+
+    @@keyframes onboardingRing {
+        0% {
+            box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0.35);
+            opacity: 1;
+        }
+        100% {
+            box-shadow: 0 0 0 14px rgba(var(--bs-primary-rgb), 0);
+            opacity: 0;
+        }
+    }
+
+    @@keyframes onboardingCtaBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-1px); }
+    }
+
+    @@keyframes onboardingArrowMove {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(2px); }
+    }
+
+    @@keyframes onboardingBadgeBlink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.62; }
+    }
+
+    @@keyframes onboardingChipPop {
+        0% { transform: scale(0.94); }
+        100% { transform: scale(1); }
+    }
+
+    @@keyframes onboardingArrowNudge {
+        0%, 100% { transform: translateX(0) scale(1); }
+        50% { transform: translateX(18px) scale(1.16); }
+    }
+
+    @@keyframes onboardingArrowAttention {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    @@keyframes onboardingArrowTraverse {
+        0% {
+            opacity: 0;
+            transform: translateX(-70px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes onboardingTrackGlow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.65; }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        [data-app-onboarding="box"].onboarding-live,
+        [data-app-onboarding="box"].onboarding-live::after,
+        .onboarding-focus,
+        .onboarding-focus-soft,
+        .onboarding-live-badge,
+        .onboarding-next-cta,
+        .onboarding-next-cta::after,
+        .onboarding-chip.active,
+        .onboarding-arrow-indicator,
+        .onboarding-arrow-shape,
+        .onboarding-arrow-track {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        var onboardingKey = "ingenius_applications_onboarding_seen_v4";
+        var hasSeenOnboarding = false;
+        try {
+            hasSeenOnboarding = localStorage.getItem(onboardingKey) === "true";
+        } catch (error) {
+            hasSeenOnboarding = false;
+        }
+
+        var steps = [
+            {
+                key: "entraide",
+                title: "ENTRAIDE",
+                description: "Pose des questions et échange avec la communauté sur Discord."
+            },
+            {
+                key: "kali",
+                title: "KALI LINUX SANDBOX",
+                description: "Accède à ton environnement de pratique pour les labs sécurité."
+            },
+            {
+                key: "event",
+                title: "Evenement",
+                description: "Retrouve les lives, challenges en direct et nouveautés de la plateforme."
+            },
+            {
+                key: "profil",
+                title: "Profil",
+                description: "Consulte ta progression et tes informations de membre."
+            },
+            {
+                key: "ctf",
+                title: "CTF guidé",
+                description: "Entraîne-toi avec un parcours CTF accompagné étape par étape."
+            },
+            {
+                key: "challenges",
+                title: "Challenges",
+                description: "Lance des exercices bonus pour renforcer tes acquis."
+            },
+            {
+                key: "cours",
+                title: "COURS",
+                description: "Cette section regroupe tous les cours disponibles avec leurs modules et leçons."
+            },
+            {
+                key: "champ-recherche",
+                title: "Champ de recherche",
+                description: "Saisis un mot-clé ici pour trouver rapidement les leçons qui t’intéressent."
+            },
+            {
+                key: "rechercher",
+                title: "Rechercher",
+                description: "Utilise ce bouton pour filtrer rapidement les leçons selon un mot-clé."
+            }
+        ];
+
+        var onboardingSections = document.querySelectorAll('[data-app-onboarding="section"]');
+        if (!onboardingSections.length) {
+            return;
+        }
+
+        onboardingSections.forEach(function (section) {
+            var onboardingBox = section.querySelector('[data-app-onboarding="box"]');
+            var stepBadge = section.querySelector('[data-app-onboarding="step"]');
+            var progressBar = section.querySelector('[data-app-onboarding="progress"]');
+            var titleElement = section.querySelector('[data-app-onboarding="title"]');
+            var descriptionElement = section.querySelector('[data-app-onboarding="description"]');
+            var hintElement = section.querySelector('[data-app-onboarding="hint"]');
+            var chipsContainer = section.querySelector('[data-app-onboarding="chips"]');
+            var openButton = section.querySelector('[data-app-onboarding="open"]');
+            var skipButton = section.querySelector('[data-app-onboarding="skip"]');
+            var prevButton = section.querySelector('[data-app-onboarding="prev"]');
+            var nextButton = section.querySelector('[data-app-onboarding="next"]');
+
+            if (!onboardingBox || !stepBadge || !progressBar || !titleElement || !descriptionElement || !hintElement || !chipsContainer || !openButton || !skipButton || !prevButton || !nextButton) {
+                return;
+            }
+
+            var activeLink = null;
+            var currentStep = 0;
+            var activeTarget = null;
+            var isOpen = false;
+
+            function handleKeyDown(event) {
+                if (!isOpen) {
+                    return;
+                }
+
+                if (event.key === "Escape") {
+                    closeOnboarding();
+                    return;
+                }
+
+                if (event.key === "ArrowRight") {
+                    event.preventDefault();
+                    if (currentStep >= steps.length - 1) {
+                        closeOnboarding();
+                    } else {
+                        currentStep += 1;
+                        focusStep(currentStep);
+                    }
+                    return;
+                }
+
+                if (event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    if (currentStep > 0) {
+                        currentStep -= 1;
+                        focusStep(currentStep);
+                    }
+                }
+            }
+
+            chipsContainer.innerHTML = "";
+            steps.forEach(function (step, index) {
+                var chipButton = document.createElement("button");
+                chipButton.type = "button";
+                chipButton.className = "onboarding-chip";
+                chipButton.textContent = String(index + 1);
+                chipButton.setAttribute("aria-label", "Aller à l'étape " + (index + 1) + " : " + step.title);
+                chipButton.addEventListener("click", function () {
+                    currentStep = index;
+                    focusStep(currentStep);
+                });
+                chipsContainer.appendChild(chipButton);
+            });
+
+            function focusStep(stepIndex) {
+                var step = steps[stepIndex];
+                if (!step) {
+                    return;
+                }
+
+                if (activeLink) {
+                    activeLink.classList.remove("onboarding-focus");
+                }
+                if (activeTarget) {
+                    activeTarget.classList.remove("onboarding-focus-soft");
+                }
+
+                var nextLink = section.querySelector('[data-onboarding-app="' + step.key + '"]')
+                    || document.querySelector('[data-onboarding-app="' + step.key + '"]');
+                if (nextLink) {
+                    var tagName = (nextLink.tagName || "").toUpperCase();
+                    if (tagName === "A") {
+                        nextLink.classList.add("onboarding-focus");
+                        activeLink = nextLink;
+                    } else {
+                        nextLink.classList.add("onboarding-focus-soft");
+                        activeLink = null;
+                    }
+
+                    activeTarget = nextLink;
+                    if (typeof nextLink.scrollIntoView === "function") {
+                        nextLink.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                } else {
+                    activeLink = null;
+                    activeTarget = null;
+                }
+
+                titleElement.textContent = step.title;
+                descriptionElement.textContent = step.description;
+                stepBadge.textContent = "Étape " + (stepIndex + 1) + "/" + steps.length;
+                hintElement.textContent = "Astuce : flèches ← / → pour naviguer, Échap pour fermer.";
+
+                var progressPercent = ((stepIndex + 1) / steps.length) * 100;
+                progressBar.style.width = progressPercent + "%";
+                progressBar.setAttribute("aria-valuenow", String(Math.round(progressPercent)));
+
+                var chips = chipsContainer.querySelectorAll(".onboarding-chip");
+                chips.forEach(function (chip, idx) {
+                    chip.classList.toggle("active", idx === stepIndex);
+                });
+
+                prevButton.disabled = stepIndex === 0;
+                nextButton.textContent = stepIndex === steps.length - 1 ? "Terminer" : "Suivant";
+
+                var href = nextLink && nextLink.getAttribute ? nextLink.getAttribute("href") : null;
+                if (href) {
+                    openButton.classList.remove("d-none");
+                    openButton.dataset.targetHref = href;
+                    openButton.dataset.targetBlank = nextLink.getAttribute("target") === "_blank" ? "true" : "false";
+                    openButton.textContent = "Ouvrir";
+                } else {
+                    openButton.classList.add("d-none");
+                    openButton.dataset.targetHref = "";
+                    openButton.dataset.targetBlank = "false";
+                }
+            }
+
+            function closeOnboarding() {
+                onboardingBox.classList.add("d-none");
+                onboardingBox.classList.remove("onboarding-live");
+                onboardingBox.style.display = "none";
+                onboardingBox.setAttribute("aria-hidden", "true");
+                document.body.classList.remove("app-onboarding-active");
+                section.classList.remove("onboarding-active");
+                isOpen = false;
+                document.removeEventListener("keydown", handleKeyDown);
+                if (activeLink) {
+                    activeLink.classList.remove("onboarding-focus");
+                }
+                if (activeTarget) {
+                    activeTarget.classList.remove("onboarding-focus-soft");
+                }
+
+                try {
+                    localStorage.setItem(onboardingKey, "true");
+                } catch (error) {
+                }
+            }
+
+            if (!hasSeenOnboarding) {
+                onboardingBox.classList.remove("d-none");
+                onboardingBox.classList.add("onboarding-live");
+                onboardingBox.style.display = "";
+                onboardingBox.removeAttribute("aria-hidden");
+                document.body.classList.add("app-onboarding-active");
+                section.classList.add("onboarding-active");
+                isOpen = true;
+                document.addEventListener("keydown", handleKeyDown);
+                focusStep(currentStep);
+            } else {
+                onboardingBox.classList.add("d-none");
+                onboardingBox.classList.remove("onboarding-live");
+                onboardingBox.style.display = "none";
+                onboardingBox.setAttribute("aria-hidden", "true");
+                section.classList.remove("onboarding-active");
+            }
+
+            prevButton.addEventListener("click", function () {
+                if (currentStep <= 0) {
+                    return;
+                }
+
+                currentStep -= 1;
+                focusStep(currentStep);
+            });
+
+            nextButton.addEventListener("click", function () {
+                if (currentStep >= steps.length - 1) {
+                    closeOnboarding();
+                    return;
+                }
+
+                currentStep += 1;
+                focusStep(currentStep);
+            });
+
+            skipButton.addEventListener("click", function () {
+                closeOnboarding();
+            });
+
+            openButton.addEventListener("click", function () {
+                var href = openButton.dataset.targetHref;
+                if (!href) {
+                    return;
+                }
+
+                if (openButton.dataset.targetBlank === "true") {
+                    window.open(href, "_blank", "noopener,noreferrer");
+                } else {
+                    window.location.href = href;
+                }
+            });
+        });
+    })();
+</script>
 
 

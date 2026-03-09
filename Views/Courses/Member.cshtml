@@ -55,7 +55,7 @@
 
             @if (subscription == null)
             {
-                <div class="alert alert-warning mb-3">
+                <div class="alert alert-warning mb-3" style="margin-bottom: 15px;">
                     Vous n'avez pas encore d'abonnement actif.
                 </div>
 
@@ -131,6 +131,25 @@
                         <div class="fw-semibold">@(Model.LastQuizAttemptAt.HasValue ? Model.LastQuizAttemptAt.Value.ToString("dd/MM/yyyy") : "-")</div>
                     </div>
                 </div>
+            </div>
+
+            <div class="mt-3">
+                @if (Model.IsCertificateEligible)
+                {
+                    <div class="alert alert-success mb-2" style="margin-bottom: 15px;">
+                        ✅ Tous les quiz sont complétés et votre score dépasse 80%.
+                    </div>
+                    <a asp-controller="Courses" asp-action="Certif1" class="btn btn-success">
+                        <i class="fas fa-certificate"></i> Accéder à mon certificat
+                    </a>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        Certificat disponible quand tous les quiz sont complétés avec un score supérieur à 80%.<br />
+                        Progression quiz: <strong>@Model.CompletedQuizCount / @Model.TotalQuizCount</strong> | Score: <strong>@Model.QuizSuccessRate.ToString("0.0")%</strong>
+                    </div>
+                }
             </div>
         </div>
     </div>

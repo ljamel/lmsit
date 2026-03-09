@@ -63,7 +63,7 @@ namespace CrudDemo.Controllers
                                 "• Ajout de contenu personnalisé selon vos demandes.\u2028" +
                                 "• Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
                             },
-                            UnitAmount = 2900, // 29 EUR en centimes
+                            UnitAmount = 1900, // 19 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -161,7 +161,7 @@ namespace CrudDemo.Controllers
                                 Name = "Abonnement Mensuel - Accès Illimité",
                                 Description = "Accès complet à tous les cours de la plateforme",
                             },
-                            UnitAmount = 2900, // 29 EUR en centimes
+                            UnitAmount = 1900, // 19 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "month",
@@ -220,7 +220,7 @@ namespace CrudDemo.Controllers
                             userId, 
                             userId.Split('@')[0], 
                             "Abonnement Mensuel - Accès Illimité", 
-                            29.00m);
+                            19.00m);
                     }
                     catch (Exception ex)
                     {
@@ -301,7 +301,7 @@ namespace CrudDemo.Controllers
                                     ? course.Description.Substring(0, 200) + "..." 
                                     : course.Description,
                             },
-                            UnitAmount = 1000, // Prix fixe: 10€ (en centimes)
+                            UnitAmount = 1900, // Prix fixe: 19€ (en centimes)
                         },
                         Quantity = 1,
                     },
@@ -322,7 +322,7 @@ namespace CrudDemo.Controllers
             {
                 UserId = User.Identity?.Name ?? "",
                 CourseId = courseId,
-                Amount = 10.00m, // Prix fixe: 10€
+                Amount = 19.00m, // Prix fixe: 19€
                 Currency = "eur",
                 StripePaymentIntentId = session.PaymentIntentId ?? session.Id,
                 Status = "pending"
@@ -391,7 +391,7 @@ namespace CrudDemo.Controllers
                             userId, 
                             userId.Split('@')[0], 
                             course.Title, 
-                            10.00m);
+                            19.00m);
                     }
                     catch (Exception ex)
                     {

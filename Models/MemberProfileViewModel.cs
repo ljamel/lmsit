@@ -16,5 +16,9 @@ namespace CrudDemo.Models
         public int QuizCorrectAnswers { get; set; }
         public double QuizSuccessRate { get; set; }
         public DateTime? LastQuizAttemptAt { get; set; }
+
+        public int TotalQuizCount { get; set; }
+        public int CompletedQuizCount { get; set; }
+        public bool IsCertificateEligible { get; set; }
     }
 }
