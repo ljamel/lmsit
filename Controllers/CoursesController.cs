@@ -710,6 +710,82 @@ namespace CrudDemo.Controllers
             return LocalRedirect($"/QuizResults?lessonId={lesson.Id}");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitLessonQuizAnswers(int lessonId, Dictionary<int, int> answers)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var lesson = await _context.Lessons
+                .AsNoTracking()
+                .Where(l => l.Id == lessonId)
+                .Include(l => l.Quizzes)
+                .FirstOrDefaultAsync();
+
+            if (lesson == null)
+                return NotFound();
+
+            var lessonQuizIds = lesson.Quizzes.Select(q => q.Id).ToList();
+            if (!lessonQuizIds.Any())
+                return RedirectToAction(nameof(Lesson), new { id = lessonId });
+
+            if (answers.Count != lessonQuizIds.Count)
+            {
+                TempData["Error"] = "Veuillez répondre à toutes les questions du quiz avant de valider.";
+                return RedirectToAction(nameof(Lesson), new { id = lessonId });
+            }
+
+            var selectedOptionIds = answers.Values.Distinct().ToList();
+            var selectedOptions = await _context.QuizOptions
+                .AsNoTracking()
+                .Where(o => selectedOptionIds.Contains(o.Id))
+                .ToListAsync();
+
+            var optionsById = selectedOptions.ToDictionary(o => o.Id);
+
+            foreach (var quizId in lessonQuizIds)
+            {
+                if (!answers.TryGetValue(quizId, out var optionId)
+                    || !optionsById.TryGetValue(optionId, out var option)
+                    || option.QuizId != quizId)
+                {
+                    TempData["Error"] = "Certaines réponses sont invalides. Merci de réessayer.";
+                    return RedirectToAction(nameof(Lesson), new { id = lessonId });
+                }
+            }
+
+            var existingResults = await _context.UserQuizResults
+                .Where(r => r.UserId == userId && lessonQuizIds.Contains(r.QuizId))
+                .ToListAsync();
+
+            if (existingResults.Any())
+            {
+                _context.UserQuizResults.RemoveRange(existingResults);
+            }
+
+            var now = DateTime.UtcNow;
+            foreach (var quizId in lessonQuizIds)
+            {
+                var optionId = answers[quizId];
+                var option = optionsById[optionId];
+
+                _context.UserQuizResults.Add(new UserQuizResult
+                {
+                    UserId = userId,
+                    QuizId = quizId,
+                    SelectedOptionId = optionId,
+                    IsCorrect = option.IsCorrect,
+                    AttemptedAt = now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            return LocalRedirect($"/QuizResults?lessonId={lessonId}");
+        }
+
         // Show quiz results for a lesson
         [HttpGet("/QuizResults")]
         public async Task<IActionResult> QuizResults(int lessonId)

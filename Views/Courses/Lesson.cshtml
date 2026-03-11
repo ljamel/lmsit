@@ -190,49 +190,57 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        @foreach (var quiz in Model.Quizzes)
-                        {
-                            <div class="mb-4 quiz-item animated-quiz-item">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h4 class="mb-1">
-                                            <i class="fas fa-question"></i> @quiz.Question
-                                        </h4>
-                                        @if (!string.IsNullOrEmpty(quiz.Description))
-                                        {
-                                            <small class="text-muted d-block mb-2">@quiz.Description</small>
-                                        }
+                        <form asp-action="SubmitLessonQuizAnswers" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="lessonId" value="@Model.Id" />
+
+                            @foreach (var quiz in Model.Quizzes)
+                            {
+                                <div class="mb-4 quiz-item animated-quiz-item">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h4 class="mb-1">
+                                                <i class="fas fa-question"></i> @quiz.Question
+                                            </h4>
+                                            @if (!string.IsNullOrEmpty(quiz.Description))
+                                            {
+                                                <small class="text-muted d-block mb-2">@quiz.Description</small>
+                                            }
+                                        </div>
+                                        <span>
+                                            <i class="fas fa-star"></i> @quiz.Points pts
+                                        </span>
                                     </div>
-                                    <span>
-                                        <i class="fas fa-star"></i> @quiz.Points pts
-                                    </span>
-                                </div>
-                                <div class="mt-3">
-                                    @if (quiz.Options != null && quiz.Options.Any())
-                                    {
-                                        <form asp-action="SubmitQuizAnswer" method="post" class="d-inline">
-                                            <input type="hidden" name="quizId" value="@quiz.Id" />
+                                    <div class="mt-3">
+                                        @if (quiz.Options != null && quiz.Options.Any())
+                                        {
                                             <div class="options-list">
+                                                @{ var optionIndex = 0; }
                                                 @foreach (var option in quiz.Options)
                                                 {
                                                     <div class="form-check mb-3 animated-option-item">
-                                                        <input class="form-check-input quiz-radio" type="radio" 
-                                                               name="optionId" id="option_@option.Id" 
-                                                               value="@option.Id" />
+                                                        <input class="form-check-input quiz-radio" type="radio"
+                                                               name="answers[@quiz.Id]" id="option_@option.Id"
+                                                               value="@option.Id" @(optionIndex == 0 ? "required" : string.Empty) />
                                                         <label class="form-check-label" for="option_@option.Id">
                                                             <span class="option-text">@option.Text</span>
                                                         </label>
                                                     </div>
+                                                    optionIndex++;
                                                 }
                                             </div>
-                                            <button type="submit" class="btn btn-success animated-btn">
-                                                <i class="fas fa-check"></i> Soumettre
-                                            </button>
-                                        </form>
-                                    }
+                                        }
+                                    </div>
                                 </div>
+                            }
+
+                            <div class="text-center mt-3">
+                                <button type="submit" class="btn btn-success animated-btn px-4">
+                                    <i class="fas fa-check-double"></i> Valider toutes mes réponses
+                                </button>
                             </div>
-                        }
+                        </form>
+
                         <p class="text-center mt-4">
                             <a asp-action="QuizResults" asp-route-lessonId="@Model.Id" class="btn btn-info animated-btn">
                                 <i class="fas fa-chart-bar"></i> Voir mes résultats
