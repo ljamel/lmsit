@@ -281,6 +281,7 @@ iframe.ql-video {
     margin: 8px 0;
     font-weight: 500;
     letter-spacing: 0.5px;
+    display: block ruby;
 }
 
 .menu-dashboard .lesson-link {

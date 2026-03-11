@@ -23,7 +23,7 @@
                     if (regex.test(node.textContent)) {
                         const span = document.createElement('span');
                         span.innerHTML = node.textContent.replace(regex, 
-                            '<span style="background:#fff3a3; color:#2d3436; font-weight:bold; padding:2px 4px; border-radius:3px; box-shadow: 0 8px 25px rgba(102,126,234,0.5);">$1</span>'
+                            '<span style="background:#fff3a3; color:#2d3436; font-weight:bold; padding:2px 4px; border-radius:3px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">$1</span>'
                         );
                         node.parentNode.replaceChild(span, node);
                     }

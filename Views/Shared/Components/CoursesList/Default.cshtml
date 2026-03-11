@@ -175,12 +175,17 @@
                                                         || lesson.Description.Contains("&lt;video", StringComparison.OrdinalIgnoreCase)
                                                         || lesson.Description.Contains("&lt;iframe", StringComparison.OrdinalIgnoreCase)
                                                     );
+                                                var hasQuiz = lesson.Quizzes.Any();
 
                                                 <li class="mb-2">
                                                     <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
                                                         @if (hasVideo)
                                                         {
                                                             <i class="fas fa-play-circle"></i>
+                                                        }
+                                                        @if (hasQuiz)
+                                                        {
+                                                            <i class="fa-solid fa-circle-question" title="Quiz disponible"></i>
                                                         }
                                                         @lesson.Title
                                                     </a>
