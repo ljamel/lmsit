@@ -183,7 +183,7 @@ https://templatemo.com/tm-596-electric-xtra
 
         // Start rotation after initial display
         setTimeout(() => {
-            setInterval(rotateText, 3000); // Change every 5 seconds
+            setInterval(rotateText, 6000); // Change every 5 seconds
         }, 4000);
 
 

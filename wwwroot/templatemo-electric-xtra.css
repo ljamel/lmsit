@@ -449,7 +449,6 @@ https://templatemo.com/tm-596-electric-xtra
 
         .glitch-text {
             font-family: 'Orbitron', monospace;
-            font-size: clamp(2.6rem, 10vw, 3.8rem);
             font-weight: 900;
             position: relative;
             text-transform: uppercase;
@@ -468,7 +467,6 @@ https://templatemo.com/tm-596-electric-xtra
         }
 
         .glitch-text::before {
-            animation: glitch-1 0.5s infinite;
             color: #FF5E00;
             z-index: -1;
             text-shadow: -2px 0 #FF5E00;
@@ -478,7 +476,6 @@ https://templatemo.com/tm-596-electric-xtra
             animation: glitch-2 0.5s infinite;
             color: #00B2FF;
             z-index: -1;
-            text-shadow: 2px 0 #00B2FF;
         }
 
         @keyframes glitch-1 {

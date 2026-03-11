@@ -25,12 +25,12 @@
     <div class="hero-content">
         <div class="text-rotator">
             <div class="text-set active">
-                <h1 class="glitch-text" data-text="DEVENEZ PRO CYBER">Apprenez&nbsp; la&nbsp; cybersécurité&nbsp; et&nbsp; le&nbsp; hacking&nbsp; éthique&nbsp; pas&nbsp; à&nbsp; pas</h1>
+                <h1 class="glitch-text" data-text="DEVENEZ PRO CYBER">Forme-toi,&nbsp; certifie-toi,&nbsp; décroche&nbsp; le&nbsp; job.</h1>
                 <p class="subtitle">Vous avez déjà essayé d'apprendre le hacking mais vous vous êtes perdu</p>
             </div>
             <div class="text-set">
                 <h1 class="glitch-text" data-text="DEBUTANT">100%&nbsp; débutant</h1>
-                <p class="subtitle">Nos cours bien structuré offre un chemin clair vers la montée compétence.</p>
+                <p class="subtitle">Nos cours bien structurés offrent un chemin clair vers la montée en compétences.</p>
             </div>
             <div class="text-set">
                 <h1 class="glitch-text" data-text="HACKING ÉTHIQUE">PLONGE&nbsp; DANS&nbsp; L'ACTION&nbsp; AVEC&nbsp; DES&nbsp; EXERCICES&nbsp; PRATIQUES</h1>
@@ -75,7 +75,7 @@
                 <p>Apprenez l’administration Windows & Linux : gestion réseau, services, sécurité et bonnes pratiques professionnelles.</p>
                 <ul class="feature-list">
                     <li>Termes et techniques du hacking (glossaire, méthodologies)</li>
-                    <li>TP cracké un fichier protéger par mot de passe</li>
+                    <li>Craquer des fichiers protégés par mot de passe et des sites web</li>
                     <li>Comprendre les failles (SQLi, XSS, RCE, CSRF, etc.)</li>
                     <li>Administration Linux & Windows</li>
                     <li>Virtualisation & Cloud</li>
@@ -325,7 +325,7 @@
         <div class="advantage-item">
             <div class="advantage-icon">🎓 Certifications</div>
             <h3>Accès illimité à tous les LAB</h3>
-            <p>Nos cours interactifs, avec des heures de tutoriels vidéo. pour vous aidez à résssir vos certifications</p>
+            <p>Accédez à nos cours interactifs et à des heures de tutoriels vidéo. Pour vous aider à réussir vos certifications</p>
         </div>
         <div class="advantage-item">
             <div class="advantage-icon">⚔️ Challenges de hacking</div>
@@ -372,7 +372,11 @@
                 <div class="info-icon">📧</div>
                 <div class="info-details">
                     <h4>Email</h4>
-                    <p>djamallamri "at" yahoo.fr</p>
+                    <!-- HTML -->
+                    <span class="email" 
+                          data-user="djamallamri" 
+                          data-domain="yahoo.fr">
+                    </span>
                 </div>
             </div>
             <div class="info-item">
@@ -394,6 +398,9 @@
         backdrop-filter: blur(4px);
     }
 
+    .email::before {
+        content: attr(data-user) "@@" attr(data-domain);
+    }
 
     .exit-lead-modal {
         max-width: 620px;
