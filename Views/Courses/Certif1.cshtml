@@ -1,6 +1,15 @@
 ﻿@page
 @model IEnumerable<CrudDemo.Models.Lesson>
 
+@{
+    var learnerFullName = (ViewBag.LearnerFullName as string ?? string.Empty).Trim();
+    var learnerFirstName = (ViewBag.LearnerFirstName as string ?? string.Empty).Trim();
+    var learnerLastName = (ViewBag.LearnerLastName as string ?? string.Empty).Trim();
+    var learnerNamePlaceholder = !string.IsNullOrWhiteSpace(learnerFirstName) || !string.IsNullOrWhiteSpace(learnerLastName)
+        ? $"{learnerFirstName} {learnerLastName}".Trim()
+        : "Entrez votre nom complet";
+}
+
 
 
     <style>
@@ -211,7 +220,8 @@
                             class="name-input"
                             type="text"
                             maxlength="80"
-                            placeholder="Entrez votre nom complet" />
+                            value="@learnerFullName"
+                            placeholder="@learnerNamePlaceholder" />
                     </div>
                     <p class="course">
                         Pour avoir complété avec succès le module d'initiation :<br>

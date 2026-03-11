@@ -827,13 +827,65 @@ namespace CrudDemo.Controllers
 			return View();
 		}
 
-        public IActionResult Certif1()
+        public async Task<IActionResult> Certif1()
 		{
             if (User.IsInRole("Free"))
             {
                 TempData["Error"] = "Cette section n'est pas accessible avec le plan Free.";
                 return RedirectToAction("SubscriptionCheckout", "Payment");
             }
+
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            var learnerFullName = string.Empty;
+            var learnerFirstName = string.Empty;
+            var learnerLastName = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(userEmail))
+            {
+                var subscription = await _context.Subscriptions
+                    .AsNoTracking()
+                    .Where(s => s.UserId == userEmail)
+                    .OrderByDescending(s => s.StartDate)
+                    .FirstOrDefaultAsync();
+
+                if (subscription != null && !string.IsNullOrWhiteSpace(subscription.StripeCustomerId))
+                {
+                    try
+                    {
+                        var secretKey = _configuration["Stripe:SecretKey"];
+                        if (!string.IsNullOrWhiteSpace(secretKey))
+                        {
+                            StripeConfiguration.ApiKey = secretKey;
+                            var customerService = new CustomerService();
+                            var customer = await customerService.GetAsync(subscription.StripeCustomerId);
+                            var stripeName = customer?.Name?.Trim() ?? string.Empty;
+
+                            if (!string.IsNullOrWhiteSpace(stripeName))
+                            {
+                                learnerFullName = stripeName;
+                                var firstSeparator = stripeName.IndexOf(' ');
+                                if (firstSeparator > 0)
+                                {
+                                    learnerFirstName = stripeName.Substring(0, firstSeparator).Trim();
+                                    learnerLastName = stripeName.Substring(firstSeparator + 1).Trim();
+                                }
+                                else
+                                {
+                                    learnerFirstName = stripeName;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Impossible de récupérer le nom Stripe pour l'utilisateur {UserEmail}", userEmail);
+                    }
+                }
+            }
+
+            ViewBag.LearnerFullName = learnerFullName;
+            ViewBag.LearnerFirstName = learnerFirstName;
+            ViewBag.LearnerLastName = learnerLastName;
 
 			return View();
 		}
