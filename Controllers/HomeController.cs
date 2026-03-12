@@ -270,7 +270,7 @@ public class HomeController : Controller
 
             var recipient = _configuration["Marketing:LeadCaptureRecipient"]
                 ?? _configuration["EmailSettings:FromEmail"]
-                ?? "djamallamri@yahoo.fr";
+                ?? "lamri87-ingenius@yahoo.com";
 
             var subject = "Nouveau lead - Ressource cyber (Exit Popup)";
             var body = $@"

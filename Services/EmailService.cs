@@ -137,7 +137,7 @@ public class EmailService : IEmailService
 
             <p>
             <strong>L’équipe Ingenius Cyber</strong><br />
-            📧 Contact : <a href='mailto:djamallamri@yahoo.fr'>djamallamri@yahoo.fr</a>
+            📧 Contact : <a href='mailto:lamri87-ingenius@yahoo.com'>lamri87-ingenius@yahoo.com</a>
             </p>
 
 
