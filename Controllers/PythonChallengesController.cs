@@ -11,29 +11,29 @@ namespace CrudDemo.Controllers
         // Challenge 1: Inverser la liste
         public IActionResult Exercise1()
         {
-            return View();
+            return View("Exercise8");
         }
 
         [HttpPost]
         public IActionResult Exercise1(string code)
         {
             var result = ExecutePythonCode(code);
-            
-            string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
-            if (result.success && cleanOutput == "[7, 6, 5, 4, 3, 2, 1]")
+
+            string cleanOutput = result.output.Trim();
+            if (result.success && cleanOutput == "Alice")
             {
                 return RedirectToAction("Exercise2");
             }
             
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise8");
         }
 
         // Challenge 2: Trier du plus grand au plus petit
         public IActionResult Exercise2()
         {
-            return View();
+            return View("Exercise9");
         }
 
         [HttpPost]
@@ -41,21 +41,21 @@ namespace CrudDemo.Controllers
         {
             var result = ExecutePythonCode(code);
             
-            string cleanOutput = System.Text.RegularExpressions.Regex.Replace(result.output.Trim(), @"\s+", " ");
-            if (result.success && cleanOutput == "[8, 7, 6, 5, 4, 3, 2, 1]")
+            string cleanOutput = result.output.Trim();
+            if (result.success && cleanOutput == "12")
             {
                 return RedirectToAction("Exercise3");
             }
             
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise9");
         }
 
         // Challenge 3: Médiane
         public IActionResult Exercise3()
         {
-            return View();
+            return View("Exercise10");
         }
 
         [HttpPost]
@@ -64,44 +64,42 @@ namespace CrudDemo.Controllers
             var result = ExecutePythonCode(code);
             
             string cleanOutput = result.output.Trim();
-            if (result.success && (cleanOutput == "7" || cleanOutput == "7.0"))
+            if (result.success && cleanOutput == "20")
             {
                 return RedirectToAction("Exercise4");
             }
             
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise10");
         }
 
         // Challenge 4: Moyenne
         public IActionResult Exercise4()
         {
-            return View();
+            return View("Exercise1");
         }
 
         [HttpPost]
         public IActionResult Exercise4(string code)
         {
             var result = ExecutePythonCode(code);
-            
-            if (result.success && double.TryParse(result.output.Trim(), out double value))
+
+            string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
+            if (result.success && cleanOutput == "[7, 6, 5, 4, 3, 2, 1]")
             {
-                if (Math.Abs(value - 18.222222) < 0.01)
-                {
-                    return RedirectToAction("Exercise5");
-                }
+                return RedirectToAction("Exercise5");
             }
             
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise1");
         }
 
         // Challenge 5: Supprimer les doublons
         public IActionResult Exercise5()
         {
-            return View();
+            return View("Exercise2");
         }
 
         [HttpPost]
@@ -109,21 +107,21 @@ namespace CrudDemo.Controllers
         {
             var result = ExecutePythonCode(answer);
             
-            string cleanOutput = System.Text.RegularExpressions.Regex.Replace(result.output.Trim(), @"\s+", " ");
-            if (result.success && cleanOutput == "[1, 2, 3, 4, 5, 7]")
+            string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
+            if (result.success && cleanOutput == "[8, 7, 6, 5, 4, 3, 2, 1]")
             {
                 return RedirectToAction("Exercise6");
             }
             
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise2");
         }
 
         // Challenge 6: Valeurs supérieures à la moyenne
         public IActionResult Exercise6()
         {
-            return View();
+            return View("Exercise3");
         }
 
         [HttpPost]
@@ -131,25 +129,93 @@ namespace CrudDemo.Controllers
         {
             var result = ExecutePythonCode(answer);
             
-            string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
-            if (result.success && cleanOutput == "[32, 87, 90, 77, 88]")
+            string cleanOutput = result.output.Trim();
+            if (result.success && (cleanOutput == "7" || cleanOutput == "7.0"))
             {
                 return RedirectToAction("Exercise7");
             }
             
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise3");
         }
 
         // Challenge 7: Moyenne des notes par âge (describe)
         public IActionResult Exercise7()
         {
-            return View();
+            return View("Exercise4");
         }
 
         [HttpPost]
         public IActionResult Exercise7(string code)
+        {
+            var result = ExecutePythonCode(code);
+
+            if (result.success && double.TryParse(result.output.Trim(), out double value))
+            {
+                if (Math.Abs(value - 18.222222) < 0.01)
+                {
+                    return RedirectToAction("Exercise8");
+                }
+            }
+
+            ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
+            ViewBag.Output = result.output;
+            return View("Exercise4");
+        }
+
+        // Challenge 8: Variables de base
+        public IActionResult Exercise8()
+        {
+            return View("Exercise5");
+        }
+
+        [HttpPost]
+        public IActionResult Exercise8(string code)
+        {
+            var result = ExecutePythonCode(code);
+
+            string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
+            if (result.success && cleanOutput == "[1, 2, 3, 4, 5, 7]")
+            {
+                return RedirectToAction("Exercise9");
+            }
+
+            ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
+            ViewBag.Output = result.output;
+            return View("Exercise5");
+        }
+
+        // Challenge 9: Calcul simple
+        public IActionResult Exercise9()
+        {
+            return View("Exercise6");
+        }
+
+        [HttpPost]
+        public IActionResult Exercise9(string code)
+        {
+            var result = ExecutePythonCode(code);
+
+            string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
+            if (result.success && cleanOutput == "[32, 87, 90, 77, 88]")
+            {
+                return RedirectToAction("Exercise10");
+            }
+
+            ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
+            ViewBag.Output = result.output;
+            return View("Exercise6");
+        }
+
+        // Challenge 10: Lecture du deuxième élément d'une liste
+        public IActionResult Exercise10()
+        {
+            return View("Exercise7");
+        }
+
+        [HttpPost]
+        public IActionResult Exercise10(string code)
         {
             var result = ExecutePythonCode(code);
 
@@ -169,7 +235,7 @@ namespace CrudDemo.Controllers
 
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
-            return View();
+            return View("Exercise7");
         }
 
         // Page de succès
