@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
 
 namespace CrudDemo.Controllers
 {
@@ -22,6 +21,7 @@ namespace CrudDemo.Controllers
             string cleanOutput = result.output.Trim();
             if (result.success && cleanOutput == "Alice")
             {
+                TempData["ShowPromoPopup"] = true;
                 return RedirectToAction("Exercise2");
             }
             
@@ -33,6 +33,7 @@ namespace CrudDemo.Controllers
         // Challenge 2: Trier du plus grand au plus petit
         public IActionResult Exercise2()
         {
+            ViewBag.ShowPromoPopup = TempData["ShowPromoPopup"] != null;
             return View("Exercise9");
         }
 
@@ -200,42 +201,12 @@ namespace CrudDemo.Controllers
             string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
             if (result.success && cleanOutput == "[32, 87, 90, 77, 88]")
             {
-                return RedirectToAction("Exercise10");
+                return RedirectToAction("Success");
             }
 
             ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
             ViewBag.Output = result.output;
             return View("Exercise6");
-        }
-
-        // Challenge 10: Lecture du deuxième élément d'une liste
-        public IActionResult Exercise10()
-        {
-            return View("Exercise7");
-        }
-
-        [HttpPost]
-        public IActionResult Exercise10(string code)
-        {
-            var result = ExecutePythonCode(code);
-
-            if (result.success)
-            {
-                string output = result.output.Trim();
-
-                bool has21 = Regex.IsMatch(output, @"\b21\b\D+9(\.0+)?\b", RegexOptions.Multiline);
-                bool has42 = Regex.IsMatch(output, @"\b42\b\D+12\.5\b", RegexOptions.Multiline);
-                bool has84 = Regex.IsMatch(output, @"\b84\b\D+14(\.0+)?\b", RegexOptions.Multiline);
-
-                if (has21 && has42 && has84)
-                {
-                    return RedirectToAction("Success");
-                }
-            }
-
-            ViewBag.Error = result.success ? "Résultat incorrect. Essayez encore!" : result.error;
-            ViewBag.Output = result.output;
-            return View("Exercise7");
         }
 
         // Page de succès
@@ -256,20 +227,29 @@ namespace CrudDemo.Controllers
                     return (false, "", validationResult.error);
                 }
 
-                // Créer un fichier temporaire pour le script Python
-                string tempFile = Path.Combine(Path.GetTempPath(), $"script_{Guid.NewGuid()}.py");
-                System.IO.File.WriteAllText(tempFile, code);
+                // Créer un dossier temporaire isolé pour le script Python
+                string tempDir = Path.Combine(Path.GetTempPath(), $"python_challenge_{Guid.NewGuid()}");
+                Directory.CreateDirectory(tempDir);
+                string tempFile = Path.Combine(tempDir, "script.py");
+                string scriptWithNumexpr = BuildScriptWithNumexpr(code);
+                System.IO.File.WriteAllText(tempFile, scriptWithNumexpr);
 
                 // Préparer le processus Python
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "python3",
-                    Arguments = tempFile,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    CreateNoWindow = true
+                    CreateNoWindow = true,
+                    WorkingDirectory = tempDir,
                 };
+
+                psi.ArgumentList.Add("-I");
+                psi.ArgumentList.Add(tempFile);
+                psi.Environment["PYTHONPATH"] = string.Empty;
+                psi.Environment["PYTHONHOME"] = string.Empty;
+                psi.Environment["HOME"] = tempDir;
 
                 using (Process? process = Process.Start(psi))
                 {
@@ -281,8 +261,17 @@ namespace CrudDemo.Controllers
                     string output = process.StandardOutput.ReadToEnd();
                     string error = process.StandardError.ReadToEnd();
 
-                    // Nettoyer le fichier temporaire
-                    try { System.IO.File.Delete(tempFile); } catch { }
+                    // Nettoyer le dossier temporaire
+                    try
+                    {
+                        if (Directory.Exists(tempDir))
+                        {
+                            Directory.Delete(tempDir, recursive: true);
+                        }
+                    }
+                    catch
+                    {
+                    }
 
                     if (!exited)
                     {
@@ -292,6 +281,12 @@ namespace CrudDemo.Controllers
 
                     if (!string.IsNullOrEmpty(error))
                     {
+                        if (error.Contains("No module named 'numexpr'", StringComparison.OrdinalIgnoreCase) ||
+                            error.Contains("No module named \"numexpr\"", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return (false, output, "Le module Python 'numexpr' est requis pour ces exercices. Installe-le côté serveur avec: pip install numexpr");
+                        }
+
                         return (false, output, error);
                     }
 
@@ -302,6 +297,60 @@ namespace CrudDemo.Controllers
             {
                 return (false, "", $"Erreur d'exécution: {ex.Message}");
             }
+        }
+
+        private static string BuildScriptWithNumexpr(string userCode)
+        {
+            string userCodeBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(userCode));
+
+            const string bootstrap = @"import base64
+import numexpr as ne
+
+def ne_eval(expression, variables=None):
+    if variables is None:
+        variables = {}
+    return ne.evaluate(expression, local_dict=variables)
+
+SAFE_BUILTINS = {
+    'print': print,
+    'len': len,
+    'range': range,
+    'sum': sum,
+    'min': min,
+    'max': max,
+    'sorted': sorted,
+    'list': list,
+    'dict': dict,
+    'set': set,
+    'tuple': tuple,
+    'int': int,
+    'float': float,
+    'str': str,
+    'bool': bool,
+    'abs': abs,
+    'round': round,
+    'enumerate': enumerate,
+    'zip': zip,
+    'map': map,
+    'filter': filter,
+    'any': any,
+    'all': all,
+}
+
+RUNTIME_GLOBALS = {
+    '__builtins__': SAFE_BUILTINS,
+    'ne': ne,
+    'ne_eval': ne_eval,
+}
+
+USER_CODE_B64 = '__USER_CODE_B64__'
+USER_CODE = base64.b64decode(USER_CODE_B64).decode('utf-8', errors='replace')
+
+exec(compile(USER_CODE, '<user_code>', 'exec'), RUNTIME_GLOBALS, {})
+
+";
+
+            return bootstrap.Replace("__USER_CODE_B64__", userCodeBase64);
         }
 
         // Valider le code Python - blocage des opérations dangereuses
@@ -415,6 +464,19 @@ namespace CrudDemo.Controllers
             };
 
             string codeLower = code.ToLower();
+
+            // Interdire globalement tout import utilisateur : les libs nécessaires
+            // sont préchargées côté sandbox (numexpr -> ne)
+            if (Regex.IsMatch(code, @"^\s*(from|import)\s+", RegexOptions.Multiline | RegexOptions.IgnoreCase))
+            {
+                return (false, "❌ Les imports utilisateur sont désactivés pour ces exercices. Utilise numexpr via 'ne' déjà disponible.");
+            }
+
+            // Bloquer les dunder pour éviter l'introspection/contournements
+            if (Regex.IsMatch(code, @"__\w+__|__\w+", RegexOptions.IgnoreCase))
+            {
+                return (false, "❌ Accès aux attributs internes Python interdit pour des raisons de sécurité.");
+            }
             
             foreach (string keyword in blockedKeywords)
             {
