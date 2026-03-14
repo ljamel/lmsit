@@ -148,6 +148,20 @@
                     </label>
                 </div>
 
+                <div class="form-check mb-3">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="OnlyNonSubscribers"
+                        name="OnlyNonSubscribers"
+                        value="true"
+                        @(bulkEmailModel.OnlyNonSubscribers ? "checked" : "")
+                    />
+                    <label class="form-check-label" for="OnlyNonSubscribers" style="color: rgba(255,255,255,0.9);">
+                        Envoyer uniquement aux non abonnés
+                    </label>
+                </div>
+
                 <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #00B2FF 0%, #0080FF 100%); border: none;">
                     <i class="fas fa-paper-plane me-1"></i> Envoyer à tous les inscrits
                 </button>

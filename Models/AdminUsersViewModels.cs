@@ -51,5 +51,6 @@ namespace CrudDemo.Models
         public string Message { get; set; } = string.Empty;
 
         public bool OnlyActiveSubscribers { get; set; }
+        public bool OnlyNonSubscribers { get; set; }
     }
 }

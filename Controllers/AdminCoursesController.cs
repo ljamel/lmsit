@@ -620,7 +620,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             }
 
             var subscriptionsToSync = await _context.Subscriptions
-                .Where(s => s.StripeSubscriptionId != null && s.StripeSubscriptionId != string.Empty)
+                .Where(s => s.StripeSubscriptionId != string.Empty)
                 .ToListAsync();
 
             await SyncStripeSubscriptionsAsync(subscriptionsToSync);
@@ -859,7 +859,9 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 Subject = TempData["BulkEmailSubject"] as string ?? string.Empty,
                 Message = TempData["BulkEmailMessage"] as string ?? string.Empty,
                 OnlyActiveSubscribers = bool.TryParse(TempData["BulkEmailOnlyActive"] as string, out var onlyActive)
-                    && onlyActive
+                    && onlyActive,
+                OnlyNonSubscribers = bool.TryParse(TempData["BulkEmailOnlyNonSubscribers"] as string, out var onlyNonSubscribers)
+                    && onlyNonSubscribers
             };
 
             return View(userRows);
@@ -964,6 +966,17 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 TempData["BulkEmailSubject"] = model.Subject;
                 TempData["BulkEmailMessage"] = model.Message;
                 TempData["BulkEmailOnlyActive"] = model.OnlyActiveSubscribers.ToString();
+                TempData["BulkEmailOnlyNonSubscribers"] = model.OnlyNonSubscribers.ToString();
+                return RedirectToAction(nameof(Users));
+            }
+
+            if (model.OnlyActiveSubscribers && model.OnlyNonSubscribers)
+            {
+                TempData["Error"] = "Sélectionnez soit abonnés actifs, soit non abonnés (pas les deux).";
+                TempData["BulkEmailSubject"] = model.Subject;
+                TempData["BulkEmailMessage"] = model.Message;
+                TempData["BulkEmailOnlyActive"] = model.OnlyActiveSubscribers.ToString();
+                TempData["BulkEmailOnlyNonSubscribers"] = model.OnlyNonSubscribers.ToString();
                 return RedirectToAction(nameof(Users));
             }
 
@@ -972,16 +985,21 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 .Where(user => user.Email != null && user.Email != string.Empty)
                 .Select(user => user.Email!);
 
+            var activeEmailsQuery = _context.Subscriptions
+                .AsNoTracking()
+                .Where(subscription => subscription.IsActive)
+                .Select(subscription => subscription.UserId)
+                .Distinct();
+
             if (model.OnlyActiveSubscribers)
             {
-                var activeEmailsQuery = _context.Subscriptions
-                    .AsNoTracking()
-                    .Where(subscription => subscription.IsActive)
-                    .Select(subscription => subscription.UserId)
-                    .Distinct();
-
                 recipientsQuery = recipientsQuery
                     .Where(email => activeEmailsQuery.Contains(email));
+            }
+            else if (model.OnlyNonSubscribers)
+            {
+                recipientsQuery = recipientsQuery
+                    .Where(email => !activeEmailsQuery.Contains(email));
             }
 
             var recipients = await recipientsQuery
@@ -1006,7 +1024,9 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
 
             TempData["Success"] = model.OnlyActiveSubscribers
                 ? $"Tentative d'envoi effectuée pour {recipients.Count} abonnés actifs."
-                : $"Tentative d'envoi effectuée pour {recipients.Count} inscrits.";
+                : model.OnlyNonSubscribers
+                    ? $"Tentative d'envoi effectuée pour {recipients.Count} non abonnés."
+                    : $"Tentative d'envoi effectuée pour {recipients.Count} inscrits.";
             return RedirectToAction(nameof(Users));
         }
 
