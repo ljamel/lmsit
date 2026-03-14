@@ -229,6 +229,34 @@ namespace CrudDemo.Controllers
             return false;
         }
 
+        private async Task<int?> GetFirstCourseIdAsync()
+        {
+            var firstCourseId = await _context.Courses
+                .AsNoTracking()
+                .OrderBy(c => c.CreatedAt)
+                .ThenBy(c => c.Id)
+                .Select(c => c.Id)
+                .FirstOrDefaultAsync();
+
+            return firstCourseId == 0 ? null : firstCourseId;
+        }
+
+        private async Task<bool> CanAccessCourseAsync(string userEmail, int courseId)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            if (await HasCourseAccessAsync(userEmail))
+            {
+                return true;
+            }
+
+            var firstCourseId = await GetFirstCourseIdAsync();
+            return firstCourseId.HasValue && firstCourseId.Value == courseId;
+        }
+
         private async Task SyncUserSubscriptionFromStripeAsync(string userEmail)
         {
             var localSubscription = await _context.Subscriptions
@@ -291,27 +319,38 @@ namespace CrudDemo.Controllers
         // List all courses (public view for authenticated users)
         public async Task<IActionResult> Index()
         {
-            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
-            if (!User.IsInRole("Admin") && !User.IsInRole("Free"))
-            {
-                var userId = User.Identity?.Name ?? "";
-                var hasActiveSubscription = await HasCourseAccessAsync(userId);
+            var userId = User.Identity?.Name ?? "";
+            var hasPaidAccess = User.IsInRole("Admin") || await HasCourseAccessAsync(userId);
 
-                if (!hasActiveSubscription)
-                {
-                    TempData["Error"] = "Vous devez avoir un abonnement actif pour accéder aux cours.";
-                    return RedirectToAction("SubscriptionCheckout", "Payment");
-                }
+            int? allowedCourseId = null;
+            if (!hasPaidAccess)
+            {
+                allowedCourseId = await GetFirstCourseIdAsync();
             }
 
             // Optimisé: AsNoTracking + projection pour ne charger que les données nécessaires
-            var courses = await _context.Courses
+            var coursesQuery = _context.Courses
                 .AsNoTracking()
                 .Include(c => c.Modules)
                     .ThenInclude(m => m.Lessons)
                 .AsSplitQuery()
-                .OrderByDescending(c => c.CreatedAt)
-                .ToListAsync();
+                .OrderByDescending(c => c.CreatedAt);
+
+            if (!hasPaidAccess)
+            {
+                if (!allowedCourseId.HasValue)
+                {
+                    return View(new List<Course>());
+                }
+
+                coursesQuery = coursesQuery
+                    .Where(c => c.Id == allowedCourseId.Value)
+                    .OrderByDescending(c => c.CreatedAt);
+
+                TempData["Info"] = "Accès limité: seul le premier cours est disponible sans abonnement.";
+            }
+
+            var courses = await coursesQuery.ToListAsync();
 
             // Charger les commentaires pour tous les cours
             var courseIds = courses.Select(c => c.Id).ToList();
@@ -540,17 +579,12 @@ namespace CrudDemo.Controllers
         // View course details with modules and lessons
         public async Task<IActionResult> Details(int id)
         {
-            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin ou Free)
-            if (!User.IsInRole("Admin") && !User.IsInRole("Free"))
+            var userId = User.Identity?.Name ?? "";
+            var canAccess = await CanAccessCourseAsync(userId, id);
+            if (!canAccess)
             {
-                var userId = User.Identity?.Name ?? "";
-                var hasActiveSubscription = await HasCourseAccessAsync(userId);
-
-                if (!hasActiveSubscription)
-                {
-                    TempData["Error"] = "Vous devez avoir un abonnement actif pour accéder à ce cours.";
-                    return RedirectToAction("SubscriptionCheckout", "Payment");
-                }
+                TempData["Error"] = "Ce cours nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
             }
 
             // Optimisé: AsNoTracking + filtre WHERE précoce
@@ -590,19 +624,6 @@ namespace CrudDemo.Controllers
         // View a specific lesson and video
         public async Task<IActionResult> Lesson(int id, string? lessonSearch)
         {
-            // Vérifier si l'utilisateur a un abonnement actif (sauf Admin)
-            if (!User.IsInRole("Admin"))
-            {
-                var userEmail = User.Identity?.Name ?? "";
-                var hasActiveSubscription = await HasCourseAccessAsync(userEmail);
-
-                if (!hasActiveSubscription)
-                {
-                    TempData["Error"] = "Vous devez avoir un abonnement actif pour accéder aux leçons.";
-                    return RedirectToAction("SubscriptionCheckout", "Payment");
-                }
-            }
-
             // Optimisé: Une seule requête avec Include pour charger tout d'un coup (évite N+1)
             var lesson = await _context.Lessons
                 .AsNoTracking()
@@ -616,6 +637,14 @@ namespace CrudDemo.Controllers
 
             if (lesson == null)
                 return NotFound();
+
+            var userEmail = User.Identity?.Name ?? "";
+            var canAccess = await CanAccessCourseAsync(userEmail, lesson.Module!.CourseId);
+            if (!canAccess)
+            {
+                TempData["Error"] = "Cette leçon nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
 
             // Get the current user's previous quiz attempts for this lesson
             var userId = _userManager.GetUserId(User);
@@ -670,11 +699,23 @@ namespace CrudDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitQuizAnswer(int quizId, int optionId)
         {
-            var quiz = await _context.Quizzes.FindAsync(quizId);
+            var quiz = await _context.Quizzes
+                .AsNoTracking()
+                .Include(q => q.Lesson)
+                    .ThenInclude(l => l!.Module)
+                .FirstOrDefaultAsync(q => q.Id == quizId);
             var option = await _context.QuizOptions.FindAsync(optionId);
 
             if (quiz == null || option == null)
                 return BadRequest("Invalid quiz or option.");
+
+            var userEmail = User.Identity?.Name ?? "";
+            var canAccess = await CanAccessCourseAsync(userEmail, quiz.Lesson!.Module!.CourseId);
+            if (!canAccess)
+            {
+                TempData["Error"] = "Ce quiz nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
 
             var userId = _userManager.GetUserId(User);
             if (userId == null)
@@ -722,10 +763,19 @@ namespace CrudDemo.Controllers
                 .AsNoTracking()
                 .Where(l => l.Id == lessonId)
                 .Include(l => l.Quizzes)
+                .Include(l => l.Module)
                 .FirstOrDefaultAsync();
 
             if (lesson == null)
                 return NotFound();
+
+            var userEmail = User.Identity?.Name ?? "";
+            var canAccess = await CanAccessCourseAsync(userEmail, lesson.Module!.CourseId);
+            if (!canAccess)
+            {
+                TempData["Error"] = "Ce quiz nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
 
             var lessonQuizIds = lesson.Quizzes.Select(q => q.Id).ToList();
             if (!lessonQuizIds.Any())
@@ -801,6 +851,14 @@ namespace CrudDemo.Controllers
             if (lesson == null)
                 return NotFound();
 
+            var userEmail = User.Identity?.Name ?? "";
+            var canAccess = await CanAccessCourseAsync(userEmail, lesson.Module!.CourseId);
+            if (!canAccess)
+            {
+                TempData["Error"] = "Ces résultats nécessitent un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
+
             var userId = _userManager.GetUserId(User);
             if (userId == null)
                 return Unauthorized();
@@ -842,6 +900,13 @@ namespace CrudDemo.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
+            var canAccess = await CanAccessCourseAsync(userId, courseId);
+            if (!canAccess)
+            {
+                TempData["Error"] = "Ce cours nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
+
             var comment = new Comment
             {
                 CourseId = courseId,
@@ -881,6 +946,14 @@ namespace CrudDemo.Controllers
 
         public async Task<IActionResult> Event()
         {
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            var hasPaidAccess = await HasCourseAccessAsync(userEmail);
+            if (!User.IsInRole("Admin") && !hasPaidAccess)
+            {
+                TempData["Error"] = "Cette page nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
+
             var latestLessons = await _context.Lessons
                 .AsNoTracking()
                 .Include(l => l.Module)
@@ -892,11 +965,13 @@ namespace CrudDemo.Controllers
             return View(latestLessons);
         }
 
-        public IActionResult Challenges()
+        public async Task<IActionResult> Challenges()
 		{
-            if (User.IsInRole("Free"))
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            var hasPaidAccess = await HasCourseAccessAsync(userEmail);
+            if (!User.IsInRole("Admin") && !hasPaidAccess)
             {
-                TempData["Error"] = "Cette section n'est pas accessible avec le plan Free.";
+                TempData["Error"] = "Cette section nécessite un abonnement payant.";
                 return RedirectToAction("SubscriptionCheckout", "Payment");
             }
 

@@ -1,5 +1,12 @@
 @model IEnumerable<CrudDemo.Models.Course>
 
+@{
+    var canAccessPremium = (bool?)ViewBag.CanAccessPremium ?? false;
+    var canAccessEntraide = (bool?)ViewBag.CanAccessEntraide ?? false;
+    var canAccessKaliSandbox = (bool?)ViewBag.CanAccessKaliSandbox ?? false;
+    var firstCourseId = (int?)ViewBag.FirstCourseId ?? 0;
+}
+
 <div class="menu-dashboard">
 <a class="logo-link" href="/Courses">
         <svg class="logo-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -60,12 +67,47 @@
                 </div>
             </div>
         </div>
-        <a data-onboarding-app="entraide" href="https://discord.gg/ZJGDPfVwMt" target="_blank"><i class="fas fa-comments"></i> ENTRAIDE</a>
-        <a data-onboarding-app="kali" href="#" id="monBouton"><i class="fa-solid fa-computer"></i> KALI LINUX SANDBOX</a>
-        <a data-onboarding-app="event" asp-controller="Courses" asp-action="Event"><i class="fas fa-comments"></i> Evenement (live, chall, new)</a>
+        @if (canAccessEntraide)
+        {
+            <a data-onboarding-app="entraide" href="https://discord.gg/ZJGDPfVwMt" target="_blank"><i class="fas fa-comments"></i> ENTRAIDE</a>
+        }
+        else
+        {
+            <a data-onboarding-app="entraide" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> ENTRAIDE <span class="premium-badge">PREMIUM</span></a>
+        }
+        @if (canAccessKaliSandbox)
+        {
+            <a data-onboarding-app="kali" href="#" id="monBouton"><i class="fa-solid fa-computer"></i> KALI LINUX SANDBOX</a>
+        }
+        else
+        {
+            <a data-onboarding-app="kali" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> KALI LINUX SANDBOX <span class="premium-badge">PREMIUM</span></a>
+        }
+        @if (canAccessPremium)
+        {
+            <a data-onboarding-app="event" asp-controller="Courses" asp-action="Event"><i class="fas fa-comments"></i> Evenement (live, chall, new)</a>
+        }
+        else
+        {
+            <a data-onboarding-app="event" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Evenement (live, chall, new) <span class="premium-badge">PREMIUM</span></a>
+        }
         <a data-onboarding-app="profil" asp-area="" asp-controller="Courses" asp-action="Member"><i class="fa-regular fa-circle-user"></i> Profil</a>
-        <a data-onboarding-app="ctf" href="http://13.38.113.143:8000"  target="_blank"><i class="fa-solid fa-hat-cowboy"></i> CTF guidé</a>
-        <a data-onboarding-app="challenges" asp-controller="Courses" asp-action="Challenges">🎁 Challenges</a>
+        @if (canAccessPremium)
+        {
+            <a data-onboarding-app="ctf" href="http://13.38.113.143:8000"  target="_blank"><i class="fa-solid fa-hat-cowboy"></i> CTF guidé</a>
+        }
+        else
+        {
+            <a data-onboarding-app="ctf" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> CTF guidé <span class="premium-badge">PREMIUM</span></a>
+        }
+        @if (canAccessPremium)
+        {
+            <a data-onboarding-app="challenges" asp-controller="Courses" asp-action="Challenges">🎁 Challenges</a>
+        }
+        else
+        {
+            <a data-onboarding-app="challenges" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> 🎁 Challenges <span class="premium-badge">PREMIUM</span></a>
+        }
     </div>
 
     <h2 data-onboarding-app="cours">COURS</h2>
@@ -112,6 +154,7 @@
             @foreach (var course in Model)
             {
                 ++module;
+                var isLockedCourse = !canAccessPremium && firstCourseId > 0 && course.Id != firstCourseId;
                 var modules = course.Modules ?? new List<CrudDemo.Models.Module>();
                 if (hasLessonSearch)
                 {
@@ -130,13 +173,21 @@
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-footer bg-white border-top">
-                            <a
-                                asp-controller="Courses"
-                                asp-action="Details"
-                                asp-route-id="@course.Id">
-                                <i class="fas fa-eye"></i> @course.Title
-
-                            </a>
+                            @if (isLockedCourse)
+                            {
+                                <a class="premium-link" href="/Payment/SubscriptionCheckout">
+                                    <i class="fa-solid fa-crown"></i> @course.Title <span class="premium-badge">PREMIUM</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a
+                                    asp-controller="Courses"
+                                    asp-action="Details"
+                                    asp-route-id="@course.Id">
+                                    <i class="fas fa-eye"></i> @course.Title
+                                </a>
+                            }
 
                             @foreach (var m in modules)
                             {
@@ -178,17 +229,26 @@
                                                 var hasQuiz = lesson.Quizzes.Any();
 
                                                 <li class="mb-2">
-                                                    <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
-                                                        @if (hasVideo)
-                                                        {
-                                                            <i class="fas fa-play-circle"></i>
-                                                        }
-                                                        @if (hasQuiz)
-                                                        {
-                                                            <i class="fa-solid fa-circle-question" title="Quiz disponible"></i>
-                                                        }
-                                                        @lesson.Title
-                                                    </a>
+                                                    @if (isLockedCourse)
+                                                    {
+                                                        <a href="/Payment/SubscriptionCheckout" class="lesson-link premium-link">
+                                                            <i class="fa-solid fa-lock"></i> @lesson.Title <span class="premium-badge">PREMIUM</span>
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
+                                                            @if (hasVideo)
+                                                            {
+                                                                <i class="fas fa-play-circle"></i>
+                                                            }
+                                                            @if (hasQuiz)
+                                                            {
+                                                                <i class="fa-solid fa-circle-question" title="Quiz disponible"></i>
+                                                            }
+                                                            @lesson.Title
+                                                        </a>
+                                                    }
                                                 </li>
 
                                             }
@@ -457,6 +517,25 @@
             animation: none !important;
             transition: none !important;
         }
+    }
+
+    .premium-link {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.22), rgba(255, 152, 0, 0.22));
+        border-left: 3px solid #ffb300;
+        border-radius: 8px;
+        padding: 8px 10px;
+    }
+
+    .premium-badge {
+        margin-left: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #1d1d1d;
+        background: linear-gradient(135deg, #ffd54f, #ffb300);
+        border-radius: 999px;
+        padding: 2px 7px;
+        vertical-align: middle;
     }
 </style>
 
@@ -736,6 +815,8 @@
 <script>
 const btn = document.getElementById('monBouton');
 
+if (btn) {
+
 btn.addEventListener('click', async () => {
   const url = 'http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/'; // L'URL à afficher
   const titre = "kali linux sandbox. pour l'entrainement";
@@ -777,6 +858,7 @@ btn.addEventListener('click', async () => {
     }
   }
 });
+}
 </script>
 
 

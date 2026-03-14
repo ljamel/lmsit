@@ -1,21 +1,26 @@
+using CrudDemo.Data;
 using CrudDemo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrudDemo.Controllers;
 
 public class RocketChatController : Controller
 {
     private readonly IRocketChatService _rocketChatService;
+    private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly ILogger<RocketChatController> _logger;
 
     public RocketChatController(
+        ApplicationDbContext context,
         IRocketChatService rocketChatService, 
         UserManager<IdentityUser> userManager,
         ILogger<RocketChatController> logger)
     {
+        _context = context;
         _rocketChatService = rocketChatService;
         _userManager = userManager;
         _logger = logger;
@@ -29,6 +34,12 @@ public class RocketChatController : Controller
     [HttpGet]
     public async Task<IActionResult> ConnectToChat()
     {
+        if (!await HasPaidAccessAsync())
+        {
+            TempData["Error"] = "Cette section nécessite un abonnement payant.";
+            return RedirectToAction("SubscriptionCheckout", "Payment");
+        }
+
         try
         {
             var user = await _userManager.GetUserAsync(User);
@@ -69,6 +80,44 @@ public class RocketChatController : Controller
             TempData["Error"] = "Impossible de se connecter au chat. Veuillez réessayer.";
             return RedirectToAction("Index", "Courses");
         }
+    }
+
+    private async Task<bool> HasPaidAccessAsync()
+    {
+        if (User.IsInRole("Admin"))
+        {
+            return true;
+        }
+
+        var userEmail = User.Identity?.Name ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userEmail))
+        {
+            return false;
+        }
+
+        var subscription = await _context.Subscriptions
+            .AsNoTracking()
+            .Where(s => s.UserId == userEmail)
+            .OrderByDescending(s => s.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (subscription == null)
+        {
+            return false;
+        }
+
+        if (subscription.IsActive && subscription.Status == "active")
+        {
+            return true;
+        }
+
+        if (subscription.Status == "canceled")
+        {
+            var accessUntil = subscription.EndDate ?? subscription.StartDate.AddMonths(1);
+            return DateTime.UtcNow <= accessUntil;
+        }
+
+        return false;
     }
 
     /// <summary>

@@ -269,8 +269,8 @@ iframe.ql-video {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.4s ease;
     animation: slideInLeft 0.5s ease-out;
-    max-width: 386px;
-    font-size: 14px;
+    max-width: 430px;
+    font-size: 11px;
 }
 
 .menu-dashboard a {

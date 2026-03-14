@@ -1,12 +1,36 @@
+using CrudDemo.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CrudDemo.Controllers
 {
+    [Authorize]
     public class PythonChallengesController : Controller
     {
+        private readonly ApplicationDbContext _context;
+
+        public PythonChallengesController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            if (!await HasPaidAccessAsync())
+            {
+                TempData["Error"] = "Cette section nécessite un abonnement payant.";
+                context.Result = RedirectToAction("SubscriptionCheckout", "Payment");
+                return;
+            }
+
+            await next();
+        }
+
         // Challenge 1: Inverser la liste
         public IActionResult Exercise1()
         {
@@ -494,6 +518,44 @@ exec(compile(USER_CODE, '<user_code>', 'exec'), RUNTIME_GLOBALS, {})
             }
 
             return (true, "");
+        }
+
+        private async Task<bool> HasPaidAccessAsync()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(userEmail))
+            {
+                return false;
+            }
+
+            var subscription = await _context.Subscriptions
+                .AsNoTracking()
+                .Where(s => s.UserId == userEmail)
+                .OrderByDescending(s => s.StartDate)
+                .FirstOrDefaultAsync();
+
+            if (subscription == null)
+            {
+                return false;
+            }
+
+            if (subscription.IsActive && subscription.Status == "active")
+            {
+                return true;
+            }
+
+            if (subscription.Status == "canceled")
+            {
+                var accessUntil = subscription.EndDate ?? subscription.StartDate.AddMonths(1);
+                return DateTime.UtcNow <= accessUntil;
+            }
+
+            return false;
         }
     }
 }
