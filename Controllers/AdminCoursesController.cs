@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Stripe;
 using System;
 using System.IO;
@@ -23,13 +24,15 @@ namespace CrudDemo.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly ILogger<AdminCoursesController> _logger;
 
-        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration, IEmailService emailService)
+        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration, IEmailService emailService, ILogger<AdminCoursesController> logger)
         {
             _context = context;
             _env = env;
             _configuration = configuration;
             _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -615,6 +618,35 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             public DateTime? LastActivityAt { get; set; }
         }
 
+        private sealed class LessonEngagementRow
+        {
+            public string UserId { get; set; } = string.Empty;
+            public int CourseId { get; set; }
+            public int LessonId { get; set; }
+            public DateTime EngagedAt { get; set; }
+        }
+
+        private static bool IsLessonEngagementsTableMissing(Exception ex)
+        {
+            var current = ex;
+            while (current != null)
+            {
+                var message = current.Message;
+                if (!string.IsNullOrWhiteSpace(message)
+                    && message.Contains("LessonEngagements", StringComparison.OrdinalIgnoreCase)
+                    && (message.Contains("doesn't exist", StringComparison.OrdinalIgnoreCase)
+                        || message.Contains("does not exist", StringComparison.OrdinalIgnoreCase)
+                        || message.Contains("doesn\u2019t exist", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+
+                current = current.InnerException;
+            }
+
+            return false;
+        }
+
         public async Task<IActionResult> Users(string? search, int page = 1)
         {
             const int pageSize = 15;
@@ -714,17 +746,26 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 })
                 .ToListAsync();
 
-            var lessonEngagementRows = await _context.LessonEngagements
-                .AsNoTracking()
-                .Where(row => row.IsActive)
-                .Select(row => new
-                {
-                    row.UserId,
-                    row.CourseId,
-                    row.LessonId,
-                    row.EngagedAt
-                })
-                .ToListAsync();
+            List<LessonEngagementRow> lessonEngagementRows;
+            try
+            {
+                lessonEngagementRows = await _context.LessonEngagements
+                    .AsNoTracking()
+                    .Where(row => row.IsActive)
+                    .Select(row => new LessonEngagementRow
+                    {
+                        UserId = row.UserId,
+                        CourseId = row.CourseId,
+                        LessonId = row.LessonId,
+                        EngagedAt = row.EngagedAt
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex) when (IsLessonEngagementsTableMissing(ex))
+            {
+                _logger.LogWarning(ex, "Table LessonEngagements absente: stats progression admin indisponibles temporairement.");
+                lessonEngagementRows = new List<LessonEngagementRow>();
+            }
 
             var totalLessonsCount = await _context.Lessons
                 .AsNoTracking()

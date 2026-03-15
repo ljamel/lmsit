@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using CrudDemo.Data;
 using System;
 using System.Collections.Generic;
@@ -9,10 +10,12 @@ using System.Threading.Tasks;
 public class CoursesListViewComponent : ViewComponent
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<CoursesListViewComponent> _logger;
 
-    public CoursesListViewComponent(ApplicationDbContext context)
+    public CoursesListViewComponent(ApplicationDbContext context, ILogger<CoursesListViewComponent> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     // Optimisé: Async + AsNoTracking pour réduire la consommation CPU
@@ -46,14 +49,22 @@ public class CoursesListViewComponent : ViewComponent
 
             trackedCourseIds = trackedCourseIdList.ToHashSet();
 
-            var trackedLessonIdList = await _context.LessonEngagements
-                .AsNoTracking()
-                .Where(e => e.UserId == userEmail && e.IsActive)
-                .Select(e => e.LessonId)
-                .Distinct()
-                .ToListAsync();
+            try
+            {
+                var trackedLessonIdList = await _context.LessonEngagements
+                    .AsNoTracking()
+                    .Where(e => e.UserId == userEmail && e.IsActive)
+                    .Select(e => e.LessonId)
+                    .Distinct()
+                    .ToListAsync();
 
-            trackedLessonIds = trackedLessonIdList.ToHashSet();
+                trackedLessonIds = trackedLessonIdList.ToHashSet();
+            }
+            catch (Exception ex) when (IsLessonEngagementsTableMissing(ex))
+            {
+                _logger.LogWarning(ex, "Table LessonEngagements absente: progression leçons désactivée temporairement.");
+                trackedLessonIds = new HashSet<int>();
+            }
         }
 
         var totalLessons = courses
@@ -119,6 +130,27 @@ public class CoursesListViewComponent : ViewComponent
         {
             var accessUntil = subscription.EndDate ?? subscription.StartDate.AddMonths(1);
             return DateTime.UtcNow <= accessUntil;
+        }
+
+        return false;
+    }
+
+    private static bool IsLessonEngagementsTableMissing(Exception ex)
+    {
+        var current = ex;
+        while (current != null)
+        {
+            var message = current.Message;
+            if (!string.IsNullOrWhiteSpace(message)
+                && message.Contains("LessonEngagements", StringComparison.OrdinalIgnoreCase)
+                && (message.Contains("doesn't exist", StringComparison.OrdinalIgnoreCase)
+                    || message.Contains("does not exist", StringComparison.OrdinalIgnoreCase)
+                    || message.Contains("doesn\u2019t exist", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            current = current.InnerException;
         }
 
         return false;

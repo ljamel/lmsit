@@ -752,49 +752,58 @@ namespace CrudDemo.Controllers
                 enrollment.IsActive = true;
             }
 
+            await _context.SaveChangesAsync();
+
             if (lessonId.HasValue && lessonId.Value > 0)
             {
-                var resolvedCourseId = await _context.Lessons
-                    .AsNoTracking()
-                    .Where(l => l.Id == lessonId.Value)
-                    .Join(
-                        _context.Modules.AsNoTracking(),
-                        lesson => lesson.ModuleId,
-                        module => module.Id,
-                        (_, module) => module.CourseId)
-                    .FirstOrDefaultAsync();
-
-                if (resolvedCourseId == 0 || resolvedCourseId != courseId)
+                try
                 {
-                    return BadRequest(new { success = false, message = "LessonId invalide pour ce cours." });
-                }
+                    var resolvedCourseId = await _context.Lessons
+                        .AsNoTracking()
+                        .Where(l => l.Id == lessonId.Value)
+                        .Join(
+                            _context.Modules.AsNoTracking(),
+                            lesson => lesson.ModuleId,
+                            module => module.Id,
+                            (_, module) => module.CourseId)
+                        .FirstOrDefaultAsync();
 
-                var lessonEngagement = await _context.LessonEngagements
-                    .Where(e => e.UserId == userEmail && e.LessonId == lessonId.Value)
-                    .FirstOrDefaultAsync();
-
-                if (lessonEngagement == null)
-                {
-                    lessonEngagement = new LessonEngagement
+                    if (resolvedCourseId == 0 || resolvedCourseId != courseId)
                     {
-                        UserId = userEmail,
-                        CourseId = courseId,
-                        LessonId = lessonId.Value,
-                        EngagedAt = now,
-                        IsActive = true
-                    };
+                        return BadRequest(new { success = false, message = "LessonId invalide pour ce cours." });
+                    }
 
-                    _context.LessonEngagements.Add(lessonEngagement);
+                    var lessonEngagement = await _context.LessonEngagements
+                        .Where(e => e.UserId == userEmail && e.LessonId == lessonId.Value)
+                        .FirstOrDefaultAsync();
+
+                    if (lessonEngagement == null)
+                    {
+                        lessonEngagement = new LessonEngagement
+                        {
+                            UserId = userEmail,
+                            CourseId = courseId,
+                            LessonId = lessonId.Value,
+                            EngagedAt = now,
+                            IsActive = true
+                        };
+
+                        _context.LessonEngagements.Add(lessonEngagement);
+                    }
+                    else
+                    {
+                        lessonEngagement.CourseId = courseId;
+                        lessonEngagement.EngagedAt = now;
+                        lessonEngagement.IsActive = true;
+                    }
+
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (Exception ex) when (IsLessonEngagementsTableMissing(ex))
                 {
-                    lessonEngagement.CourseId = courseId;
-                    lessonEngagement.EngagedAt = now;
-                    lessonEngagement.IsActive = true;
+                    _logger.LogWarning(ex, "Table LessonEngagements absente: suivi de leçon ignoré pour User={UserEmail}, CourseId={CourseId}, LessonId={LessonId}", userEmail, courseId, lessonId);
                 }
             }
-
-            await _context.SaveChangesAsync();
 
             return Ok(new { success = true, courseId, lessonId, enrolledAt = now });
         }
@@ -1150,6 +1159,27 @@ namespace CrudDemo.Controllers
         {
             public int CourseId { get; set; }
             public int? LessonId { get; set; }
+        }
+
+        private static bool IsLessonEngagementsTableMissing(Exception ex)
+        {
+            var current = ex;
+            while (current != null)
+            {
+                var message = current.Message;
+                if (!string.IsNullOrWhiteSpace(message)
+                    && message.Contains("LessonEngagements", StringComparison.OrdinalIgnoreCase)
+                    && (message.Contains("doesn't exist", StringComparison.OrdinalIgnoreCase)
+                        || message.Contains("does not exist", StringComparison.OrdinalIgnoreCase)
+                        || message.Contains("doesn\u2019t exist", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+
+                current = current.InnerException;
+            }
+
+            return false;
         }
 
     }
