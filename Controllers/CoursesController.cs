@@ -694,6 +694,111 @@ namespace CrudDemo.Controllers
             return View(lesson);
         }
 
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> TrackCourseEngagement([FromBody] TrackCourseEngagementRequest request)
+        {
+            return await TrackCourseEngagementInternalAsync(request.CourseId, request.LessonId);
+        }
+
+        [HttpGet]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> TrackCourseEngagementGet(int courseId, int? lessonId = null)
+        {
+            return await TrackCourseEngagementInternalAsync(courseId, lessonId);
+        }
+
+        private async Task<IActionResult> TrackCourseEngagementInternalAsync(int courseId, int? lessonId)
+        {
+            if (courseId <= 0)
+            {
+                return BadRequest(new { success = false, message = "CourseId invalide." });
+            }
+
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(userEmail))
+            {
+                return Unauthorized(new { success = false, message = "Utilisateur non authentifié." });
+            }
+
+            var canAccess = await CanAccessCourseAsync(userEmail, courseId);
+            if (!canAccess)
+            {
+                return Forbid();
+            }
+
+            var now = DateTime.UtcNow;
+
+            var enrollment = await _context.CourseEnrollments
+                .Where(e => e.UserId == userEmail && e.CourseId == courseId)
+                .OrderByDescending(e => e.EnrolledAt)
+                .FirstOrDefaultAsync();
+
+            if (enrollment == null)
+            {
+                enrollment = new CourseEnrollment
+                {
+                    UserId = userEmail,
+                    CourseId = courseId,
+                    EnrolledAt = now,
+                    IsActive = true
+                };
+
+                _context.CourseEnrollments.Add(enrollment);
+            }
+            else
+            {
+                enrollment.EnrolledAt = now;
+                enrollment.IsActive = true;
+            }
+
+            if (lessonId.HasValue && lessonId.Value > 0)
+            {
+                var resolvedCourseId = await _context.Lessons
+                    .AsNoTracking()
+                    .Where(l => l.Id == lessonId.Value)
+                    .Join(
+                        _context.Modules.AsNoTracking(),
+                        lesson => lesson.ModuleId,
+                        module => module.Id,
+                        (_, module) => module.CourseId)
+                    .FirstOrDefaultAsync();
+
+                if (resolvedCourseId == 0 || resolvedCourseId != courseId)
+                {
+                    return BadRequest(new { success = false, message = "LessonId invalide pour ce cours." });
+                }
+
+                var lessonEngagement = await _context.LessonEngagements
+                    .Where(e => e.UserId == userEmail && e.LessonId == lessonId.Value)
+                    .FirstOrDefaultAsync();
+
+                if (lessonEngagement == null)
+                {
+                    lessonEngagement = new LessonEngagement
+                    {
+                        UserId = userEmail,
+                        CourseId = courseId,
+                        LessonId = lessonId.Value,
+                        EngagedAt = now,
+                        IsActive = true
+                    };
+
+                    _context.LessonEngagements.Add(lessonEngagement);
+                }
+                else
+                {
+                    lessonEngagement.CourseId = courseId;
+                    lessonEngagement.EngagedAt = now;
+                    lessonEngagement.IsActive = true;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, courseId, lessonId, enrolledAt = now });
+        }
+
         // Submit a quiz answer
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -1040,6 +1145,12 @@ namespace CrudDemo.Controllers
 
 			return View();
 		}
+
+        public sealed class TrackCourseEngagementRequest
+        {
+            public int CourseId { get; set; }
+            public int? LessonId { get; set; }
+        }
 
     }
 }

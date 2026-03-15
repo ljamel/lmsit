@@ -181,6 +181,8 @@
                         <th><i class="fas fa-shield-alt me-2"></i>Statut Abonnement</th>
                         <th><i class="fas fa-calendar-alt me-2"></i>Date Début</th>
                         <th><i class="fas fa-graduation-cap me-2"></i>Cours Suivis</th>
+                        <th><i class="fas fa-chart-pie me-2"></i>Progression</th>
+                        <th><i class="fas fa-calendar-check me-2"></i>Dernier Suivi</th>
                         <th><i class="fas fa-tasks me-2"></i>Leçons Quiz</th>
                         <th><i class="fas fa-question-circle me-2"></i>Tentatives Quiz</th>
                         <th><i class="fas fa-check-circle me-2"></i>Bonnes Réponses</th>
@@ -230,6 +232,19 @@
                             </td>
                             <td>
                                 <span class="badge-active">@item.CoursesTracked</span>
+                            </td>
+                            <td>
+                                <span class="date-info">@item.LessonsTracked/@item.TotalLessons (@item.LessonsProgressPercent.ToString("0.0")%)</span>
+                            </td>
+                            <td>
+                                @if (item.LastLessonTrackedAt != null)
+                                {
+                                    <span class="date-info">@item.LastLessonTrackedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
                             </td>
                             <td>
                                 <span class="date-info">@item.QuizLessonsTracked</span>

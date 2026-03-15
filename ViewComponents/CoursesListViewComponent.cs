@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CrudDemo.Data;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public class CoursesListViewComponent : ViewComponent
@@ -31,11 +33,56 @@ public class CoursesListViewComponent : ViewComponent
             .FirstOrDefault();
 
         var userEmail = User?.Identity?.Name ?? string.Empty;
+        var trackedCourseIds = new HashSet<int>();
+        var trackedLessonIds = new HashSet<int>();
+        if (!string.IsNullOrWhiteSpace(userEmail))
+        {
+            var trackedCourseIdList = await _context.CourseEnrollments
+                .AsNoTracking()
+                .Where(e => e.UserId == userEmail && e.IsActive)
+                .Select(e => e.CourseId)
+                .Distinct()
+                .ToListAsync();
+
+            trackedCourseIds = trackedCourseIdList.ToHashSet();
+
+            var trackedLessonIdList = await _context.LessonEngagements
+                .AsNoTracking()
+                .Where(e => e.UserId == userEmail && e.IsActive)
+                .Select(e => e.LessonId)
+                .Distinct()
+                .ToListAsync();
+
+            trackedLessonIds = trackedLessonIdList.ToHashSet();
+        }
+
+        var totalLessons = courses
+            .SelectMany(c => c.Modules)
+            .SelectMany(m => m.Lessons)
+            .Select(l => l.Id)
+            .Distinct()
+            .Count();
+
+        var trackedLessonsCount = trackedLessonIds
+            .Count(lessonId => courses
+                .SelectMany(c => c.Modules)
+                .SelectMany(m => m.Lessons)
+                .Any(l => l.Id == lessonId));
+
+        var progressPercent = totalLessons == 0
+            ? 0
+            : Math.Round((trackedLessonsCount * 100.0) / totalLessons, 0);
+
         var canAccessKaliSandbox = await HasPaidAccessAsync(userEmail);
         ViewBag.CanAccessPremium = canAccessKaliSandbox;
         ViewBag.CanAccessEntraide = canAccessKaliSandbox;
         ViewBag.CanAccessKaliSandbox = canAccessKaliSandbox;
         ViewBag.FirstCourseId = firstCourseId;
+        ViewBag.TrackedCourseIds = trackedCourseIds;
+        ViewBag.TrackedLessonIds = trackedLessonIds;
+        ViewBag.UserTrackedLessonsCount = trackedLessonsCount;
+        ViewBag.UserTotalLessonsCount = totalLessons;
+        ViewBag.UserCourseProgressPercent = progressPercent;
 
         return View(courses);
     }

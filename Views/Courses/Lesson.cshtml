@@ -176,6 +176,71 @@
                 wrapper.remove();
             }, 4200);
         })();
+
+        (() => {
+            const courseId = @courseId;
+            const lessonId = @Model.Id;
+            const trackingDelayMs = 4 * 60 * 1000;
+            const retryDelayMs = 30 * 1000;
+            const storageStartKey = `lesson_engagement_start_${lessonId}`;
+            const storageTrackedKey = `lesson_engagement_tracked_${lessonId}`;
+            let hasTracked = false;
+
+            const trackEngagement = async () => {
+                if (hasTracked || !Number.isInteger(courseId) || courseId <= 0 || !Number.isInteger(lessonId) || lessonId <= 0) {
+                    return;
+                }
+
+                try {
+                    const postResponse = await fetch('/Courses/TrackCourseEngagement', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ courseId, lessonId })
+                    });
+
+                    let ok = postResponse.ok;
+                    if (!ok) {
+                        const getResponse = await fetch(`/Courses/TrackCourseEngagementGet?courseId=${courseId}&lessonId=${lessonId}`, {
+                            method: 'GET',
+                            credentials: 'same-origin'
+                        });
+                        ok = getResponse.ok;
+                    }
+
+                    if (ok) {
+                        hasTracked = true;
+                        localStorage.setItem(storageTrackedKey, '1');
+                        localStorage.removeItem(storageStartKey);
+                        return;
+                    }
+                } catch {
+                }
+
+                window.setTimeout(trackEngagement, retryDelayMs);
+            };
+
+            if (localStorage.getItem(storageTrackedKey) === '1') {
+                hasTracked = true;
+                return;
+            }
+
+            const now = Date.now();
+            const startRaw = localStorage.getItem(storageStartKey);
+            const startTs = startRaw ? Number(startRaw) : NaN;
+            const effectiveStart = Number.isFinite(startTs) && startTs > 0 ? startTs : now;
+
+            if (!Number.isFinite(startTs) || startTs <= 0) {
+                localStorage.setItem(storageStartKey, String(now));
+            }
+
+            const elapsedMs = now - effectiveStart;
+            const remainingMs = Math.max(0, trackingDelayMs - elapsedMs);
+            window.setTimeout(trackEngagement, remainingMs);
+        })();
     </script>
 }
 

@@ -32,6 +32,10 @@ namespace CrudDemo.Models
         public string? StripeSubscriptionId { get; set; }
 
         public int CoursesTracked { get; set; }
+        public int LessonsTracked { get; set; }
+        public int TotalLessons { get; set; }
+        public double LessonsProgressPercent { get; set; }
+        public DateTime? LastLessonTrackedAt { get; set; }
         public int QuizAttempts { get; set; }
         public int QuizCorrectAnswers { get; set; }
         public int QuizLessonsTracked { get; set; }

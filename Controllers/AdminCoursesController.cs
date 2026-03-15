@@ -604,6 +604,10 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         private sealed class UserTrackingSummary
         {
             public int CoursesTracked { get; set; }
+            public int LessonsTracked { get; set; }
+            public int TotalLessons { get; set; }
+            public double LessonsProgressPercent { get; set; }
+            public DateTime? LastLessonTrackedAt { get; set; }
             public int QuizAttempts { get; set; }
             public int QuizCorrectAnswers { get; set; }
             public int QuizLessonsTracked { get; set; }
@@ -710,11 +714,33 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 })
                 .ToListAsync();
 
+            var lessonEngagementRows = await _context.LessonEngagements
+                .AsNoTracking()
+                .Where(row => row.IsActive)
+                .Select(row => new
+                {
+                    row.UserId,
+                    row.CourseId,
+                    row.LessonId,
+                    row.EngagedAt
+                })
+                .ToListAsync();
+
+            var totalLessonsCount = await _context.Lessons
+                .AsNoTracking()
+                .Select(l => l.Id)
+                .Distinct()
+                .CountAsync();
+
             var quizByUserId = quizActivityRows
                 .GroupBy(row => row.UserId)
                 .ToDictionary(group => group.Key, group => group.ToList());
 
             var commentsByUserEmail = commentActivityRows
+                .GroupBy(row => row.UserId)
+                .ToDictionary(group => group.Key, group => group.ToList());
+
+            var lessonEngagementByUserEmail = lessonEngagementRows
                 .GroupBy(row => row.UserId)
                 .ToDictionary(group => group.Key, group => group.ToList());
 
@@ -756,6 +782,10 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     SubscriptionStartDate = subscription?.StartDate ?? latestSubscription?.StartDate,
                     StripeSubscriptionId = subscription?.StripeSubscriptionId,
                     CoursesTracked = tracking.CoursesTracked,
+                    LessonsTracked = tracking.LessonsTracked,
+                    TotalLessons = tracking.TotalLessons,
+                    LessonsProgressPercent = tracking.LessonsProgressPercent,
+                    LastLessonTrackedAt = tracking.LastLessonTrackedAt,
                     QuizAttempts = tracking.QuizAttempts,
                     QuizCorrectAnswers = tracking.QuizCorrectAnswers,
                     QuizLessonsTracked = tracking.QuizLessonsTracked,
@@ -870,6 +900,7 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             {
                 quizStatsByUserId.TryGetValue(userId, out var quizStats);
                 commentStatsByUserEmail.TryGetValue(userEmail ?? string.Empty, out var commentStats);
+                lessonEngagementByUserEmail.TryGetValue(userEmail ?? string.Empty, out var lessonStatsRows);
 
                 var courseIds = new System.Collections.Generic.HashSet<int>();
                 if (quizStats != null)
@@ -882,8 +913,21 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                     courseIds.UnionWith(commentStats.CourseIds);
                 }
 
+                var lessonsTracked = lessonStatsRows?.Select(row => row.LessonId).Distinct().Count() ?? 0;
+                if (lessonStatsRows != null)
+                {
+                    courseIds.UnionWith(lessonStatsRows.Select(row => row.CourseId));
+                }
+
+                var lastLessonTrackedAt = lessonStatsRows?.OrderByDescending(row => row.EngagedAt).FirstOrDefault()?.EngagedAt;
+
+                var lessonsProgressPercent = totalLessonsCount == 0
+                    ? 0
+                    : Math.Round((lessonsTracked * 100.0) / totalLessonsCount, 1);
+
                 var lastActivityAt = new[]
                 {
+                    lastLessonTrackedAt,
                     quizStats != null ? (DateTime?)quizStats.LastQuizActivityAt : null,
                     commentStats != null ? (DateTime?)commentStats.LastCommentActivityAt : null
                 }
@@ -897,6 +941,10 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                 return new UserTrackingSummary
                 {
                     CoursesTracked = courseIds.Count,
+                    LessonsTracked = lessonsTracked,
+                    TotalLessons = totalLessonsCount,
+                    LessonsProgressPercent = lessonsProgressPercent,
+                    LastLessonTrackedAt = lastLessonTrackedAt,
                     QuizAttempts = quizStats?.QuizAttempts ?? 0,
                     QuizCorrectAnswers = quizStats?.QuizCorrectAnswers ?? 0,
                     QuizLessonsTracked = quizStats?.QuizLessonsTracked ?? 0,

@@ -20,6 +20,7 @@ namespace CrudDemo.Data
 	public DbSet<UserQuizResult> UserQuizResults { get; set; }
 	public DbSet<Payment> Payments { get; set; }
 	public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+	public DbSet<LessonEngagement> LessonEngagements { get; set; }
 	public DbSet<Subscription> Subscriptions { get; set; }
 	public DbSet<Comment> Comments { get; set; }
 
@@ -65,6 +66,16 @@ namespace CrudDemo.Data
 			modelBuilder.Entity<CourseEnrollment>()
 				.HasIndex(e => new { e.UserId, e.CourseId, e.IsActive })
 				.HasDatabaseName("IX_CourseEnrollments_UserId_CourseId_IsActive");
+
+			// Index sur LessonEngagements pour le suivi par leçon
+			modelBuilder.Entity<LessonEngagement>()
+				.HasIndex(e => new { e.UserId, e.LessonId })
+				.IsUnique()
+				.HasDatabaseName("UX_LessonEngagements_UserId_LessonId");
+
+			modelBuilder.Entity<LessonEngagement>()
+				.HasIndex(e => new { e.UserId, e.CourseId, e.IsActive })
+				.HasDatabaseName("IX_LessonEngagements_UserId_CourseId_IsActive");
 
 			// Index sur Payments pour recherche par utilisateur
 			modelBuilder.Entity<Payment>()

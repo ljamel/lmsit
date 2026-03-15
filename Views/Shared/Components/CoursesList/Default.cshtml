@@ -5,9 +5,30 @@
     var canAccessEntraide = (bool?)ViewBag.CanAccessEntraide ?? false;
     var canAccessKaliSandbox = (bool?)ViewBag.CanAccessKaliSandbox ?? false;
     var firstCourseId = (int?)ViewBag.FirstCourseId ?? 0;
+    var trackedCourseIds = ViewBag.TrackedCourseIds as HashSet<int> ?? new HashSet<int>();
+    var trackedLessonIds = ViewBag.TrackedLessonIds as HashSet<int> ?? new HashSet<int>();
+    var trackedLessonsCount = (int?)ViewBag.UserTrackedLessonsCount ?? 0;
+    var totalLessonsCount = (int?)ViewBag.UserTotalLessonsCount ?? 0;
+    var courseProgressPercent = (double?)ViewBag.UserCourseProgressPercent ?? 0;
 }
 
 <div class="menu-dashboard">
+    <div class="mb-3" aria-label="Progression des cours">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <small class="text-muted">Progression des leçons</small>
+            <small class="text-muted">@trackedLessonsCount/@totalLessonsCount (@courseProgressPercent%)</small>
+        </div>
+        <div class="progress" style="height: 8px;">
+            <div
+                class="progress-bar"
+                role="progressbar"
+                style="width: @courseProgressPercent%;"
+                aria-valuenow="@courseProgressPercent"
+                aria-valuemin="0"
+                aria-valuemax="100"></div>
+        </div>
+    </div>
+
 <a class="logo-link" href="/Courses">
         <svg class="logo-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -102,7 +123,7 @@
         }
         @if (canAccessPremium)
         {
-            <a data-onboarding-app="challenges" asp-controller="Courses" asp-action="Challenges">🎁 Challenges</a>
+            <a data-onboarding-app="challenges" asp-controller="Courses" asp-action="Challenges">🎁 Challenges cadeau à gagner</a>
         }
         else
         {
@@ -238,6 +259,10 @@
                                                     else
                                                     {
                                                         <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
+                                                            @if (trackedLessonIds.Contains(lesson.Id))
+                                                            {
+                                                                <i class="fas fa-check text-success" aria-label="Leçon suivie"></i>
+                                                            }
                                                             @if (hasVideo)
                                                             {
                                                                 <i class="fas fa-play-circle"></i>
