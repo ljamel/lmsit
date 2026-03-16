@@ -431,6 +431,7 @@ h1 {
     padding: 1rem 1.25rem !important;
     color: #0f172a !important;
     text-transform: none !important; /* Plus moderne que le tout majuscule */
+    display: ruby-base;
 }
 
 /* --- Badges de Points --- */
