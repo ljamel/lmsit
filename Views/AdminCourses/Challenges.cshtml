@@ -79,6 +79,7 @@
                     <tr>
                         <th>Challenge</th>
                         <th>Leçon</th>
+                        <th>Flag</th>
                         <th>Points</th>
                         <th>Modifier</th>
                         <th>Supprimer</th>
@@ -90,12 +91,14 @@
                         <tr>
                             <td>
                                 <div class="fw-semibold">@challenge.Title</div>
-                                <div class="text-muted small">@challenge.Description</div>
                             </td>
                             <td>
                                 <div class="small text-muted">@challenge.CourseTitle</div>
                                 <div class="small">@challenge.ModuleTitle</div>
                                 <div class="small fw-semibold">@challenge.LessonTitle</div>
+                            </td>
+                            <td>
+                                <code class="small">@challenge.CurrentFlag</code>
                             </td>
                             <td><span class="badge text-bg-warning">@challenge.Points</span></td>
                             <td>

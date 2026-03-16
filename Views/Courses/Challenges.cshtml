@@ -45,7 +45,11 @@
                         @foreach (var challenge in group)
                         {
                             <div class="col-12 col-lg-6">
-                                <div class="card h-100 shadow-sm border-0 challenge-card-themed">
+                                <div class="card h-100 shadow-sm border-0 challenge-card-themed challenge-card-clickable"
+                                     role="button"
+                                     tabindex="0"
+                                     data-challenge-title="@challenge.Title"
+                                     data-challenge-detail-id="challenge-detail-@challenge.QuizId">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <strong>@challenge.Title</strong>
                                         <span class="badge text-bg-warning">@challenge.Points pts</span>
@@ -54,34 +58,40 @@
                                         <p class="text-muted mb-2">
                                             <i class="fas fa-play-circle"></i> @challenge.LessonTitle
                                         </p>
-                                        <div class="mb-3">@Html.Raw(System.Net.WebUtility.HtmlDecode(challenge.Description))</div>
-
-                                        @if (challenge.IsSolved)
-                                        {
-                                            <div class="alert alert-success mb-0 py-2">
-                                                ✅ Flag déjà réussi
-                                            </div>
-                                            @if (!string.IsNullOrWhiteSpace(challenge.CurrentFlag))
-                                            {
-                                                <div class="alert alert-secondary mt-2 mb-0 py-2">
-                                                    Ancien flag : <strong>@challenge.CurrentFlag</strong>
-                                                </div>
-                                            }
-                                            <div class="d-flex gap-2 mt-2">
-                                                <input type="text" class="form-control" value="Déjà validé" disabled />
-                                                <button type="button" class="btn btn-success" disabled>Envoyer</button>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <form asp-controller="Courses" asp-action="SubmitChallengeFlag" method="post" class="d-flex gap-2">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="QuizId" value="@challenge.QuizId" />
-                                                <input type="text" name="Flag" class="form-control" placeholder="Soumettre un flag" required />
-                                                <button type="submit" class="btn btn-success">Envoyer</button>
-                                            </form>
-                                        }
                                     </div>
+                                </div>
+
+                                <div id="challenge-detail-@challenge.QuizId" class="d-none">
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-play-circle"></i> @challenge.LessonTitle
+                                    </p>
+                                    <div class="mb-3">@Html.Raw(System.Net.WebUtility.HtmlDecode(challenge.Description))</div>
+
+                                    @if (challenge.IsSolved)
+                                    {
+                                        <div class="alert alert-success mb-0 py-2">
+                                            ✅ Flag déjà réussi
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(challenge.CurrentFlag))
+                                        {
+                                            <div class="alert alert-secondary mt-2 mb-0 py-2">
+                                                Ancien flag : <strong>@challenge.CurrentFlag</strong>
+                                            </div>
+                                        }
+                                        <div class="d-flex gap-2 mt-2">
+                                            <input type="text" class="form-control" value="Déjà validé" disabled />
+                                            <button type="button" class="btn btn-success" disabled>Envoyer</button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <form asp-controller="Courses" asp-action="SubmitChallengeFlag" method="post" class="d-flex gap-2">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="QuizId" value="@challenge.QuizId" />
+                                            <input type="text" name="Flag" class="form-control" placeholder="Soumettre un flag" required />
+                                            <button type="submit" class="btn btn-success">Envoyer</button>
+                                        </form>
+                                    }
                                 </div>
                             </div>
                         }
@@ -92,13 +102,188 @@
     }
 </div>
 
+<div class="modal fade" id="challengeDetailsModal" tabindex="-1" aria-labelledby="challengeDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="challengeDetailsModalLabel">Détail du challenge</h5>
+                <button type="button" id="challengeDetailsModalClose" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body" id="challengeDetailsModalBody"></div>
+        </div>
+    </div>
+</div>
+
 <style>
     .challenge-card-themed {
         border-left: 4px solid #0d6efd;
     }
+
+    .challenge-card-clickable {
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .challenge-card-clickable:hover,
+    .challenge-card-clickable:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(13, 110, 253, 0.15) !important;
+    }
+
+    .challenge-card-clickable .card-body {
+        min-height: 72px;
+    }
+
     .card.shadow-sm.mb-4 {
         display: table-cell;
         width: 500px;
         padding: 2px;
     }
+
+    #challengeDetailsModal {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.55);
+    }
+
+    #challengeDetailsModal.show,
+    #challengeDetailsModal.challenge-modal-fallback-open {
+        display: flex !important;
+    }
+
+    #challengeDetailsModal .modal-dialog {
+        width: min(900px, 100%);
+        margin: 0;
+        max-height: calc(100vh - 32px);
+    }
+
+    #challengeDetailsModal .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        max-height: calc(100vh - 32px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    #challengeDetailsModal .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    #challengeDetailsModal .modal-body {
+        padding: 16px;
+        overflow-y: auto;
+    }
+
+    #challengeDetailsModal .btn-close {
+        border: 0;
+        background: transparent;
+        font-size: 1.2rem;
+        opacity: 0.7;
+    }
+
+    #challengeDetailsModal .btn-close:hover {
+        opacity: 1;
+    }
+
+    .challenge-modal-fallback-open {
+        display: block !important;
+        background: rgba(0, 0, 0, 0.55);
+    }
+
+    body.challenge-modal-open {
+        overflow: hidden;
+    }
 </style>
+
+<script>
+    (function () {
+        var cards = document.querySelectorAll('.challenge-card-clickable');
+        var modalElement = document.getElementById('challengeDetailsModal');
+        var modalTitle = document.getElementById('challengeDetailsModalLabel');
+        var modalBody = document.getElementById('challengeDetailsModalBody');
+        var closeButton = document.getElementById('challengeDetailsModalClose');
+
+        if (!cards.length || !modalElement || !modalTitle || !modalBody) {
+            return;
+        }
+
+        var hasBootstrapModal = typeof bootstrap !== 'undefined' && typeof bootstrap.Modal !== 'undefined';
+        var modal = hasBootstrapModal ? new bootstrap.Modal(modalElement) : null;
+
+        function showFallbackModal() {
+            modalElement.classList.add('show', 'challenge-modal-fallback-open');
+            modalElement.removeAttribute('aria-hidden');
+            document.body.classList.add('challenge-modal-open');
+        }
+
+        function hideFallbackModal() {
+            modalElement.classList.remove('show', 'challenge-modal-fallback-open');
+            modalElement.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('challenge-modal-open');
+        }
+
+        function openChallengeModal(card) {
+            var detailId = card.getAttribute('data-challenge-detail-id');
+            var title = card.getAttribute('data-challenge-title') || 'Détail du challenge';
+            if (!detailId) {
+                return;
+            }
+
+            var detail = document.getElementById(detailId);
+            if (!detail) {
+                return;
+            }
+
+            modalTitle.textContent = title;
+            modalBody.innerHTML = detail.innerHTML;
+
+            if (modal) {
+                modal.show();
+            } else {
+                showFallbackModal();
+            }
+        }
+
+        cards.forEach(function (card) {
+            card.addEventListener('click', function () {
+                openChallengeModal(card);
+            });
+
+            card.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openChallengeModal(card);
+                }
+            });
+        });
+
+        if (!modal) {
+            if (closeButton) {
+                closeButton.addEventListener('click', hideFallbackModal);
+            }
+
+            modalElement.addEventListener('click', function (event) {
+                if (event.target === modalElement) {
+                    hideFallbackModal();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && modalElement.classList.contains('show')) {
+                    hideFallbackModal();
+                }
+            });
+        }
+    })();
+</script>
