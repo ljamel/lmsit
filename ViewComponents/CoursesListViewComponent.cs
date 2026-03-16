@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using CrudDemo.Data;
+using System.Security.Claims;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +37,15 @@ public class CoursesListViewComponent : ViewComponent
             .FirstOrDefault();
 
         var userEmail = User?.Identity?.Name ?? string.Empty;
+        var userId = HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var trackedCourseIds = new HashSet<int>();
         var trackedLessonIds = new HashSet<int>();
+        var totalQuizCount = await _context.Quizzes.AsNoTracking().CountAsync();
+        var totalQuizPoints = await _context.Quizzes.AsNoTracking().SumAsync(q => q.Points);
+        var completedQuizCount = 0;
+        var earnedQuizPoints = 0;
+        var certificateScorePercent = 0d;
+        var isCertificateEligible = false;
         if (!string.IsNullOrWhiteSpace(userEmail))
         {
             var trackedCourseIdList = await _context.CourseEnrollments
@@ -85,6 +93,45 @@ public class CoursesListViewComponent : ViewComponent
             : Math.Round((trackedLessonsCount * 100.0) / totalLessons, 0);
 
         var canAccessKaliSandbox = await HasPaidAccessAsync(userEmail);
+
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            var userQuizResults = await _context.UserQuizResults
+                .AsNoTracking()
+                .Where(r => r.UserId == userId)
+                .Select(r => new { r.QuizId, r.IsCorrect, r.AttemptedAt })
+                .ToListAsync();
+
+            var latestResultsByQuiz = userQuizResults
+                .GroupBy(r => r.QuizId)
+                .Select(group => group.OrderByDescending(x => x.AttemptedAt).First())
+                .ToList();
+
+            completedQuizCount = latestResultsByQuiz.Count;
+
+            if (latestResultsByQuiz.Count > 0)
+            {
+                var quizIds = latestResultsByQuiz.Select(x => x.QuizId).Distinct().ToList();
+                var quizPointsById = await _context.Quizzes
+                    .AsNoTracking()
+                    .Where(q => quizIds.Contains(q.Id))
+                    .Select(q => new { q.Id, q.Points })
+                    .ToDictionaryAsync(q => q.Id, q => q.Points);
+
+                earnedQuizPoints = latestResultsByQuiz
+                    .Where(x => x.IsCorrect && quizPointsById.ContainsKey(x.QuizId))
+                    .Sum(x => quizPointsById[x.QuizId]);
+            }
+
+            certificateScorePercent = totalQuizPoints == 0
+                ? 0
+                : Math.Round((earnedQuizPoints * 100.0) / totalQuizPoints, 1);
+
+            isCertificateEligible = totalQuizCount > 0
+                && completedQuizCount == totalQuizCount
+                && certificateScorePercent > 80;
+        }
+
         ViewBag.CanAccessPremium = canAccessKaliSandbox;
         ViewBag.CanAccessEntraide = canAccessKaliSandbox;
         ViewBag.CanAccessKaliSandbox = canAccessKaliSandbox;
@@ -94,6 +141,12 @@ public class CoursesListViewComponent : ViewComponent
         ViewBag.UserTrackedLessonsCount = trackedLessonsCount;
         ViewBag.UserTotalLessonsCount = totalLessons;
         ViewBag.UserCourseProgressPercent = progressPercent;
+        ViewBag.IsCertificateEligible = isCertificateEligible;
+        ViewBag.EarnedQuizPoints = earnedQuizPoints;
+        ViewBag.TotalQuizPoints = totalQuizPoints;
+        ViewBag.CertificateScorePercent = certificateScorePercent;
+        ViewBag.CompletedQuizCount = completedQuizCount;
+        ViewBag.TotalQuizCount = totalQuizCount;
 
         return View(courses);
     }

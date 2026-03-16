@@ -10,6 +10,13 @@
     var trackedLessonsCount = (int?)ViewBag.UserTrackedLessonsCount ?? 0;
     var totalLessonsCount = (int?)ViewBag.UserTotalLessonsCount ?? 0;
     var courseProgressPercent = (double?)ViewBag.UserCourseProgressPercent ?? 0;
+    var isCertificateEligible = (bool?)ViewBag.IsCertificateEligible ?? false;
+    var earnedQuizPoints = (int?)ViewBag.EarnedQuizPoints ?? 0;
+    var totalQuizPoints = (int?)ViewBag.TotalQuizPoints ?? 0;
+    var certificateScorePercent = (double?)ViewBag.CertificateScorePercent ?? 0;
+    var completedQuizCount = (int?)ViewBag.CompletedQuizCount ?? 0;
+    var totalQuizCount = (int?)ViewBag.TotalQuizCount ?? 0;
+    var certificateAction = isCertificateEligible ? "Certif1" : "Member";
 }
 
 <div class="menu-dashboard">
@@ -115,11 +122,11 @@
         <a data-onboarding-app="profil" asp-area="" asp-controller="Courses" asp-action="Member"><i class="fa-regular fa-circle-user"></i> Profil</a>
         @if (canAccessPremium)
         {
-            <a data-onboarding-app="ctf" href="http://13.38.113.143:8000"  target="_blank"><i class="fa-solid fa-hat-cowboy"></i> CTF guidé</a>
+            <a data-onboarding-app="ctf" asp-controller="Challenges" asp-action="Index"><i class="fa-solid fa-hat-cowboy"></i> Plateforme CTF</a>
         }
         else
         {
-            <a data-onboarding-app="ctf" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> CTF guidé <span class="premium-badge">PREMIUM</span></a>
+            <a data-onboarding-app="ctf" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Plateforme CTF <span class="premium-badge">PREMIUM</span></a>
         }
         @if (canAccessPremium)
         {
@@ -129,6 +136,22 @@
         {
             <a data-onboarding-app="challenges" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> 🎁 Challenges <span class="premium-badge">PREMIUM</span></a>
         }
+
+        <a data-onboarding-app="certification"
+           asp-controller="Courses"
+           asp-action="@certificateAction"
+           class="certification-link @(isCertificateEligible ? "certification-ready" : "certification-pending")"
+           data-certification-toggle="@(isCertificateEligible ? "disabled" : "pending")"
+           aria-expanded="@(isCertificateEligible ? "true" : "false")">
+            <i class="fas fa-certificate"></i>
+            @(isCertificateEligible ? "Certification disponible" : "Certification (voir conditions)")
+        </a>
+        <div class="certification-conditions @(isCertificateEligible ? "is-ready" : "is-pending") @(isCertificateEligible ? string.Empty : "d-none")"
+             data-certification-conditions="@(isCertificateEligible ? "ready" : "pending")">
+            <div><strong>Points:</strong> @earnedQuizPoints / @totalQuizPoints (@certificateScorePercent.ToString("0.0")%)</div>
+            <div><strong>Quiz:</strong> @completedQuizCount / @totalQuizCount complétés</div>
+            <div class="conditions-text">Compléter les quiz et challenges pratiques avec un score minimal de 80 %.</div>
+        </div>
     </div>
 
     <h2 data-onboarding-app="cours">COURS</h2>
@@ -299,6 +322,9 @@
 </div>
 
 <style>
+    .d-none {
+        display: none;
+    }
     .app-onboarding-active {
         overflow: auto;
     }
@@ -829,6 +855,34 @@
                 } else {
                     window.location.href = href;
                 }
+            });
+        });
+    })();
+</script>
+
+<script>
+    (function () {
+        var pendingLinks = document.querySelectorAll('[data-certification-toggle="pending"]');
+        if (!pendingLinks.length) {
+            return;
+        }
+
+        pendingLinks.forEach(function (link) {
+            var menu = link.closest('.menu-dashboard');
+            if (!menu) {
+                return;
+            }
+
+            var conditions = menu.querySelector('[data-certification-conditions="pending"]');
+            if (!conditions) {
+                return;
+            }
+
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                conditions.classList.toggle('d-none');
+                var isExpanded = !conditions.classList.contains('d-none');
+                link.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
             });
         });
     })();

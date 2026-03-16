@@ -1,22 +1,104 @@
-﻿@model IEnumerable<CrudDemo.Models.Lesson>
+﻿@model CrudDemo.Models.CtfChallengePageViewModel
 
 @{
-    ViewData["Title"] = "Challenges lot à gagné";
+    ViewData["Title"] = "Challenges CTF";
 }
 
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4"><i class="fas fa-flag-checkered"></i> @ViewData["Title"]</h1>
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
 
-<div class="container mt-4">
-    <h1 class="mb-4">
-        <i class="fas fa-graduation-cap"></i> @ViewData["Title"]
-    </h1>
-    <p>🔥 <strong>Pr&eacute;parez-vous&hellip; quelque chose d&rsquo;&eacute;norme arrive !</strong> 🔥</p>
-    <p>Tr&egrave;s bient&ocirc;t, des <strong>lots exceptionnels</strong> seront &agrave; gagner &agrave; travers des <strong>challenges cyber</strong> palpitants ⚡</p>
-    <p>Au programme :<br />💻 Des &eacute;preuves techniques stimulantes<br />🧠 Des d&eacute;fis strat&eacute;giques<br />🚩 Des sc&eacute;narios immersifs inspir&eacute;s du monde r&eacute;el<br />🎁 Et surtout&hellip; des r&eacute;compenses &agrave; la hauteur de votre performance</p>
-    <p>Que vous soyez passionn&eacute; de cybers&eacute;curit&eacute;, amateur de CTF ou simplement pr&ecirc;t &agrave; tester vos comp&eacute;tences, ces challenges seront l&rsquo;occasion parfaite de vous d&eacute;passer et de montrer ce dont vous &ecirc;tes capable.</p>
-    <p>👉 Restez connect&eacute;s.<br />👉 &Eacute;chauffez vos neurones.<br />👉 Pr&eacute;parez votre clavier.</p>
-    <p>Les d&eacute;fis arrivent&hellip; et ils ne feront aucun cadeau 😈</p>
-    <p>Qui sera pr&ecirc;t &agrave; relever le challenge ? 🚀</p>
+    @if (!Model.Challenges.Any())
+    {
+        <div class="alert alert-info">Aucun challenge CTF disponible pour le moment.</div>
+    }
+    else
+    {
+        var groupedChallenges = Model.Challenges
+            .OrderBy(c => c.CourseTitle)
+            .ThenBy(c => c.ModuleTitle)
+            .ThenBy(c => c.Title)
+            .GroupBy(c => new { c.CourseTitle, c.ModuleTitle })
+            .ToList();
 
+        foreach (var group in groupedChallenges)
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-1">
+                        <i class="fas fa-layer-group"></i> @group.Key.ModuleTitle
+                    </h5>
+                    <small class="text-muted">
+                        <i class="fas fa-book"></i> @group.Key.CourseTitle · @group.Count() challenge(s)
+                    </small>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @foreach (var challenge in group)
+                        {
+                            <div class="col-12 col-lg-6">
+                                <div class="card h-100 shadow-sm border-0 challenge-card-themed">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <strong>@challenge.Title</strong>
+                                        <span class="badge text-bg-warning">@challenge.Points pts</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-play-circle"></i> @challenge.LessonTitle
+                                        </p>
+                                        <p class="mb-3">@challenge.Description</p>
 
+                                        @if (challenge.IsSolved)
+                                        {
+                                            <div class="alert alert-success mb-0 py-2">
+                                                ✅ Flag déjà réussi
+                                            </div>
+                                            @if (!string.IsNullOrWhiteSpace(challenge.CurrentFlag))
+                                            {
+                                                <div class="alert alert-secondary mt-2 mb-0 py-2">
+                                                    Ancien flag : <strong>@challenge.CurrentFlag</strong>
+                                                </div>
+                                            }
+                                            <div class="d-flex gap-2 mt-2">
+                                                <input type="text" class="form-control" value="Déjà validé" disabled />
+                                                <button type="button" class="btn btn-success" disabled>Envoyer</button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="Courses" asp-action="SubmitChallengeFlag" method="post" class="d-flex gap-2">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="QuizId" value="@challenge.QuizId" />
+                                                <input type="text" name="Flag" class="form-control" placeholder="Soumettre un flag" required />
+                                                <button type="submit" class="btn btn-success">Envoyer</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
 </div>
+
+<style>
+    .challenge-card-themed {
+        border-left: 4px solid #0d6efd;
+    }
+    .card.shadow-sm.mb-4 {
+        display: table-cell;
+        width: 500px;
+        padding: 2px;
+    }
+</style>

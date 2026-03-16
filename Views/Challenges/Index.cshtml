@@ -1,28 +1,106 @@
+@model CrudDemo.Models.CtfChallengePageViewModel
+
 @{
-    ViewData["Title"] = "Exercice informatique";
+    ViewData["Title"] = "Plateforme CTF";
 }
 
-<section class="features">
-    <h1>@ViewData["Title"]</h1>
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="mb-0"><i class="fas fa-flag-checkered"></i> @ViewData["Title"]</h1>
+        <span class="badge text-bg-dark">Style CTFd</span>
+    </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
 
-<div class="container mt-4">
-    <h2 class="mb-4">
-        <i class="fas fa-graduation-cap"></i> Sélectionnez un exercices pour commencer.
-    </h2>
-    <p>
-        Page dédiée à l’apprentissage pratique de l’informatique à travers des exercices interactifs. Accédez à des challenges Python pour progresser en programmation, testez vos compétences en sécurité avec un site web à hacker légalement, et entraînez-vous aux commandes Linux dans un bac à sable Bash. Une plateforme idéale pour apprendre en pratiquant, développer ses compétences techniques et s’exercer en conditions réelles.
-    </p><br />
-<h2>Exercices : </h2>
+    @if (Model.IsAdmin)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong><i class="fas fa-plus-circle"></i> Ajouter un challenge CTF</strong>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Challenges" asp-action="AddCtfChallenge" method="post">
+                    @Html.AntiForgeryToken()
 
-<p>
-    <ul class="nav-links" style="display: block;">
-        <li><a href="/PythonChallenges/Exercise1" class="nav-link" target="_blank"> Python </a></li>
-        <li><a href="http://progfacil.fr:8080/" class="nav-link" target="_blank"> Hack mon site web </a></li>
-        <li><a href="http://ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:8080/detectivedex/" class="nav-link" target="_blank"> Création de rapport de cyber Sécurité de façon graphique </a></li>      
-    </ul>
-    </p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Leçon</label>
+                            <select name="LessonId" class="form-select" required>
+                                <option value="">Sélectionner...</option>
+                                @foreach (var lesson in Model.LessonOptions)
+                                {
+                                    <option value="@lesson.LessonId">@lesson.Label</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Points</label>
+                            <input type="number" name="Points" class="form-control" value="100" min="1" max="5000" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Titre challenge</label>
+                            <input type="text" name="Title" class="form-control" maxlength="160" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Énoncé</label>
+                            <textarea name="Description" class="form-control" rows="5" maxlength="5000" required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Flag correct</label>
+                            <input type="text" name="Flag" class="form-control" maxlength="255" placeholder="INGENIUS{...}" required />
+                        </div>
+                    </div>
 
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="fas fa-save"></i> Publier le challenge
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Challenges.Any())
+    {
+        <div class="alert alert-info">Aucun challenge CTF disponible pour le moment.</div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var challenge in Model.Challenges)
+            {
+                <div class="col-12 col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>@challenge.Title</strong>
+                            <span class="badge text-bg-warning">@challenge.Points pts</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-book"></i> @challenge.CourseTitle
+                                <br />
+                                <i class="fas fa-folder-open"></i> @challenge.ModuleTitle
+                                <br />
+                                <i class="fas fa-play-circle"></i> @challenge.LessonTitle
+                            </p>
+                            <p class="mb-3">@challenge.Description</p>
+
+                            <form asp-controller="Challenges" asp-action="SubmitFlag" method="post" class="d-flex gap-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="QuizId" value="@challenge.QuizId" />
+                                <input type="text" name="Flag" class="form-control" placeholder="Soumettre un flag" required />
+                                <button type="submit" class="btn btn-success">Valider</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
-
-</section>

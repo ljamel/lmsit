@@ -46,6 +46,155 @@ namespace CrudDemo.Controllers
             return View(courses);
         }
 
+        public async Task<IActionResult> Challenges()
+        {
+            var quizzes = await _context.Quizzes
+                .AsNoTracking()
+                .Include(q => q.Lesson)
+                    .ThenInclude(l => l!.Module)
+                        .ThenInclude(m => m!.Course)
+                .OrderByDescending(q => q.CreatedAt)
+                .Where(q => EF.Functions.Like(q.Question, "[CTF]%")
+                    || (q.Description != null && EF.Functions.Like(q.Description, "%[[FLAG:%")))
+                .ToListAsync();
+
+            var model = new CtfChallengePageViewModel
+            {
+                IsAdmin = true,
+                Challenges = quizzes.Select(quiz =>
+                {
+                    var (publicDescription, existingFlag) = ExtractCtfPayload(quiz.Description);
+
+                    return new CtfChallengeCardViewModel
+                    {
+                        QuizId = quiz.Id,
+                        LessonId = quiz.LessonId,
+                        Title = NormalizeCtfTitle(quiz.Question),
+                        Description = publicDescription,
+                        Points = quiz.Points,
+                        CurrentFlag = existingFlag,
+                        CourseTitle = quiz.Lesson?.Module?.Course?.Title ?? "-",
+                        ModuleTitle = quiz.Lesson?.Module?.Title ?? "-",
+                        LessonTitle = quiz.Lesson?.Title ?? "-"
+                    };
+                }).ToList()
+            };
+
+            model.LessonOptions = await _context.Lessons
+                .AsNoTracking()
+                .Include(l => l.Module)
+                    .ThenInclude(m => m!.Course)
+                .OrderBy(l => l.Module!.Course!.Title)
+                .ThenBy(l => l.Module!.Title)
+                .ThenBy(l => l.OrderIndex)
+                .Select(l => new CtfLessonOptionViewModel
+                {
+                    LessonId = l.Id,
+                    Label = (l.Module != null && l.Module.Course != null)
+                        ? $"{l.Module.Course.Title} / {l.Module.Title} / {l.Title}"
+                        : l.Title
+                })
+                .ToListAsync();
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCtfChallenge(CreateCtfChallengeRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Formulaire invalide: vérifiez les champs du challenge.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            var lessonExists = await _context.Lessons
+                .AsNoTracking()
+                .AnyAsync(l => l.Id == request.LessonId);
+
+            if (!lessonExists)
+            {
+                TempData["Error"] = "Leçon introuvable pour ce challenge.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            var quiz = new Quiz
+            {
+                LessonId = request.LessonId,
+                Question = $"[CTF] {request.Title.Trim()}",
+                Description = BuildCtfPayload(request.Description, request.Flag.Trim()),
+                Points = request.Points,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Quizzes.Add(quiz);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Challenge CTF ajouté.";
+            return RedirectToAction(nameof(Challenges));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCtfChallenge(int quizId, CreateCtfChallengeRequest request)
+        {
+            var quiz = await _context.Quizzes
+                .FirstOrDefaultAsync(q => q.Id == quizId);
+
+            if (quiz == null)
+            {
+                TempData["Error"] = "Challenge introuvable.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Modification invalide: vérifiez les champs.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            var lessonExists = await _context.Lessons
+                .AsNoTracking()
+                .AnyAsync(l => l.Id == request.LessonId);
+
+            if (!lessonExists)
+            {
+                TempData["Error"] = "Leçon introuvable pour ce challenge.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            quiz.LessonId = request.LessonId;
+            quiz.Question = $"[CTF] {request.Title.Trim()}";
+            quiz.Description = BuildCtfPayload(request.Description, request.Flag.Trim());
+            quiz.Points = request.Points;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Challenge CTF modifié.";
+            return RedirectToAction(nameof(Challenges));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCtfChallenge(int quizId)
+        {
+            var quiz = await _context.Quizzes
+                .FirstOrDefaultAsync(q => q.Id == quizId);
+
+            if (quiz == null)
+            {
+                TempData["Error"] = "Challenge introuvable.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            _context.Quizzes.Remove(quiz);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Challenge CTF supprimé.";
+            return RedirectToAction(nameof(Challenges));
+        }
+
         public IActionResult Create()
         {
             return View();
@@ -1235,6 +1384,53 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        private static string BuildCtfPayload(string description, string flag)
+        {
+            var cleanDescription = description.Trim();
+            return $"{cleanDescription}\n[[FLAG:{flag}]]";
+        }
+
+        private static (string PublicDescription, string? Flag) ExtractCtfPayload(string? rawDescription)
+        {
+            if (string.IsNullOrWhiteSpace(rawDescription))
+            {
+                return (string.Empty, null);
+            }
+
+            const string marker = "[[FLAG:";
+            var markerIndex = rawDescription.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (markerIndex < 0)
+            {
+                return (rawDescription.Trim(), null);
+            }
+
+            var endIndex = rawDescription.IndexOf("]]", markerIndex, StringComparison.OrdinalIgnoreCase);
+            if (endIndex < 0)
+            {
+                return (rawDescription.Trim(), null);
+            }
+
+            var flagStart = markerIndex + marker.Length;
+            var flagLength = endIndex - flagStart;
+            var flag = flagLength > 0
+                ? rawDescription.Substring(flagStart, flagLength).Trim()
+                : string.Empty;
+
+            var publicDescription = rawDescription.Remove(markerIndex, (endIndex + 2) - markerIndex).Trim();
+            return (publicDescription, string.IsNullOrWhiteSpace(flag) ? null : flag);
+        }
+
+        private static string NormalizeCtfTitle(string question)
+        {
+            const string prefix = "[CTF]";
+            if (question.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return question.Substring(prefix.Length).Trim();
+            }
+
+            return question;
         }
 
     }

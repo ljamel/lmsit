@@ -52,8 +52,10 @@ namespace CrudDemo.Controllers
 
             var quizAttempts = 0;
             var quizCorrectAnswers = 0;
+            var earnedQuizPoints = 0;
             DateTime? lastQuizAttemptAt = null;
             var totalQuizCount = await _context.Quizzes.AsNoTracking().CountAsync();
+            var totalQuizPoints = await _context.Quizzes.AsNoTracking().SumAsync(q => q.Points);
             var completedQuizCount = 0;
 
             if (!string.IsNullOrEmpty(userId))
@@ -71,10 +73,20 @@ namespace CrudDemo.Controllers
                         .First())
                     .ToList();
 
+                var quizIds = latestResultsByQuiz.Select(x => x.QuizId).Distinct().ToList();
+                var quizPointsById = await _context.Quizzes
+                    .AsNoTracking()
+                    .Where(q => quizIds.Contains(q.Id))
+                    .Select(q => new { q.Id, q.Points })
+                    .ToDictionaryAsync(q => q.Id, q => q.Points);
+
                 if (latestResultsByQuiz.Count > 0)
                 {
                     quizAttempts = latestResultsByQuiz.Count;
                     quizCorrectAnswers = latestResultsByQuiz.Count(x => x.IsCorrect);
+                    earnedQuizPoints = latestResultsByQuiz
+                        .Where(x => x.IsCorrect && quizPointsById.ContainsKey(x.QuizId))
+                        .Sum(x => quizPointsById[x.QuizId]);
                     lastQuizAttemptAt = latestResultsByQuiz.Max(x => x.AttemptedAt);
                 }
 
@@ -123,7 +135,7 @@ namespace CrudDemo.Controllers
                 }
             }
 
-            var successRate = quizAttempts == 0 ? 0 : (quizCorrectAnswers * 100.0) / quizAttempts;
+            var successRate = totalQuizPoints == 0 ? 0 : (earnedQuizPoints * 100.0) / totalQuizPoints;
             var isCertificateEligible = totalQuizCount > 0
                 && completedQuizCount == totalQuizCount
                 && successRate > 80;
@@ -138,6 +150,8 @@ namespace CrudDemo.Controllers
                 OrientationCourse = orientationCourse,
                 QuizAttempts = quizAttempts,
                 QuizCorrectAnswers = quizCorrectAnswers,
+                EarnedQuizPoints = earnedQuizPoints,
+                TotalQuizPoints = totalQuizPoints,
                 QuizSuccessRate = Math.Round(successRate, 1),
                 LastQuizAttemptAt = lastQuizAttemptAt,
                 TotalQuizCount = totalQuizCount,
@@ -1089,8 +1103,168 @@ namespace CrudDemo.Controllers
                 return RedirectToAction("SubscriptionCheckout", "Payment");
             }
 
-			return View();
+            var quizzes = await _context.Quizzes
+                .AsNoTracking()
+                .Include(q => q.Lesson)
+                    .ThenInclude(l => l!.Module)
+                        .ThenInclude(m => m!.Course)
+                .OrderByDescending(q => q.CreatedAt)
+                .Where(q => EF.Functions.Like(q.Question, "[CTF]%")
+                    || (q.Description != null && EF.Functions.Like(q.Description, "%[[FLAG:%")))
+                .ToListAsync();
+
+            var solvedQuizIds = new HashSet<int>();
+            var userId = _userManager.GetUserId(User);
+            if (!string.IsNullOrWhiteSpace(userId) && quizzes.Count > 0)
+            {
+                var challengeQuizIds = quizzes.Select(q => q.Id).ToList();
+                solvedQuizIds = await _context.UserQuizResults
+                    .AsNoTracking()
+                    .Where(r => r.UserId == userId && r.IsCorrect && challengeQuizIds.Contains(r.QuizId))
+                    .Select(r => r.QuizId)
+                    .Distinct()
+                    .ToHashSetAsync();
+            }
+
+            var model = new CtfChallengePageViewModel
+            {
+                IsAdmin = false,
+                Challenges = quizzes.Select(quiz =>
+                {
+                    var (publicDescription, existingFlag) = ExtractCtfPayload(quiz.Description);
+                    var isSolved = solvedQuizIds.Contains(quiz.Id);
+
+                    return new CtfChallengeCardViewModel
+                    {
+                        QuizId = quiz.Id,
+                        LessonId = quiz.LessonId,
+                        Title = NormalizeCtfTitle(quiz.Question),
+                        Description = publicDescription,
+                        Points = quiz.Points,
+                        IsSolved = isSolved,
+                        CurrentFlag = isSolved ? existingFlag : null,
+                        CourseTitle = quiz.Lesson?.Module?.Course?.Title ?? "-",
+                        ModuleTitle = quiz.Lesson?.Module?.Title ?? "-",
+                        LessonTitle = quiz.Lesson?.Title ?? "-"
+                    };
+                }).ToList()
+            };
+
+			return View(model);
 		}
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitChallengeFlag(SubmitCtfFlagRequest request)
+        {
+            var userEmail = User.Identity?.Name ?? string.Empty;
+            var hasPaidAccess = await HasCourseAccessAsync(userEmail);
+            if (!User.IsInRole("Admin") && !hasPaidAccess)
+            {
+                TempData["Error"] = "Cette section nécessite un abonnement payant.";
+                return RedirectToAction("SubscriptionCheckout", "Payment");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Flag invalide.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            var quiz = await _context.Quizzes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(q => q.Id == request.QuizId);
+
+            if (quiz == null)
+            {
+                TempData["Error"] = "Challenge introuvable.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            var (_, expectedFlag) = ExtractCtfPayload(quiz.Description);
+            if (string.IsNullOrWhiteSpace(expectedFlag))
+            {
+                TempData["Error"] = "Ce challenge n'a pas de flag configuré.";
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            var submittedFlag = request.Flag.Trim();
+            var isCorrect = string.Equals(submittedFlag, expectedFlag, StringComparison.Ordinal);
+
+            if (isCorrect)
+            {
+                var userId = _userManager.GetUserId(User);
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    var existingResults = await _context.UserQuizResults
+                        .Where(r => r.UserId == userId && r.QuizId == quiz.Id)
+                        .ToListAsync();
+
+                    if (existingResults.Any())
+                    {
+                        _context.UserQuizResults.RemoveRange(existingResults);
+                    }
+
+                    _context.UserQuizResults.Add(new UserQuizResult
+                    {
+                        UserId = userId,
+                        QuizId = quiz.Id,
+                        SelectedOptionId = 0,
+                        IsCorrect = true,
+                        AttemptedAt = DateTime.UtcNow
+                    });
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            TempData["Success"] = isCorrect
+                ? "✅ Flag correct ! Challenge validé."
+                : "❌ Flag incorrect. Réessaie.";
+
+            return RedirectToAction(nameof(Challenges));
+        }
+
+        private static (string PublicDescription, string? Flag) ExtractCtfPayload(string? rawDescription)
+        {
+            if (string.IsNullOrWhiteSpace(rawDescription))
+            {
+                return (string.Empty, null);
+            }
+
+            const string marker = "[[FLAG:";
+            var markerIndex = rawDescription.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (markerIndex < 0)
+            {
+                return (rawDescription.Trim(), null);
+            }
+
+            var endIndex = rawDescription.IndexOf("]]", markerIndex, StringComparison.OrdinalIgnoreCase);
+            if (endIndex < 0)
+            {
+                return (rawDescription.Trim(), null);
+            }
+
+            var flagStart = markerIndex + marker.Length;
+            var flagLength = endIndex - flagStart;
+            var flag = flagLength > 0
+                ? rawDescription.Substring(flagStart, flagLength).Trim()
+                : string.Empty;
+
+            var publicDescription = rawDescription.Remove(markerIndex, (endIndex + 2) - markerIndex).Trim();
+            return (publicDescription, string.IsNullOrWhiteSpace(flag) ? null : flag);
+        }
+
+        private static string NormalizeCtfTitle(string question)
+        {
+            const string prefix = "[CTF]";
+            if (question.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return question.Substring(prefix.Length).Trim();
+            }
+
+            return question;
+        }
 
         public async Task<IActionResult> Certif1()
 		{

@@ -147,7 +147,9 @@
                 {
                     <div class="alert alert-info mb-0">
                         Certificat disponible quand tous les quiz sont complétés avec un score supérieur à 80%.<br />
-                        Progression quiz: <strong>@Model.CompletedQuizCount / @Model.TotalQuizCount</strong> | Score: <strong>@Model.QuizSuccessRate.ToString("0.0")%</strong>
+                        Progression quiz: <strong>@Model.CompletedQuizCount / @Model.TotalQuizCount</strong> |
+                        Points: <strong>@Model.EarnedQuizPoints / @Model.TotalQuizPoints</strong> |
+                        Score: <strong>@Model.QuizSuccessRate.ToString("0.0")%</strong>
                     </div>
                 }
             </div>

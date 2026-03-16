@@ -14,6 +14,8 @@ namespace CrudDemo.Models
 
         public int QuizAttempts { get; set; }
         public int QuizCorrectAnswers { get; set; }
+        public int EarnedQuizPoints { get; set; }
+        public int TotalQuizPoints { get; set; }
         public double QuizSuccessRate { get; set; }
         public DateTime? LastQuizAttemptAt { get; set; }
 

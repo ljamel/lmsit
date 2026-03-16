@@ -1,0 +1,260 @@
+@model CrudDemo.Models.CtfChallengePageViewModel
+
+@{
+    ViewData["Title"] = "Gestion des Challenges CTF";
+}
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="mb-0"><i class="fas fa-flag-checkered"></i> @ViewData["Title"]</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Retour admin
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm mb-4 ctf-admin-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong><i class="fas fa-plus-circle"></i> Nouveau challenge</strong>
+            <span class="badge text-bg-dark">Stockage flags via Quiz</span>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddCtfChallenge" method="post" class="row g-3" id="createChallengeForm">
+                @Html.AntiForgeryToken()
+                <div class="col-md-6">
+                    <label class="form-label">Leçon</label>
+                    <select name="LessonId" class="form-select" required>
+                        <option value="">Sélectionner...</option>
+                        @foreach (var lesson in Model.LessonOptions)
+                        {
+                            <option value="@lesson.LessonId">@lesson.Label</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Points</label>
+                    <input type="number" name="Points" class="form-control" value="10" min="1" max="5000" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Titre</label>
+                    <input type="text" name="Title" class="form-control" maxlength="160" required />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Description</label>
+                    <div id="challengeDescriptionEditor" style="height: 240px;"></div>
+                    <textarea name="Description" id="createChallengeDescriptionInput" class="form-control d-none" rows="4" maxlength="5000" required></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Flag correct</label>
+                    <input type="text" name="Flag" class="form-control" maxlength="255" placeholder="INGENIUS{...}" required />
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer le challenge
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Challenges.Any())
+    {
+        <div class="alert alert-info">Aucun challenge CTF pour le moment.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle ctf-table">
+                <thead>
+                    <tr>
+                        <th>Challenge</th>
+                        <th>Leçon</th>
+                        <th>Points</th>
+                        <th>Modifier</th>
+                        <th>Supprimer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var challenge in Model.Challenges)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@challenge.Title</div>
+                                <div class="text-muted small">@challenge.Description</div>
+                            </td>
+                            <td>
+                                <div class="small text-muted">@challenge.CourseTitle</div>
+                                <div class="small">@challenge.ModuleTitle</div>
+                                <div class="small fw-semibold">@challenge.LessonTitle</div>
+                            </td>
+                            <td><span class="badge text-bg-warning">@challenge.Points</span></td>
+                            <td>
+                                <details>
+                                    <summary class="btn btn-sm btn-outline-primary">Éditer</summary>
+                                    <form asp-action="UpdateCtfChallenge" method="post" class="mt-2 d-grid gap-2 edit-challenge-form">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="quizId" value="@challenge.QuizId" />
+
+                                        <select name="LessonId" class="form-select form-select-sm" required>
+                                            @foreach (var lesson in Model.LessonOptions)
+                                            {
+                                                <option value="@lesson.LessonId" selected="@(lesson.LessonId == challenge.LessonId ? "selected" : null)">@lesson.Label</option>
+                                            }
+                                        </select>
+                                        <input type="text" name="Title" class="form-control form-control-sm" value="@challenge.Title" maxlength="160" required />
+                                        <div id="editChallengeDescriptionEditor_@challenge.QuizId" class="edit-challenge-description-editor" style="height: 180px;"></div>
+                                        <textarea
+                                            name="Description"
+                                            id="editChallengeDescriptionInput_@challenge.QuizId"
+                                            class="form-control form-control-sm d-none edit-challenge-description-input"
+                                            rows="3"
+                                            maxlength="5000"
+                                            required>@challenge.Description</textarea>
+                                        <input type="text" name="Flag" class="form-control form-control-sm" value="@challenge.CurrentFlag" required />
+                                        <input type="number" name="Points" class="form-control form-control-sm" value="@challenge.Points" min="1" max="5000" required />
+                                        <button type="submit" class="btn btn-sm btn-primary">Enregistrer</button>
+                                    </form>
+                                </details>
+                            </td>
+                            <td>
+                                <form asp-action="DeleteCtfChallenge" method="post" onsubmit="return confirm('Supprimer ce challenge ?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="quizId" value="@challenge.QuizId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .ctf-admin-card {
+        border: 1px solid rgba(0, 178, 255, 0.2);
+        border-radius: 14px;
+    }
+
+    .ctf-table thead th {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-bottom: none;
+    }
+
+    .ctf-table tbody tr {
+        background: #fff;
+        transition: background-color .2s ease;
+    }
+
+    .ctf-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    #challengeDescriptionEditor {
+        background-color: #fff;
+        border-radius: 8px;
+    }
+
+    .edit-challenge-description-editor {
+        background-color: #fff;
+        border-radius: 8px;
+    }
+
+    .ql-toolbar {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .ql-container {
+        border-radius: 0 0 8px 8px;
+        min-height: 180px;
+    }
+</style>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    (function () {
+        var editorElement = document.getElementById('challengeDescriptionEditor');
+        var inputElement = document.getElementById('createChallengeDescriptionInput');
+        var formElement = document.getElementById('createChallengeForm');
+
+        if (!editorElement || !inputElement || !formElement) {
+            return;
+        }
+
+        var quill = new Quill('#challengeDescriptionEditor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image', 'video'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Rédigez la description du challenge ici...'
+        });
+
+        quill.on('text-change', function () {
+            inputElement.value = quill.root.innerHTML;
+        });
+
+        formElement.addEventListener('submit', function () {
+            inputElement.value = quill.root.innerHTML;
+        });
+
+        var editForms = document.querySelectorAll('.edit-challenge-form');
+        editForms.forEach(function (editForm) {
+            var hiddenInput = editForm.querySelector('.edit-challenge-description-input');
+            if (!hiddenInput || !hiddenInput.id) {
+                return;
+            }
+
+            var editorId = hiddenInput.id.replace('Input', 'Editor');
+            var editorElement = document.getElementById(editorId);
+            if (!editorElement) {
+                return;
+            }
+
+            var editQuill = new Quill('#' + editorId, {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image', 'video'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Modifiez la description du challenge...'
+            });
+
+            editQuill.root.innerHTML = hiddenInput.value || '';
+
+            editQuill.on('text-change', function () {
+                hiddenInput.value = editQuill.root.innerHTML;
+            });
+
+            editForm.addEventListener('submit', function () {
+                hiddenInput.value = editQuill.root.innerHTML;
+            });
+        });
+    })();
+</script>
