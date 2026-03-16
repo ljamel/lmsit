@@ -150,7 +150,7 @@
              data-certification-conditions="@(isCertificateEligible ? "ready" : "pending")">
             <div><strong>Points:</strong> @earnedQuizPoints / @totalQuizPoints (@certificateScorePercent.ToString("0.0")%)</div>
             <div><strong>Quiz:</strong> @completedQuizCount / @totalQuizCount complétés</div>
-            <div class="conditions-text">Compléter les quiz et challenges pratiques avec un score minimal de 80 %.</div>
+            <div class="conditions-text">Compléter les quiz et <a data-onboarding-app="ctf" asp-controller="Challenges" asp-action="Index">Plateforme CTF</a> pratiques avec un score minimal de 80 %.</div>
         </div>
     </div>
 

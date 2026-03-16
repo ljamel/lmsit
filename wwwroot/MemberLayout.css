@@ -336,6 +336,7 @@ iframe.ql-video {
 .menu-dashboard .certification-conditions .conditions-text {
     margin-top: 4px;
     font-weight: 600;
+    display: block ruby;
 }
 
 .mb-2 {
