@@ -892,51 +892,42 @@
 
 
 <script>
-const buttons = document.querySelectorAll('.monBouton');
 
-
-buttons.forEach(btn => {
-  btn.addEventListener('click', async () => {
-  const url = 'http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/'; // L'URL à afficher
-  const titre = "kali linux sandbox. pour l'entrainement";
-  const specs = "width=400,height=500,top=50,left=50";
-
-  // CONDITION : On vérifie si le navigateur supporte le "Document Picture-in-Picture"
-  if ('documentPictureInPicture' in window) {
-    try {
-      // Cas Chrome / Edge : Fenêtre qui reste AU-DESSUS de tout
-      const pipWindow = await window.documentPictureInPicture.requestWindow({
-        width: 400,
-        height: 500,
-      });
-
-      // On injecte une iframe pour afficher le site à l'intérieur
-      const iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      iframe.style.border = "none";
-      
-      pipWindow.document.body.style.margin = "0";
-      pipWindow.document.body.appendChild(iframe);
-      
-      console.log("Mode PiP activé (Chrome/Edge)");
-    } catch (err) {
-      // Si le PiP échoue pour une raison X, on ouvre une fenêtre normale
-      window.open(url, titre, specs);
-    }
-  } else {
-    // Cas Firefox / Safari : On ouvre une fenêtre classique
-    console.log("Mode classique (Navigateur non compatible PiP)");
-    const nouvelleFenetre = window.open(url, titre, specs);
+// On écoute le clic sur TOUTE la page
+document.addEventListener('click', async (e) => {
     
-    if (nouvelleFenetre) {
-        nouvelleFenetre.focus();
-    } else {
-        alert("Veuillez autoriser les fenêtres surgissantes pour ce site.");
+    // On vérifie si l'élément cliqué (ou son parent) a la classe 'monBouton'
+    const btn = e.target.closest('.monBouton');
+    
+    if (btn) {
+        e.preventDefault(); // On stoppe le lien <a>
+        console.log("Bouton détecté dans le tuto !");
+
+        const url = 'http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/';
+        const specs = "width=800,height=600";
+
+        if ('documentPictureInPicture' in window) {
+            try {
+                const pipWindow = await window.documentPictureInPicture.requestWindow({
+                    width: 800,
+                    height: 600,
+                });
+
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.style.width = "100%";
+                iframe.style.height = "100%";
+                iframe.style.border = "none";
+                
+                pipWindow.document.body.style.margin = "0";
+                pipWindow.document.body.appendChild(iframe);
+            } catch (err) {
+                window.open(url, "_blank", specs);
+            }
+        } else {
+            window.open(url, "_blank", specs);
+        }
     }
-  }
-});
 });
 
 </script>
