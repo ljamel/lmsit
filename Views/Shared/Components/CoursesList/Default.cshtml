@@ -122,7 +122,7 @@
         <a data-onboarding-app="profil" asp-area="" asp-controller="Courses" asp-action="Member"><i class="fa-regular fa-circle-user"></i> Profil</a>
         @if (canAccessPremium)
         {
-            <a data-onboarding-app="ctf" asp-controller="Challenges" asp-action="Index"><i class="fa-solid fa-hat-cowboy"></i> Plateforme CTF</a>
+            <a data-onboarding-app="ctf" asp-controller="Challenges" asp-action="Index"><i class="fa-solid fa-hat-cowboy"></i> Plateforme CTF guidé</a>
         }
         else
         {
@@ -587,6 +587,30 @@
         border-radius: 999px;
         padding: 2px 7px;
         vertical-align: middle;
+    }
+
+    [role="tooltip"] {
+        visibility: hidden;
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        background: black;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        /* Laisser un délai avant de masquer pour que la souris puisse quitter le
+        champ et entrer dans l'info-bulle */
+        transition: visibility 0.5s;
+        }
+        [aria-describedby]:hover,
+        [aria-describedby]:focus {
+        position: relative;
+        }
+        [aria-describedby]:hover + [role="tooltip"],
+        [aria-describedby]:focus + [role="tooltip"],
+        [role="tooltip"]:hover,
+        [role="tooltip"]:focus {
+        visibility: visible;
     }
 </style>
 
