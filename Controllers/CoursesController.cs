@@ -1356,5 +1356,10 @@ namespace CrudDemo.Controllers
             return false;
         }
 
+    public IActionResult Ctf()
+    {
+        return View();
+    }
+
     }
 }

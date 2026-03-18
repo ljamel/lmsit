@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 
 namespace CrudDemo.Controllers
 {
-    [Authorize]
     public class PythonChallengesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,18 +16,6 @@ namespace CrudDemo.Controllers
         public PythonChallengesController(ApplicationDbContext context)
         {
             _context = context;
-        }
-
-        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-        {
-            if (!await HasPaidAccessAsync())
-            {
-                TempData["Error"] = "Cette section nécessite un abonnement payant.";
-                context.Result = RedirectToAction("SubscriptionCheckout", "Payment");
-                return;
-            }
-
-            await next();
         }
 
         // Challenge 1: Inverser la liste
