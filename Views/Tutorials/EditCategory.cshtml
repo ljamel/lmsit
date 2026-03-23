@@ -1,0 +1,118 @@
+@model CrudDemo.Models.TutorialCategory
+@{
+    ViewData["Title"] = "Modifier la catégorie";
+}
+
+<section class="features">
+    <div class="tuto-form-wrap" style="max-width:600px;">
+
+        <div class="tuto-form-header">
+            <a href="@Url.Action("AdminCategories", "Tutorials")" class="tuto-back-link">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h2 class="section-title" style="margin-bottom:0; font-size:2rem;">Modifier la catégorie</h2>
+        </div>
+
+        <div class="tuto-form-card">
+            <form asp-action="EditCategory" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="All" class="tuto-alert-error"></div>
+
+                <div class="tuto-field">
+                    <label asp-for="Name" class="tuto-label">Nom</label>
+                    <input asp-for="Name" class="tuto-input" />
+                    <span asp-validation-for="Name" class="tuto-error"></span>
+                </div>
+
+                <div class="tuto-field">
+                    <label asp-for="Description" class="tuto-label">Description <span class="tuto-optional">(optionnel)</span></label>
+                    <textarea asp-for="Description" class="tuto-input" rows="3"></textarea>
+                </div>
+
+                <div class="tuto-field">
+                    <label asp-for="OrderIndex" class="tuto-label">Ordre d'affichage</label>
+                    <input asp-for="OrderIndex" type="number" class="tuto-input" style="max-width:120px;" />
+                    <span class="tuto-hint">Trié par ordre croissant dans le menu</span>
+                </div>
+
+                <div class="tuto-form-actions">
+                    <button type="submit" class="tuto-btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a href="@Url.Action("AdminCategories", "Tutorials")" class="tuto-btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.tuto-form-wrap { margin:0 auto; }
+.tuto-form-header { display:flex; align-items:center; gap:24px; margin-bottom:40px; }
+.tuto-back-link { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid rgba(0,178,255,0.3); color:rgba(255,255,255,0.5); text-decoration:none; transition:all 0.2s; flex-shrink:0; }
+.tuto-back-link:hover { border-color:#00B2FF; color:#00B2FF; }
+.tuto-form-card { background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8)); border:1px solid rgba(0,178,255,0.3); border-radius:20px; padding:2.5rem; backdrop-filter:blur(10px); }
+.tuto-alert-error { background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.4); border-radius:10px; padding:1rem; color:#ff6b6b; margin-bottom:1.5rem; font-size:0.9rem; }
+.tuto-field { display:flex; flex-direction:column; gap:8px; margin-bottom:1.5rem; }
+.tuto-label { font-family:'Rajdhani',sans-serif; font-size:0.95rem; font-weight:600; color:rgba(255,255,255,0.8); letter-spacing:1px; text-transform:uppercase; }
+.tuto-optional { text-transform:none; color:rgba(255,255,255,0.35); font-size:0.85rem; }
+.tuto-hint { color:rgba(255,255,255,0.3); font-size:0.82rem; }
+.tuto-input { background:rgba(0,0,0,0.4); border:1px solid rgba(0,178,255,0.3); border-radius:8px; padding:12px 16px; color:#fff; font-size:1rem; font-family:'Rajdhani',sans-serif; transition:border-color 0.3s,box-shadow 0.3s; outline:none; }
+.tuto-input:focus { border-color:#FF5E00; box-shadow:0 0 0 3px rgba(255,94,0,0.15); }
+.tuto-error { color:#ff6b6b; font-size:0.85rem; }
+.tuto-form-actions { display:flex; gap:16px; padding-top:1.5rem; border-top:1px solid rgba(0,178,255,0.1); }
+.tuto-btn-primary { display:inline-flex; align-items:center; gap:8px; padding:12px 30px; background:linear-gradient(45deg,#FF5E00,#00B2FF); border:none; border-radius:8px; color:#fff; font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; letter-spacing:1px; cursor:pointer; transition:all 0.3s; text-transform:uppercase; }
+.tuto-btn-primary:hover { box-shadow:0 0 25px rgba(255,94,0,0.5); transform:translateY(-2px); }
+.tuto-btn-secondary { display:inline-flex; align-items:center; padding:12px 30px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:rgba(255,255,255,0.7); text-decoration:none; font-family:'Rajdhani',sans-serif; font-size:1rem; letter-spacing:1px; transition:all 0.3s; }
+.tuto-btn-secondary:hover { border-color:rgba(255,255,255,0.5); color:#fff; }
+</style>
+
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="@Url.Action("AdminCategories", "Tutorials")" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2 class="mb-0" style="color:#00d4ff; font-family:'Orbitron',sans-serif;">Modifier la catégorie</h2>
+    </div>
+
+    <div class="card animated-card">
+        <div class="card-body p-4">
+            <form asp-action="EditCategory" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="form-label fw-bold text-light">Nom</label>
+                    <input asp-for="Name" class="form-control animated-input" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="form-label fw-bold text-light">Description</label>
+                    <textarea asp-for="Description" class="form-control animated-input" rows="3"></textarea>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="OrderIndex" class="form-label fw-bold text-light">Ordre d'affichage</label>
+                    <input asp-for="OrderIndex" type="number" class="form-control animated-input" />
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a href="@Url.Action("AdminCategories", "Tutorials")" class="btn btn-secondary px-4">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.animated-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(0,212,255,0.2); border-radius: 12px; }
+.animated-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,212,255,0.3); color: #fff; }
+.animated-input:focus { border-color: #00d4ff; box-shadow: 0 0 0 2px rgba(0,212,255,0.2); background: rgba(0,0,0,0.5); color: #fff; }
+</style>

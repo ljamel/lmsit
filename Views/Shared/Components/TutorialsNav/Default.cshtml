@@ -1,0 +1,21 @@
+@model IEnumerable<CrudDemo.Models.TutorialCategory>
+
+<li class="nav-item nav-dropdown">
+    <a href="@Url.Action("Index", "Tutorials")" class="nav-link nav-dropdown-toggle">Tutoriels</a>
+    @if (Model.Any())
+    {
+        <ul class="nav-submenu">
+            <li>
+                <a href="@Url.Action("Index", "Tutorials")" class="nav-submenu-link">Tous</a>
+            </li>
+            <li class="submenu-separator"></li>
+            @foreach (var cat in Model)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "Tutorials", new { category = cat.Slug })"
+                       class="nav-submenu-link">@cat.Name</a>
+                </li>
+            }
+        </ul>
+    }
+</li>

@@ -1,0 +1,278 @@
+@model CrudDemo.Models.Tutorial
+@{
+    ViewData["Title"] = "Nouveau tutoriel";
+    var categories = ViewBag.Categories as IEnumerable<CrudDemo.Models.TutorialCategory> ?? Enumerable.Empty<CrudDemo.Models.TutorialCategory>();
+}
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<section class="features">
+    <div class="tuto-form-wrap">
+
+        <div class="tuto-form-header">
+            <a href="@Url.Action("AdminIndex", "Tutorials")" class="tuto-back-link">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <h2 class="section-title" style="margin-bottom:0; font-size:2rem;">Nouveau tutoriel</h2>
+        </div>
+
+        <div class="tuto-form-card">
+            <div asp-validation-summary="All" class="tuto-alert-error"></div>
+
+            <form asp-action="Create" method="post" id="tutoForm">
+                @Html.AntiForgeryToken()
+
+                <div class="tuto-field">
+                    <label asp-for="Title" class="tuto-label">Titre</label>
+                    <input asp-for="Title" class="tuto-input" placeholder="Titre du tutoriel" />
+                    <span asp-validation-for="Title" class="tuto-error"></span>
+                </div>
+
+                <div class="tuto-row">
+                    <div class="tuto-field">
+                        <label asp-for="CategoryId" class="tuto-label">Catégorie</label>
+                        <select asp-for="CategoryId" class="tuto-input tuto-select">
+                            <option value="">-- Choisir --</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="tuto-error"></span>
+                    </div>
+                    <div class="tuto-field">
+                        <label asp-for="ThumbnailUrl" class="tuto-label">Image de couverture <span class="tuto-optional">(URL)</span></label>
+                        <input asp-for="ThumbnailUrl" class="tuto-input" placeholder="https://..." />
+                    </div>
+                </div>
+
+                <div class="tuto-field">
+                    <label asp-for="Summary" class="tuto-label">Résumé <span class="tuto-optional">(optionnel)</span></label>
+                    <textarea asp-for="Summary" class="tuto-input" rows="2" placeholder="Brève description affichée dans la liste"></textarea>
+                </div>
+
+                <div class="tuto-field">
+                    <label class="tuto-label"><i class="fas fa-pen-nib" style="color:#FF5E00"></i> Contenu</label>
+                    <div class="tuto-quill-wrap">
+                        <div id="quillEditor"></div>
+                    </div>
+                    <textarea asp-for="Content" id="contentInput" style="display:none;"></textarea>
+                    <span asp-validation-for="Content" class="tuto-error"></span>
+                </div>
+
+                <div class="tuto-field">
+                    <label class="tuto-label tuto-switch-label">
+                        <div class="tuto-switch">
+                            <input asp-for="IsPublished" type="checkbox" id="isPublished" />
+                            <span class="tuto-switch-slider"></span>
+                        </div>
+                        Publier immédiatement
+                    </label>
+                </div>
+
+                <div class="tuto-form-actions">
+                    <button type="submit" class="tuto-btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a href="@Url.Action("AdminIndex", "Tutorials")" class="tuto-btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+(function(){
+    var quill = new Quill('#quillEditor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link', 'image'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Rédigez votre tutoriel ici...'
+    });
+    var existing = document.getElementById('contentInput').value;
+    if (existing) quill.root.innerHTML = existing;
+    document.getElementById('tutoForm').addEventListener('submit', function(){
+        document.getElementById('contentInput').value = quill.root.innerHTML;
+    });
+})();
+</script>
+
+@section Scripts {
+<style>
+.tuto-form-wrap { max-width:860px; margin:0 auto; }
+.tuto-form-header { display:flex; align-items:center; gap:24px; margin-bottom:40px; }
+.tuto-back-link { color:rgba(255,255,255,0.5); text-decoration:none; font-size:0.9rem; transition:color 0.2s; white-space:nowrap; }
+.tuto-back-link:hover { color:#00B2FF; }
+.tuto-form-card {
+    background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8));
+    border:1px solid rgba(0,178,255,0.3); border-radius:20px;
+    padding:2.5rem; backdrop-filter:blur(10px);
+}
+.tuto-alert-error { background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.4); border-radius:10px; padding:1rem; color:#ff6b6b; margin-bottom:1.5rem; font-size:0.9rem; }
+.tuto-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@@media(max-width:600px){ .tuto-row { grid-template-columns:1fr; } }
+.tuto-field { display:flex; flex-direction:column; gap:8px; margin-bottom:1.5rem; }
+.tuto-label { font-family:'Rajdhani',sans-serif; font-size:0.95rem; font-weight:600; color:rgba(255,255,255,0.8); letter-spacing:1px; text-transform:uppercase; }
+.tuto-optional { text-transform:none; color:rgba(255,255,255,0.35); font-size:0.85rem; }
+.tuto-input {
+    background:rgba(0,0,0,0.4); border:1px solid rgba(0,178,255,0.3);
+    border-radius:8px; padding:12px 16px; color:#fff; font-size:1rem;
+    font-family:'Rajdhani',sans-serif; transition:border-color 0.3s, box-shadow 0.3s;
+    outline:none;
+}
+.tuto-input:focus { border-color:#FF5E00; box-shadow:0 0 0 3px rgba(255,94,0,0.15); }
+.tuto-select option { background:#1a1a2e; color:#fff; }
+.tuto-quill-wrap .ql-toolbar { background:rgba(0,0,0,0.6); border:1px solid rgba(0,178,255,0.3) !important; border-radius:8px 8px 0 0; }
+.tuto-quill-wrap .ql-container { background:#fff; border:1px solid rgba(0,178,255,0.3) !important; border-top:none !important; border-radius:0 0 8px 8px; min-height:300px; }
+.tuto-quill-wrap .ql-toolbar .ql-stroke { stroke:#ccc; }
+.tuto-quill-wrap .ql-toolbar .ql-fill { fill:#ccc; }
+.tuto-quill-wrap .ql-toolbar button:hover .ql-stroke { stroke:#FF5E00; }
+.tuto-quill-wrap .ql-editor { min-height:300px; font-size:1rem; color:#222; }
+.tuto-error { color:#ff6b6b; font-size:0.85rem; }
+.tuto-switch-label { display:flex; align-items:center; gap:12px; cursor:pointer; }
+.tuto-switch { position:relative; width:50px; height:26px; flex-shrink:0; }
+.tuto-switch input { opacity:0; width:0; height:0; }
+.tuto-switch-slider { position:absolute; inset:0; background:rgba(255,255,255,0.1); border:1px solid rgba(0,178,255,0.3); border-radius:34px; transition:0.3s; cursor:pointer; }
+.tuto-switch-slider::before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:rgba(255,255,255,0.4); border-radius:50%; transition:0.3s; }
+.tuto-switch input:checked + .tuto-switch-slider { background:rgba(255,94,0,0.3); border-color:#FF5E00; box-shadow:0 0 10px rgba(255,94,0,0.3); }
+.tuto-switch input:checked + .tuto-switch-slider::before { transform:translateX(24px); background:#FF5E00; }
+.tuto-form-actions { display:flex; gap:16px; padding-top:1.5rem; border-top:1px solid rgba(0,178,255,0.1); }
+.tuto-btn-primary {
+    display:inline-flex; align-items:center; gap:8px; padding:12px 30px;
+    background:linear-gradient(45deg,#FF5E00,#00B2FF);
+    border:none; border-radius:8px; color:#fff; font-family:'Rajdhani',sans-serif;
+    font-size:1rem; font-weight:700; letter-spacing:1px; cursor:pointer;
+    transition:all 0.3s; text-transform:uppercase;
+}
+.tuto-btn-primary:hover { box-shadow:0 0 25px rgba(255,94,0,0.5); transform:translateY(-2px); }
+.tuto-btn-secondary {
+    display:inline-flex; align-items:center; padding:12px 30px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2);
+    border-radius:8px; color:rgba(255,255,255,0.7); text-decoration:none;
+    font-family:'Rajdhani',sans-serif; font-size:1rem; letter-spacing:1px;
+    transition:all 0.3s;
+}
+.tuto-btn-secondary:hover { border-color:rgba(255,255,255,0.5); color:#fff; }
+</style>
+}
+
+<div class="container mt-4" style="max-width: 900px;">
+    <div class="animated-section">
+        <div class="mb-4 d-flex align-items-center gap-3">
+            <a href="@Url.Action("AdminIndex", "Tutorials")" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <h2 class="mb-0" style="color:#00d4ff; font-family:'Orbitron',sans-serif;">Nouveau tutoriel</h2>
+        </div>
+
+        <div class="card shadow-lg animated-card">
+            <div class="card-body p-4">
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <form asp-action="Create" method="post" id="tutoForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Titre -->
+                    <div class="form-group mb-3">
+                        <label asp-for="Title" class="form-label fw-bold text-light">Titre</label>
+                        <input asp-for="Title" class="form-control animated-input" placeholder="Titre du tutoriel" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <!-- Catégorie -->
+                    <div class="form-group mb-3">
+                        <label asp-for="CategoryId" class="form-label fw-bold text-light">Catégorie</label>
+                        <select asp-for="CategoryId" class="form-select animated-input">
+                            <option value="">-- Choisir une catégorie --</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Résumé -->
+                    <div class="form-group mb-3">
+                        <label asp-for="Summary" class="form-label fw-bold text-light">Résumé <small class="text-muted">(optionnel)</small></label>
+                        <textarea asp-for="Summary" class="form-control animated-input" rows="2"
+                                  placeholder="Brève description affichée dans la liste"></textarea>
+                    </div>
+
+                    <!-- Thumbnail URL -->
+                    <div class="form-group mb-3">
+                        <label asp-for="ThumbnailUrl" class="form-label fw-bold text-light">Image de couverture <small class="text-muted">(URL, optionnel)</small></label>
+                        <input asp-for="ThumbnailUrl" class="form-control animated-input" placeholder="https://..." />
+                    </div>
+
+                    <!-- Contenu WYSIWYG -->
+                    <div class="form-group mb-4">
+                        <label class="form-label fw-bold text-light"><i class="fas fa-align-left"></i> Contenu</label>
+                        <div id="quillEditor" style="height: 400px; background:#fff;"></div>
+                        <textarea asp-for="Content" id="contentInput" style="display:none;"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+
+                    <!-- Publié -->
+                    <div class="form-check form-switch mb-4">
+                        <input asp-for="IsPublished" class="form-check-input" type="checkbox" id="isPublished" />
+                        <label class="form-check-label text-light" for="isPublished">Publier immédiatement</label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <a href="@Url.Action("AdminIndex", "Tutorials")" class="btn btn-secondary px-4">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    var quill = new Quill('#quillEditor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link', 'image'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Rédigez votre tutoriel ici...'
+    });
+
+    // Pré-remplir si édition
+    var existingContent = document.getElementById('contentInput').value;
+    if (existingContent) {
+        quill.root.innerHTML = existingContent;
+    }
+
+    document.getElementById('tutoForm').addEventListener('submit', function () {
+        document.getElementById('contentInput').value = quill.root.innerHTML;
+    });
+</script>
+
+<style>
+.animated-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(0,212,255,0.2); border-radius: 12px; }
+.animated-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,212,255,0.3); color: #fff; }
+.animated-input:focus { border-color: #00d4ff; box-shadow: 0 0 0 2px rgba(0,212,255,0.2); background: rgba(0,0,0,0.5); color: #fff; }
+.form-select.animated-input option { background: #1a1a2e; color: #fff; }
+</style>

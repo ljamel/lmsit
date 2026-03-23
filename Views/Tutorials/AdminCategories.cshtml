@@ -1,0 +1,197 @@
+@model IEnumerable<CrudDemo.Models.TutorialCategory>
+@{
+    ViewData["Title"] = "Catégories de tutoriels";
+}
+
+<section class="features">
+    <div class="tuto-admin-wrap">
+
+        <div class="tuto-admin-header">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <a href="@Url.Action("AdminIndex", "Tutorials")" class="tuto-back-link">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h2 class="section-title" style="margin-bottom:0; font-size:2rem; text-align:left;">Catégories</h2>
+            </div>
+            <a href="@Url.Action("CreateCategory", "Tutorials")" class="tuto-btn-primary">
+                <i class="fas fa-plus"></i> Nouvelle
+            </a>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="tuto-alert-success">@TempData["Success"]</div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="tuto-admin-empty">
+                <i class="fas fa-tags"></i>
+                <p>Aucune catégorie. <a href="@Url.Action("CreateCategory", "Tutorials")" class="tuto-link">Créez-en une !</a></p>
+            </div>
+        }
+        else
+        {
+            <div class="tuto-cat-grid">
+                @foreach (var cat in Model)
+                {
+                    <div class="tuto-cat-card">
+                        <div class="tuto-cat-card-top">
+                            <div>
+                                <span class="tuto-badge-small" style="margin-bottom:10px; display:inline-block;">@cat.Tutorials.Count tuto@(cat.Tutorials.Count != 1 ? "s" : "")</span>
+                                <h3 class="tuto-cat-name">@cat.Name</h3>
+                                @if (!string.IsNullOrEmpty(cat.Description))
+                                {
+                                    <p class="tuto-cat-desc">@cat.Description</p>
+                                }
+                                <code class="tuto-cat-slug">/@cat.Slug</code>
+                            </div>
+                            <div class="tuto-cat-order">#@cat.OrderIndex</div>
+                        </div>
+                        <div class="tuto-cat-card-actions">
+                            <a href="@Url.Action("Index", "Tutorials", new { category = cat.Slug })"
+                               class="tuto-action-btn tuto-action-view" target="_blank" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="@Url.Action("EditCategory", "Tutorials", new { id = cat.Id })"
+                               class="tuto-action-btn tuto-action-edit" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="DeleteCategory" asp-route-id="@cat.Id" method="post"
+                                  onsubmit="return confirm('Supprimer cette catégorie et tous ses tutoriels ?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="tuto-action-btn tuto-action-delete" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<style>
+.tuto-admin-wrap { max-width:1100px; margin:0 auto; }
+.tuto-admin-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; gap:20px; }
+.tuto-back-link { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid rgba(0,178,255,0.3); color:rgba(255,255,255,0.5); text-decoration:none; transition:all 0.2s; }
+.tuto-back-link:hover { border-color:#00B2FF; color:#00B2FF; }
+.tuto-alert-success { background:rgba(0,255,150,0.07); border:1px solid rgba(0,255,150,0.3); border-radius:10px; padding:1rem; color:#00ff96; margin-bottom:1.5rem; font-size:0.9rem; }
+.tuto-admin-empty { text-align:center; padding:80px; color:rgba(255,255,255,0.3); }
+.tuto-admin-empty i { font-size:3rem; margin-bottom:1rem; display:block; color:rgba(0,178,255,0.3); }
+.tuto-link { color:#00B2FF; }
+.tuto-cat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:24px; }
+.tuto-cat-card {
+    background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8));
+    border:1px solid rgba(0,178,255,0.3); border-radius:16px;
+    padding:1.5rem; position:relative; overflow:hidden;
+    transition:all 0.3s; backdrop-filter:blur(10px);
+    display:flex; flex-direction:column; gap:1.2rem;
+}
+.tuto-cat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,#FF5E00,#00B2FF);
+    transform:scaleX(0); transform-origin:left; transition:transform 0.3s;
+}
+.tuto-cat-card:hover { border-color:rgba(255,94,0,0.4); box-shadow:0 10px 30px rgba(0,178,255,0.1); }
+.tuto-cat-card:hover::before { transform:scaleX(1); }
+.tuto-cat-card-top { display:flex; justify-content:space-between; gap:10px; }
+.tuto-cat-name { font-family:'Orbitron',monospace; font-size:1rem; color:#fff; margin:0.3rem 0; }
+.tuto-cat-desc { color:rgba(255,255,255,0.5); font-size:0.88rem; margin:0.4rem 0 0; line-height:1.5; }
+.tuto-cat-slug { background:rgba(0,0,0,0.4); border:1px solid rgba(0,178,255,0.2); border-radius:4px; padding:2px 8px; color:rgba(0,178,255,0.7); font-size:0.8rem; display:inline-block; margin-top:0.5rem; }
+.tuto-cat-order { font-family:'Orbitron',monospace; font-size:1.5rem; color:rgba(255,94,0,0.2); font-weight:900; flex-shrink:0; }
+.tuto-cat-card-actions { display:flex; gap:8px; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.06); }
+.tuto-badge-small { display:inline-block; padding:3px 10px; border-radius:20px; background:rgba(0,178,255,0.1); border:1px solid rgba(0,178,255,0.3); color:rgba(0,178,255,0.8); font-size:0.78rem; white-space:nowrap; }
+.tuto-action-btn {
+    width:32px; height:32px; border-radius:6px; border:1px solid transparent;
+    background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:0.85rem; transition:all 0.2s; text-decoration:none;
+}
+.tuto-action-view { color:rgba(0,178,255,0.7); border-color:rgba(0,178,255,0.3); }
+.tuto-action-view:hover { color:#00B2FF; border-color:#00B2FF; background:rgba(0,178,255,0.1); }
+.tuto-action-edit { color:rgba(255,94,0,0.7); border-color:rgba(255,94,0,0.3); }
+.tuto-action-edit:hover { color:#FF5E00; border-color:#FF5E00; background:rgba(255,94,0,0.1); }
+.tuto-action-delete { color:rgba(255,80,80,0.7); border-color:rgba(255,80,80,0.3); }
+.tuto-action-delete:hover { color:#ff5050; border-color:#ff5050; background:rgba(255,80,80,0.1); }
+.tuto-btn-primary {
+    display:inline-flex; align-items:center; gap:8px; padding:10px 22px;
+    background:linear-gradient(45deg,#FF5E00,#00B2FF);
+    border:none; border-radius:8px; color:#fff; font-family:'Rajdhani',sans-serif;
+    font-size:0.95rem; font-weight:700; letter-spacing:1px; cursor:pointer;
+    transition:all 0.3s; text-transform:uppercase; text-decoration:none;
+}
+.tuto-btn-primary:hover { box-shadow:0 0 20px rgba(255,94,0,0.4); transform:translateY(-1px); color:#fff; }
+</style>
+
+<div class="container mt-4" style="max-width: 800px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="@Url.Action("AdminIndex", "Tutorials")" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h2 class="mb-0" style="color:#00d4ff; font-family:'Orbitron',sans-serif;">Catégories</h2>
+        </div>
+        <a href="@Url.Action("CreateCategory", "Tutorials")" class="btn btn-success btn-sm">
+            <i class="fas fa-plus"></i> Nouvelle catégorie
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">Aucune catégorie. Créez-en une !</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark table-hover admin-table">
+                <thead>
+                    <tr>
+                        <th>Ordre</th>
+                        <th>Nom</th>
+                        <th>Slug</th>
+                        <th>Tutoriels</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in Model)
+                    {
+                        <tr>
+                            <td>@cat.OrderIndex</td>
+                            <td>@cat.Name</td>
+                            <td><code style="color:#00d4ff;">@cat.Slug</code></td>
+                            <td>@cat.Tutorials.Count</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="@Url.Action("EditCategory", "Tutorials", new { id = cat.Id })"
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-action="DeleteCategory" asp-route-id="@cat.Id" method="post"
+                                          onsubmit="return confirm('Supprimer cette catégorie et tous ses tutoriels ?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+.admin-table { border: 1px solid rgba(0,212,255,0.2); }
+.admin-table thead th { border-color: rgba(0,212,255,0.3); color: #00d4ff; }
+.admin-table td { border-color: rgba(255,255,255,0.07); vertical-align: middle; }
+</style>

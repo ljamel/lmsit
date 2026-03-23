@@ -6,6 +6,7 @@
     <title>INGENIUS - Formation Cybersécurité</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="/templatemo-electric-xtra.css?v=@DateTime.Now.Ticks" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 @{
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
@@ -52,9 +53,7 @@
             <li>
                 <a asp-area="" asp-controller="Home" asp-action="Actual" class="nav-link">Actualités</a>
             </li>
-            <li>
-                <a asp-area="" asp-controller="Courses" asp-action="Challenges" class="nav-link">Challenges</a>
-            </li>
+            @await Component.InvokeAsync("TutorialsNav")
 
             @if (User?.Identity?.IsAuthenticated ?? false)
             {
@@ -66,6 +65,9 @@
             {
                 <li>
                     <a asp-area="" asp-controller="AdminCourses" asp-action="Index">ADMINCOURS</a>
+                </li>
+                <li>
+                    <a asp-area="" asp-controller="Tutorials" asp-action="AdminIndex">ADMIN TUTOS</a>
                 </li>
             }
 
@@ -112,6 +114,40 @@
     </div>
 </footer>
 
+<style>
+/* Tutorials dropdown nav */
+.nav-dropdown { position: relative; }
+.nav-dropdown-toggle { cursor: pointer; }
+.nav-submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: rgba(10,10,20,0.97);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 8px;
+    padding: 8px 0;
+    list-style: none;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.nav-dropdown:hover .nav-submenu { display: block; }
+.nav-submenu-link {
+    display: block;
+    padding: 8px 18px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+}
+.nav-submenu-link:hover { background: rgba(0,212,255,0.1); color: #00d4ff; }
+.submenu-separator { border-top: 1px solid rgba(0,212,255,0.15); margin: 4px 0; }
+@@media (max-width: 768px) {
+    .nav-submenu { position: static; border: none; background: rgba(0,212,255,0.05); box-shadow: none; }
+    .nav-dropdown:hover .nav-submenu { display: block; }
+}
+</style>
 <script src="/templatemo-electric-scripts.js" asp-append-version="true"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

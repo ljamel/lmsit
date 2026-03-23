@@ -1,0 +1,109 @@
+@model IEnumerable<CrudDemo.Models.Tutorial>
+@{
+    ViewData["Title"] = "Tutoriels";
+    var categories = ViewBag.Categories as IEnumerable<CrudDemo.Models.TutorialCategory> ?? Enumerable.Empty<CrudDemo.Models.TutorialCategory>();
+    string? currentCategory = ViewBag.CurrentCategory;
+}
+
+<section class="features" id="tutorials">
+    <h2 class="section-title">Tutoriels</h2>
+    <p class="section-subtitle">Approfondissez vos compétences avec des guides pratiques sur la cybersécurité.</p>
+
+    <!-- Filtres catégories -->
+    <div class="tuto-filters">
+        <a href="@Url.Action("Index", "Tutorials")" class="tuto-filter-btn @(currentCategory == null ? "active" : "")">
+            Tous
+        </a>
+        @foreach (var cat in categories)
+        {
+            <a href="@Url.Action("Index", "Tutorials", new { category = cat.Slug })"
+               class="tuto-filter-btn @(currentCategory == cat.Slug ? "active" : "")">
+                @cat.Name
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="tuto-empty">
+            <i class="fas fa-book-open" style="font-size:3rem; color:rgba(0,178,255,0.3); margin-bottom:1rem;"></i>
+            <p>Aucun tutoriel disponible pour le moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="tuto-grid">
+            @foreach (var tuto in Model)
+            {
+                <div class="tuto-card">
+                    @if (!string.IsNullOrEmpty(tuto.ThumbnailUrl))
+                    {
+                        <div class="tuto-card-img">
+                            <img src="@tuto.ThumbnailUrl" alt="@tuto.Title" />
+                        </div>
+                    }
+                    <div class="tuto-card-body">
+                        <span class="tuto-badge">@(tuto.Category?.Name ?? "Général")</span>
+                        <h3 class="tuto-card-title">@tuto.Title</h3>
+                        @if (!string.IsNullOrEmpty(tuto.Summary))
+                        {
+                            <p class="tuto-card-summary">@tuto.Summary</p>
+                        }
+                        <div class="tuto-card-footer">
+                            <span class="tuto-date"><i class="fas fa-calendar-alt"></i> @tuto.CreatedAt.ToString("dd/MM/yyyy")</span>
+                            <a href="@Url.Action("Details", "Tutorials", new { id = tuto.Id })" class="tuto-read-link">
+                                Lire <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<style>
+.section-subtitle { text-align:center; color:rgba(255,255,255,0.6); font-size:1.1rem; margin-top:-40px; margin-bottom:50px; }
+.tuto-filters { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:50px; }
+.tuto-filter-btn {
+    padding:10px 24px; border-radius:30px; text-decoration:none;
+    border:1px solid rgba(0,178,255,0.3); color:rgba(255,255,255,0.7);
+    font-size:0.95rem; font-family:'Rajdhani',sans-serif; letter-spacing:1px;
+    transition:all 0.3s ease; background:rgba(255,255,255,0.03);
+}
+.tuto-filter-btn:hover { border-color:#00B2FF; color:#00B2FF; background:rgba(0,178,255,0.1); box-shadow:0 0 15px rgba(0,178,255,0.2); }
+.tuto-filter-btn.active { border-color:#FF5E00; color:#FF5E00; background:rgba(255,94,0,0.1); box-shadow:0 0 15px rgba(255,94,0,0.3); }
+.tuto-empty { text-align:center; padding:80px 20px; color:rgba(255,255,255,0.4); }
+.tuto-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:30px; }
+.tuto-card {
+    background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8));
+    border:1px solid rgba(0,178,255,0.3); border-radius:20px;
+    overflow:hidden; position:relative;
+    transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+    display:flex; flex-direction:column;
+    backdrop-filter:blur(10px);
+}
+.tuto-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,#FF5E00,#00B2FF);
+    transform:scaleX(0); transform-origin:left; transition:transform 0.4s ease;
+}
+.tuto-card:hover { transform:translateY(-8px); border-color:rgba(255,94,0,0.5); box-shadow:0 20px 40px rgba(0,178,255,0.15),0 0 40px rgba(255,94,0,0.2); }
+.tuto-card:hover::before { transform:scaleX(1); }
+.tuto-card-img img { width:100%; height:200px; object-fit:cover; }
+.tuto-card-body { padding:1.8rem; flex:1; display:flex; flex-direction:column; gap:0.75rem; }
+.tuto-badge {
+    display:inline-block; padding:4px 14px; border-radius:20px;
+    background:rgba(255,94,0,0.15); border:1px solid rgba(255,94,0,0.4);
+    color:#FF5E00; font-size:0.8rem; font-weight:600; letter-spacing:1px; text-transform:uppercase;
+}
+.tuto-card-title { font-family:'Orbitron',monospace; font-size:1.1rem; color:#fff; margin:0; line-height:1.4; }
+.tuto-card-summary { color:rgba(255,255,255,0.65); font-size:0.95rem; line-height:1.7; flex:1; margin:0; }
+.tuto-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.07); }
+.tuto-date { color:rgba(255,255,255,0.4); font-size:0.82rem; }
+.tuto-date i { margin-right:5px; color:#FF5E00; }
+.tuto-read-link { color:#00B2FF; text-decoration:none; font-size:0.9rem; font-weight:600; font-family:'Rajdhani',sans-serif; letter-spacing:1px; transition:color 0.2s,gap 0.2s; }
+.tuto-read-link:hover { color:#FF5E00; }
+.tuto-read-link i { margin-left:6px; transition:transform 0.2s; }
+.tuto-read-link:hover i { transform:translateX(4px); }
+</style>

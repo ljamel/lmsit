@@ -315,7 +315,7 @@ namespace CrudDemo.Controllers
 
 			if (ModelState.IsValid)
 			{
-				var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+				var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
 
 				if (result.Succeeded)
 				{

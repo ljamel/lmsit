@@ -1,0 +1,236 @@
+@model IEnumerable<CrudDemo.Models.Tutorial>
+@{
+    ViewData["Title"] = "Gestion des tutoriels";
+}
+
+<section class="features">
+    <div class="tuto-admin-wrap">
+
+        <div class="tuto-admin-header">
+            <h2 class="section-title" style="margin-bottom:0; font-size:2rem; text-align:left;">Tutoriels</h2>
+            <div class="tuto-admin-actions">
+                <a href="@Url.Action("AdminCategories", "Tutorials")" class="tuto-btn-outline">
+                    <i class="fas fa-tags"></i> Catégories
+                </a>
+                <a href="@Url.Action("Create", "Tutorials")" class="tuto-btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="tuto-alert-success">@TempData["Success"]</div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="tuto-admin-empty">
+                <i class="fas fa-book-open"></i>
+                <p>Aucun tutoriel. <a href="@Url.Action("Create", "Tutorials")" class="tuto-link">Créez-en un !</a></p>
+            </div>
+        }
+        else
+        {
+            <div class="tuto-admin-card">
+                <table class="tuto-table">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Catégorie</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tuto in Model)
+                        {
+                            <tr>
+                                <td class="tuto-table-title">@tuto.Title</td>
+                                <td>
+                                    <span class="tuto-badge-small">@(tuto.Category?.Name ?? "—")</span>
+                                </td>
+                                <td>
+                                    @if (tuto.IsPublished)
+                                    {
+                                        <span class="tuto-status tuto-status-on"><i class="fas fa-circle"></i> Publié</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="tuto-status tuto-status-off"><i class="fas fa-circle"></i> Brouillon</span>
+                                    }
+                                </td>
+                                <td class="tuto-table-date">@tuto.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="tuto-row-actions">
+                                        <a href="@Url.Action("Details", "Tutorials", new { id = tuto.Id })"
+                                           class="tuto-action-btn tuto-action-view" target="_blank" title="Voir">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Tutorials", new { id = tuto.Id })"
+                                           class="tuto-action-btn tuto-action-edit" title="Modifier">
+                                            <i class="fa-regular fa-edit"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@tuto.Id" method="post"
+                                              onsubmit="return confirm('Supprimer ce tutoriel ?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="tuto-action-btn tuto-action-delete" title="Supprimer">
+                                                <i class="fa-regular fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>
+
+<style>
+.tuto-admin-wrap { max-width:1100px; margin:0 auto; }
+.tuto-admin-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; gap:20px; }
+.tuto-admin-actions { display:flex; gap:12px; flex-shrink:0; }
+.tuto-alert-success { background:rgba(0,255,150,0.07); border:1px solid rgba(0,255,150,0.3); border-radius:10px; padding:1rem; color:#00ff96; margin-bottom:1.5rem; font-size:0.9rem; }
+.tuto-admin-empty { text-align:center; padding:80px; color:rgba(255,255,255,0.3); }
+.tuto-admin-empty i { font-size:3rem; margin-bottom:1rem; display:block; color:rgba(0,178,255,0.3); }
+.tuto-link { color:#00B2FF; }
+.tuto-admin-card {
+    background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8));
+    border:1px solid rgba(0,178,255,0.3); border-radius:20px;
+    overflow:hidden; backdrop-filter:blur(10px);
+}
+.tuto-table { width:100%; border-collapse:collapse; }
+.tuto-table thead tr { border-bottom:1px solid rgba(0,178,255,0.2); }
+.tuto-table th { padding:16px 20px; font-family:'Orbitron',monospace; font-size:0.7rem; letter-spacing:2px; color:rgba(255,255,255,0.4); text-transform:uppercase; font-weight:400; white-space:nowrap; }
+.tuto-table td { padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+.tuto-table tbody tr { transition:background 0.2s; }
+.tuto-table tbody tr:hover { background:rgba(0,178,255,0.04); }
+.tuto-table tbody tr:last-child td { border-bottom:none; }
+.tuto-table-title { color:#fff; font-size:0.95rem; max-width:280px; }
+.tuto-table-date { color:rgba(255,255,255,0.35); font-size:0.88rem; white-space:nowrap; }
+.tuto-badge-small { display:inline-block; padding:3px 10px; border-radius:20px; background:rgba(255,94,0,0.12); border:1px solid rgba(255,94,0,0.3); color:#FF5E00; font-size:0.8rem; white-space:nowrap; }
+.tuto-status { font-size:0.82rem; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.tuto-status i { font-size:0.5rem; }
+.tuto-status-on { color:#00ff96; }
+.tuto-status-off { color:rgba(255,255,255,0.35); }
+.tuto-row-actions { display:flex; gap:8px; align-items:center; }
+.tuto-action-btn {
+    width:32px; height:32px; border-radius:6px; border:1px solid transparent;
+    background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:0.85rem; transition:all 0.2s; text-decoration:none;
+}
+.tuto-action-view { color:rgba(0,178,255,0.7); border-color:rgba(0,178,255,0.3); }
+.tuto-action-view:hover { color:#00B2FF; border-color:#00B2FF; background:rgba(0,178,255,0.1); }
+.tuto-action-edit { color:rgba(255,94,0,0.7); border-color:rgba(255,94,0,0.3); }
+.tuto-action-edit:hover { color:#FF5E00; border-color:#FF5E00; background:rgba(255,94,0,0.1); }
+.tuto-action-delete { color:rgba(255,80,80,0.7); border-color:rgba(255,80,80,0.3); }
+.tuto-action-delete:hover { color:#ff5050; border-color:#ff5050; background:rgba(255,80,80,0.1); }
+.tuto-btn-primary {
+    display:inline-flex; align-items:center; gap:8px; padding:10px 22px;
+    background:linear-gradient(45deg,#FF5E00,#00B2FF);
+    border:none; border-radius:8px; color:#fff; font-family:'Rajdhani',sans-serif;
+    font-size:0.95rem; font-weight:700; letter-spacing:1px; cursor:pointer;
+    transition:all 0.3s; text-transform:uppercase; text-decoration:none;
+}
+.tuto-btn-primary:hover { box-shadow:0 0 20px rgba(255,94,0,0.4); transform:translateY(-1px); color:#fff; }
+.tuto-btn-outline {
+    display:inline-flex; align-items:center; gap:8px; padding:10px 22px;
+    background:transparent; border:1px solid rgba(0,178,255,0.4);
+    border-radius:8px; color:rgba(0,178,255,0.8); font-family:'Rajdhani',sans-serif;
+    font-size:0.95rem; letter-spacing:1px; text-decoration:none; transition:all 0.3s;
+}
+.tuto-btn-outline:hover { border-color:#00B2FF; color:#00B2FF; background:rgba(0,178,255,0.08); }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color:#00d4ff; font-family:'Orbitron',sans-serif;">Tutoriels</h2>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("AdminCategories", "Tutorials")" class="btn btn-outline-info btn-sm">
+                <i class="fas fa-tags"></i> Gérer les catégories
+            </a>
+            <a href="@Url.Action("Create", "Tutorials")" class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Nouveau tutoriel
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">Aucun tutoriel. Créez-en un !</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark table-hover admin-table">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Catégorie</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tuto in Model)
+                    {
+                        <tr>
+                            <td>@tuto.Title</td>
+                            <td>
+                                <span class="badge" style="background:rgba(0,212,255,0.2); color:#00d4ff;">
+                                    @(tuto.Category?.Name ?? "—")
+                                </span>
+                            </td>
+                            <td>
+                                @if (tuto.IsPublished)
+                                {
+                                    <span class="badge bg-success">Publié</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Brouillon</span>
+                                }
+                            </td>
+                            <td>@tuto.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="@Url.Action("Details", "Tutorials", new { id = tuto.Id })"
+                                       class="btn btn-outline-info btn-sm" target="_blank" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Tutorials", new { id = tuto.Id })"
+                                       class="btn btn-outline-warning btn-sm" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@tuto.Id" method="post"
+                                          onsubmit="return confirm('Supprimer ce tutoriel ?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+.admin-table { border: 1px solid rgba(0,212,255,0.2); }
+.admin-table thead th { border-color: rgba(0,212,255,0.3); color: #00d4ff; }
+.admin-table td { border-color: rgba(255,255,255,0.07); vertical-align: middle; }
+</style>

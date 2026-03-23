@@ -1,0 +1,206 @@
+@model CrudDemo.Models.Tutorial
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="features">
+    <div class="tuto-detail-wrap">
+
+        <!-- Breadcrumb / nav -->
+        <div class="tuto-detail-nav">
+            <a href="@Url.Action("Index", "Tutorials")" class="tuto-back-link">
+                <i class="fas fa-arrow-left"></i> Tutoriels
+            </a>
+            @if (Model.Category != null)
+            {
+                <span class="tuto-detail-sep">›</span>
+                <a href="@Url.Action("Index", "Tutorials", new { category = Model.Category.Slug })"
+                   class="tuto-back-link">@Model.Category.Name</a>
+            }
+        </div>
+
+        <!-- Header -->
+        <div class="tuto-detail-header">
+            @if (Model.Category != null)
+            {
+                <span class="tuto-badge">@Model.Category.Name</span>
+            }
+            <h1 class="tuto-detail-title">@Model.Title</h1>
+            <div class="tuto-detail-meta">
+                <span><i class="fas fa-calendar-alt"></i> @Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                @if (Model.UpdatedAt.Date != Model.CreatedAt.Date)
+                {
+                    <span><i class="fas fa-sync-alt"></i> Mis à jour le @Model.UpdatedAt.ToString("dd/MM/yyyy")</span>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+        {
+            <div class="tuto-detail-hero">
+                <img src="@Model.ThumbnailUrl" alt="@Model.Title" />
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Summary))
+        {
+            <div class="tuto-detail-summary">
+                <i class="fas fa-quote-left tuto-quote-icon"></i>
+                @Model.Summary
+            </div>
+        }
+
+        <!-- Contenu HTML Quill -->
+        <div class="tuto-detail-content ql-rendered">
+            @Html.Raw(Model.Content)
+        </div>
+
+        <!-- Footer navigation -->
+        <div class="tuto-detail-footer">
+            <a href="@Url.Action("Index", "Tutorials")" class="cta-tuto-btn">
+                <i class="fas fa-arrow-left"></i> Retour aux tutoriels
+            </a>
+        </div>
+
+    </div>
+</section>
+
+<style>
+.tuto-detail-wrap { max-width:860px; margin:0 auto; }
+.tuto-detail-nav { display:flex; align-items:center; gap:10px; margin-bottom:40px; }
+.tuto-back-link { color:rgba(255,255,255,0.5); text-decoration:none; font-size:0.9rem; transition:color 0.2s; }
+.tuto-back-link:hover { color:#00B2FF; }
+.tuto-detail-sep { color:rgba(255,255,255,0.3); }
+.tuto-badge {
+    display:inline-block; padding:4px 14px; border-radius:20px;
+    background:rgba(255,94,0,0.15); border:1px solid rgba(255,94,0,0.4);
+    color:#FF5E00; font-size:0.8rem; font-weight:600; letter-spacing:1px; text-transform:uppercase;
+    margin-bottom:1rem;
+}
+.tuto-detail-title {
+    font-family:'Orbitron',monospace; font-size:clamp(1.6rem,4vw,2.8rem); font-weight:900;
+    background:linear-gradient(45deg,#fff,#00B2FF);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin:0.5rem 0 1rem; line-height:1.2;
+}
+.tuto-detail-meta { display:flex; gap:24px; color:rgba(255,255,255,0.4); font-size:0.88rem; margin-bottom:2rem; }
+.tuto-detail-meta i { color:#FF5E00; margin-right:6px; }
+.tuto-detail-hero { margin-bottom:2.5rem; }
+.tuto-detail-hero img { width:100%; border-radius:16px; max-height:440px; object-fit:cover; border:1px solid rgba(0,178,255,0.2); box-shadow:0 0 40px rgba(0,178,255,0.1); }
+.tuto-detail-summary {
+    position:relative; background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8));
+    border:1px solid rgba(255,94,0,0.3); border-left:4px solid #FF5E00;
+    border-radius:12px; padding:1.5rem 1.5rem 1.5rem 3rem;
+    color:rgba(255,255,255,0.8); font-size:1.05rem; line-height:1.8;
+    margin-bottom:2.5rem; backdrop-filter:blur(10px);
+}
+.tuto-quote-icon { position:absolute; left:1rem; top:1.2rem; color:rgba(255,94,0,0.4); font-size:1.2rem; }
+.tuto-detail-content {
+    background:linear-gradient(135deg,rgba(15,15,35,0.9),rgba(25,25,45,0.8));
+    border:1px solid rgba(0,178,255,0.2); border-radius:20px;
+    padding:2.5rem; backdrop-filter:blur(10px);
+    color:rgba(255,255,255,0.85); line-height:1.9; font-size:1rem;
+}
+.tuto-detail-content h1,.tuto-detail-content h2,.tuto-detail-content h3 {
+    font-family:'Orbitron',monospace;
+    background:linear-gradient(45deg,#FF5E00,#00B2FF);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-top:2rem; margin-bottom:1rem;
+}
+.tuto-detail-content h2 { font-size:1.5rem; }
+.tuto-detail-content h3 { font-size:1.2rem; }
+.tuto-detail-content pre {
+    background:rgba(0,0,0,0.6); border:1px solid rgba(255,94,0,0.3);
+    border-radius:10px; padding:1.2rem; overflow-x:auto; margin:1.5rem 0;
+}
+.tuto-detail-content code {
+    background:rgba(0,0,0,0.5); border:1px solid rgba(0,178,255,0.3);
+    border-radius:4px; padding:2px 7px; color:#00B2FF; font-size:0.9em;
+}
+.tuto-detail-content pre code { border:none; padding:0; background:none; color:rgba(255,255,255,0.9); }
+.tuto-detail-content a { color:#00B2FF; }
+.tuto-detail-content a:hover { color:#FF5E00; }
+.tuto-detail-content ul,.tuto-detail-content ol { padding-left:1.5rem; }
+.tuto-detail-content li { padding:4px 0; }
+.tuto-detail-content blockquote {
+    border-left:4px solid #FF5E00; padding-left:1rem;
+    color:rgba(255,255,255,0.6); font-style:italic; margin:1.5rem 0;
+}
+.tuto-detail-content img { max-width:100%; border-radius:10px; }
+.tuto-detail-footer { margin-top:3rem; padding-top:2rem; border-top:1px solid rgba(0,178,255,0.15); }
+.cta-tuto-btn {
+    display:inline-flex; align-items:center; gap:10px;
+    padding:12px 28px; border-radius:8px;
+    background:linear-gradient(45deg,rgba(255,94,0,0.2),rgba(0,178,255,0.2));
+    border:1px solid rgba(0,178,255,0.4); color:rgba(255,255,255,0.8);
+    text-decoration:none; font-family:'Rajdhani',sans-serif; font-size:1rem;
+    letter-spacing:1px; transition:all 0.3s ease;
+}
+.cta-tuto-btn:hover { border-color:#FF5E00; color:#FF5E00; box-shadow:0 0 20px rgba(255,94,0,0.3); }
+</style>
+
+<section class="tutorial-detail-section">
+    <div class="container py-5" style="max-width: 900px;">
+        <div class="mb-4">
+            <a href="@Url.Action("Index", "Tutorials")" class="back-link">← Tous les tutoriels</a>
+            @if (Model.Category != null)
+            {
+                <a href="@Url.Action("Index", "Tutorials", new { category = Model.Category.Slug })"
+                   class="tuto-cat-badge ms-3">@Model.Category.Name</a>
+            }
+        </div>
+
+        <h1 class="tuto-detail-title">@Model.Title</h1>
+        <div class="tuto-detail-meta mb-4">
+            Publié le @Model.CreatedAt.ToString("dd/MM/yyyy")
+            @if (Model.UpdatedAt != Model.CreatedAt)
+            {
+                <span> · Mis à jour le @Model.UpdatedAt.ToString("dd/MM/yyyy")</span>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="@Model.Title" class="tuto-hero-img mb-4" />
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Summary))
+        {
+            <p class="tuto-detail-summary mb-4">@Model.Summary</p>
+        }
+
+        <div class="tuto-content">
+            @Html.Raw(Model.Content)
+        </div>
+    </div>
+</section>
+
+<style>
+.tutorial-detail-section { min-height: 80vh; }
+.back-link { color: #00d4ff; text-decoration: none; font-size: 0.9rem; }
+.back-link:hover { color: #fff; }
+.tuto-cat-badge {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    background: rgba(0,212,255,0.15); color: #00d4ff; font-size: 0.8rem; text-decoration: none;
+}
+.tuto-detail-title {
+    font-family: 'Orbitron', sans-serif; color: #fff; font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.tuto-detail-meta { color: #888; font-size: 0.9rem; }
+.tuto-hero-img { width: 100%; border-radius: 12px; max-height: 400px; object-fit: cover; }
+.tuto-detail-summary {
+    color: #aaa; font-size: 1.05rem; border-left: 3px solid #00d4ff; padding-left: 1rem;
+}
+.tuto-content {
+    color: #ccc; line-height: 1.9; font-size: 1rem;
+}
+.tuto-content h1,.tuto-content h2,.tuto-content h3 { color: #00d4ff; margin-top: 2rem; font-family: 'Rajdhani', sans-serif; }
+.tuto-content pre, .tuto-content code {
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 6px; padding: 2px 6px; color: #00d4ff; font-size: 0.92em;
+}
+.tuto-content pre { padding: 1rem; overflow-x: auto; }
+.tuto-content a { color: #00d4ff; }
+.tuto-content ul, .tuto-content ol { padding-left: 1.5rem; }
+</style>

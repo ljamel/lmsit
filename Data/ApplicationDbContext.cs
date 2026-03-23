@@ -23,6 +23,8 @@ namespace CrudDemo.Data
 	public DbSet<LessonEngagement> LessonEngagements { get; set; }
 	public DbSet<Subscription> Subscriptions { get; set; }
 	public DbSet<Comment> Comments { get; set; }
+	public DbSet<TutorialCategory> TutorialCategories { get; set; }
+	public DbSet<Tutorial> Tutorials { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -116,6 +118,27 @@ namespace CrudDemo.Data
 			modelBuilder.Entity<QuizOption>()
 				.HasIndex(o => o.QuizId)
 				.HasDatabaseName("IX_QuizOptions_QuizId");
+
+			// Relations Tutorials
+			modelBuilder.Entity<TutorialCategory>()
+				.HasMany(c => c.Tutorials)
+				.WithOne(t => t.Category)
+				.HasForeignKey(t => t.CategoryId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<Tutorial>()
+				.HasIndex(t => new { t.CategoryId, t.IsPublished, t.CreatedAt })
+				.HasDatabaseName("IX_Tutorials_CategoryId_IsPublished_CreatedAt");
+
+			modelBuilder.Entity<Tutorial>()
+				.HasIndex(t => t.Slug)
+				.IsUnique()
+				.HasDatabaseName("UX_Tutorials_Slug");
+
+			modelBuilder.Entity<TutorialCategory>()
+				.HasIndex(c => c.Slug)
+				.IsUnique()
+				.HasDatabaseName("UX_TutorialCategories_Slug");
 		}
 	}
 }
