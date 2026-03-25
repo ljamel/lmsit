@@ -1,4 +1,4 @@
-@model IEnumerable<CrudDemo.Models.Course>
+@model IEnumerable<CrudDemo.Models.Module>
 
 @if (Model != null && Model.Any())
 {
@@ -25,7 +25,7 @@
                     <i class="fas fa-compass" style="font-size:1.8rem;color:#fff;"></i>
                 </div>
                 <h2 style="color:#00B2FF;font-family:'Orbitron',sans-serif;font-size:1.3rem;margin:0 0 .5rem;">
-                    Bienvenue ! Choisissez votre domaine
+                    Bienvenue ! Choisissez vos modules prioritaires
                 </h2>
                 <p style="color:rgba(255,255,255,0.7);font-size:1rem;margin:0;">
                     Sélectionnez le(s) module(s) sur lesquels vous souhaitez vous concentrer.<br>
@@ -37,33 +37,40 @@
             <form id="domainPrefForm" method="post" action="/Account/SaveDomainPreference">
                 @Html.AntiForgeryToken()
 
-                <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;">
-                    @foreach (var course in Model)
+                <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;">
+                    @foreach (var courseGroup in Model.GroupBy(m => new { m.CourseId, CourseTitle = m.Course!.Title }).OrderBy(g => g.Key.CourseTitle))
                     {
-                        <label for="dp_@course.Id"
-                               class="domain-pref-option"
-                               style="display:flex;align-items:center;gap:1rem;
-                                      background:rgba(0,178,255,0.06);
-                                      border:1px solid rgba(0,178,255,0.25);
-                                      border-radius:10px;padding:.85rem 1rem;
-                                      cursor:pointer;transition:all .2s;">
-                            <input type="checkbox"
-                                   id="dp_@course.Id"
-                                   name="courseIds"
-                                   value="@course.Id"
-                                   style="width:20px;height:20px;accent-color:#00B2FF;flex-shrink:0;" />
-                            <div>
-                                <div style="color:#fff;font-weight:700;font-size:1.05rem;">
-                                    <i class="fas fa-book-open me-2" style="color:#00B2FF;"></i>@course.Title
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(course.Description) && course.Description.Length <= 120)
-                                {
-                                    <div style="color:rgba(255,255,255,0.55);font-size:.875rem;margin-top:.2rem;">
-                                        @course.Description
+                        <div style="color:rgba(0,178,255,0.7);font-size:.8rem;font-weight:700;text-transform:uppercase;
+                                    letter-spacing:.08em;margin-top:.8rem;margin-bottom:.3rem;padding-left:.25rem;">
+                            <i class="fas fa-book me-1"></i>@courseGroup.Key.CourseTitle
+                        </div>
+                        @foreach (var m in courseGroup)
+                        {
+                            <label for="dp_@m.Id"
+                                   class="domain-pref-option"
+                                   style="display:flex;align-items:center;gap:1rem;
+                                          background:rgba(0,178,255,0.06);
+                                          border:1px solid rgba(0,178,255,0.25);
+                                          border-radius:10px;padding:.75rem 1rem;
+                                          cursor:pointer;transition:all .2s;">
+                                <input type="checkbox"
+                                       id="dp_@m.Id"
+                                       name="moduleIds"
+                                       value="@m.Id"
+                                       style="width:20px;height:20px;accent-color:#00B2FF;flex-shrink:0;" />
+                                <div>
+                                    <div style="color:#fff;font-weight:700;font-size:1rem;">
+                                        <i class="fas fa-layer-group me-2" style="color:#00B2FF;"></i>@m.Title
                                     </div>
-                                }
-                            </div>
-                        </label>
+                                    @if (!string.IsNullOrWhiteSpace(m.Description) && m.Description.Length <= 120)
+                                    {
+                                        <div style="color:rgba(255,255,255,0.55);font-size:.875rem;margin-top:.2rem;">
+                                            @m.Description
+                                        </div>
+                                    }
+                                </div>
+                            </label>
+                        }
                     }
                 </div>
 

@@ -159,13 +159,15 @@ namespace CrudDemo.Controllers
                 IsCertificateEligible = isCertificateEligible
             };
 
-            // Préférences de domaine
-            var allCourses = await _context.Courses
+            // Préférences de domaine (modules)
+            var allModules = await _context.Modules
                 .AsNoTracking()
-                .OrderBy(c => c.CreatedAt)
+                .Include(m => m.Course)
+                .OrderBy(m => m.Course!.CreatedAt)
+                .ThenBy(m => m.OrderIndex)
                 .ToListAsync();
 
-            var preferredCourseIds = new HashSet<int>();
+            var preferredModuleIds = new HashSet<int>();
             if (!string.IsNullOrWhiteSpace(userId))
             {
                 var prefClaim = await _context.UserClaims
@@ -179,14 +181,14 @@ namespace CrudDemo.Controllers
                     try
                     {
                         var ids = System.Text.Json.JsonSerializer.Deserialize<List<int>>(prefClaim);
-                        if (ids != null) preferredCourseIds = ids.ToHashSet();
+                        if (ids != null) preferredModuleIds = ids.ToHashSet();
                     }
                     catch { }
                 }
             }
 
-            ViewBag.AllCourses = allCourses;
-            ViewBag.PreferredCourseIds = preferredCourseIds;
+            ViewBag.AllModules = allModules;
+            ViewBag.PreferredModuleIds = preferredModuleIds;
 
             return View(memberProfile);
         }

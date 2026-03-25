@@ -450,7 +450,7 @@ namespace CrudDemo.Controllers
 		// POST: Account/SaveDomainPreference
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> SaveDomainPreference(List<int>? courseIds)
+		public async Task<IActionResult> SaveDomainPreference(List<int>? moduleIds)
 		{
 			var user = await _userManager.GetUserAsync(User);
 			if (user == null) return Unauthorized();
@@ -463,7 +463,7 @@ namespace CrudDemo.Controllers
 				await _userManager.RemoveClaimAsync(user, c);
 
 			// Normaliser : null ou liste vide = skip
-			var ids = courseIds?.Where(id => id > 0).Distinct().ToList() ?? new List<int>();
+			var ids = moduleIds?.Where(id => id > 0).Distinct().ToList() ?? new List<int>();
 			var value = JsonSerializer.Serialize(ids); // ex: "[1,3]" ou "[]"
 
 			await _userManager.AddClaimAsync(user, new Claim(claimType, value));

@@ -31,18 +31,14 @@ public class DomainPreferenceViewComponent : ViewComponent
         if (hasPref)
             return Content(string.Empty);
 
-        // Charger les cours pour les options de la modal
-        var courses = await _context.Courses
+        // Charger les modules pour les options de la modal
+        var modules = await _context.Modules
             .AsNoTracking()
-            .OrderBy(c => c.CreatedAt)
-            .Select(c => new CrudDemo.Models.Course
-            {
-                Id = c.Id,
-                Title = c.Title,
-                Description = c.Description
-            })
+            .Include(m => m.Course)
+            .OrderBy(m => m.Course!.CreatedAt)
+            .ThenBy(m => m.OrderIndex)
             .ToListAsync();
 
-        return View(courses);
+        return View(modules);
     }
 }

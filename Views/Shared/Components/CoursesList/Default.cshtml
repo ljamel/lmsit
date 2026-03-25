@@ -17,7 +17,7 @@
     var completedQuizCount = (int?)ViewBag.CompletedQuizCount ?? 0;
     var totalQuizCount = (int?)ViewBag.TotalQuizCount ?? 0;
     var certificateAction = isCertificateEligible ? "Certif1" : "Member";
-    var preferredCourseIds = ViewBag.PreferredCourseIds as HashSet<int> ?? new HashSet<int>();
+    var preferredModuleIds = ViewBag.PreferredModuleIds as HashSet<int> ?? new HashSet<int>();
 }
 
 <div class="menu-dashboard">
@@ -200,7 +200,6 @@
             {
                 ++module;
                 var isLockedCourse = !canAccessPremium && firstCourseId > 0 && course.Id != firstCourseId;
-                var isPreferred = preferredCourseIds.Contains(course.Id);
                 var modules = course.Modules ?? new List<CrudDemo.Models.Module>();
                 if (hasLessonSearch)
                 {
@@ -217,13 +216,7 @@
                 }
 
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm @(isPreferred ? "course-preferred" : "")">
-                        @if (isPreferred)
-                        {
-                            <div class="preferred-badge-bar">
-                                <i class="fas fa-star me-1"></i>Votre domaine prioritaire
-                            </div>
-                        }
+                    <div class="card h-100 shadow-sm">
                         <div class="card-footer bg-white border-top">
                             @if (isLockedCourse)
                             {
@@ -236,21 +229,9 @@
                                 <a
                                     asp-controller="Courses"
                                     asp-action="Details"
-                                    asp-route-id="@course.Id"
-                                    class="@(isPreferred ? "preferred-course-link" : "")">
-                                    @if (isPreferred)
-                                    {
-                                        <i class="fas fa-star me-1" style="color:#FFD700;"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="fas fa-eye me-1"></i>
-                                    }
+                                    asp-route-id="@course.Id">
+                                    <i class="fas fa-eye me-1"></i>
                                     @course.Title
-                                    @if (isPreferred)
-                                    {
-                                        <span class="preferred-course-badge">Prioritaire</span>
-                                    }
                                 </a>
                             }
 
@@ -267,8 +248,20 @@
                                 }
 
                                 <div class="ms-3 mt-2">
-                                    <div class="fw-semibold text-muted">
-                                        <i class="fas fa-folder-open"></i> @m.Title
+                                    <div class="fw-semibold @(preferredModuleIds.Contains(m.Id) ? "module-preferred-title" : "text-muted")">
+                                        @if (preferredModuleIds.Contains(m.Id))
+                                        {
+                                            <i class="fas fa-star" style="color:#FFD700;"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-folder-open"></i>
+                                        }
+                                        @m.Title
+                                        @if (preferredModuleIds.Contains(m.Id))
+                                        {
+                                            <span class="preferred-module-badge">Prioritaire</span>
+                                        }
                                     </div>
 
                                     @if (lessons.Any())
@@ -343,30 +336,15 @@
 </div>
 
 <style>
-    /* ===== Mise en évidence cours prioritaires ===== */
-    .course-preferred {
-        border: 2px solid #FFD700 !important;
-        box-shadow: 0 0 18px rgba(255,215,0,0.35), 0 4px 16px rgba(0,0,0,0.15) !important;
-        position: relative;
+    /* ===== Mise en évidence modules prioritaires ===== */
+    .module-preferred-title {
+        color: #FFD700 !important;
+        font-weight: 700 !important;
     }
-    .preferred-badge-bar {
-        background: linear-gradient(90deg, #b8860b, #FFD700, #b8860b);
-        color: #1a1a00;
-        font-family: 'Rajdhani', sans-serif;
-        font-weight: 700;
-        font-size: .8rem;
-        text-align: center;
-        padding: 4px 8px;
-        letter-spacing: .05em;
-    }
-    .preferred-course-link {
-        color: #c9a200 !important;
-        font-weight: 700;
-    }
-    .preferred-course-badge {
+    .preferred-module-badge {
         background: #FFD700;
         color: #1a1a00;
-        font-size: .7rem;
+        font-size: .65rem;
         font-weight: 700;
         padding: 1px 7px;
         border-radius: 20px;

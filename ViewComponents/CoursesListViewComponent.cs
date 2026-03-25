@@ -145,8 +145,8 @@ public class CoursesListViewComponent : ViewComponent
         ViewBag.IsCertificateEligible = isCertificateEligible;
         ViewBag.EarnedQuizPoints = earnedQuizPoints;
 
-        // Préférence de domaine
-        var preferredCourseIds = new HashSet<int>();
+        // Préférence de domaine (modules)
+        var preferredModuleIds = new HashSet<int>();
         if (!string.IsNullOrWhiteSpace(userId))
         {
             var prefClaim = await _context.UserClaims
@@ -160,12 +160,12 @@ public class CoursesListViewComponent : ViewComponent
                 try
                 {
                     var ids = JsonSerializer.Deserialize<List<int>>(prefClaim);
-                    if (ids != null) preferredCourseIds = ids.ToHashSet();
+                    if (ids != null) preferredModuleIds = ids.ToHashSet();
                 }
                 catch { }
             }
         }
-        ViewBag.PreferredCourseIds = preferredCourseIds;
+        ViewBag.PreferredModuleIds = preferredModuleIds;
         ViewBag.TotalQuizPoints = totalQuizPoints;
         ViewBag.CertificateScorePercent = certificateScorePercent;
         ViewBag.CompletedQuizCount = completedQuizCount;
