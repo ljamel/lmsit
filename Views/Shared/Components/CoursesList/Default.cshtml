@@ -973,59 +973,17 @@
 
 
 
-document.addEventListener('click', async (e) => {
-    // Détection du bouton ou d'un de ses enfants
+document.addEventListener('click', (e) => {
     const btn = e.target.closest('.monBouton');
-    
+
     if (btn) {
         e.preventDefault();
-        
+
         const url = 'http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/';
-        const windowSpecs = {
-            width: 800,
-            height: 600,
-        };
-
-        // 1. Tentative avec l'API Document Picture-in-Picture
-        if ('documentPictureInPicture' in window) {
-            try {
-                const pipWindow = await window.documentPictureInPicture.requestWindow(windowSpecs);
-
-                // On prépare le style de la fenêtre PiP pour éviter la page blanche
-                const style = pipWindow.document.createElement('style');
-                style.textContent = `
-                    body { margin: 0; padding: 0; overflow: hidden; background: #000; }
-                    iframe { width: 100vw; height: 100vh; border: none; display: block; }
-                `;
-                pipWindow.document.head.appendChild(style);
-
-                // Création de l'iframe
-                const iframe = pipWindow.document.createElement('iframe');
-                
-                // Si ça reste blanc, le problème vient de l'URL elle-même.
-                iframe.src = url;
-                
-                // On ajoute l'iframe au body de la nouvelle fenêtre
-                pipWindow.document.body.appendChild(iframe);
-
-                console.log("Fenêtre PiP ouverte avec succès.");
-
-            } catch (err) {
-                console.error("Échec du mode PiP, repli sur window.open :", err);
-                ouvrirFenetreClassique(url);
-            }
-        } else {
-            // 2. Fallback pour les navigateurs non compatibles (Firefox, vieux Edge)
-            ouvrirFenetreClassique(url);
-        }
+        const specs = 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no';
+        window.open(url, '_blank', specs);
     }
 });
-
-// Fonction utilitaire pour l'ouverture classique
-function ouvrirFenetreClassique(url) {
-    const specs = "width=800,height=600,menubar=no,toolbar=no,location=no,status=no";
-    window.open(url, "_blank", specs);
-}
 
 
 </script>
