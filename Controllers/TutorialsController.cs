@@ -64,7 +64,8 @@ namespace CrudDemo.Controllers
             if (tutorial == null)
                 return NotFound();
 
-            if (!string.IsNullOrEmpty(tutorial.Slug))
+            // Ne rediriger que si le slug est vraiment défini (non vide)
+            if (!string.IsNullOrWhiteSpace(tutorial.Slug))
                 return RedirectPermanent($"/tutoriels/{tutorial.Slug}");
 
             return View(tutorial);
