@@ -1,6 +1,7 @@
 @model IEnumerable<CrudDemo.Models.Tutorial>
 @{
-    ViewData["Title"] = "Tutoriels";
+    ViewData["Title"] = "Tutoriels Cybersécurité";
+    ViewData["Description"] = "Découvrez tous les tutoriels INGENIUS sur la cybersécurité : pentest, réseaux, forensic, OSINT, outils offensifs et bien plus.";
     var categories = ViewBag.Categories as IEnumerable<CrudDemo.Models.TutorialCategory> ?? Enumerable.Empty<CrudDemo.Models.TutorialCategory>();
     string? currentCategory = ViewBag.CurrentCategory;
 }

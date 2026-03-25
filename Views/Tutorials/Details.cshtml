@@ -1,6 +1,41 @@
 @model CrudDemo.Models.Tutorial
 @{
     ViewData["Title"] = Model.Title;
+    ViewData["Description"] = !string.IsNullOrEmpty(Model.Summary)
+        ? Model.Summary
+        : Model.Title + " — Tutoriel cybersécurité sur INGENIUS.";
+    if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+        ViewData["OgImage"] = Model.ThumbnailUrl;
+    ViewData["OgType"] = "article";
+    ViewData["CanonicalUrl"] = string.IsNullOrEmpty(Model.Slug)
+        ? $"{Context.Request.Scheme}://{Context.Request.Host}/Tutorials/Details/{Model.Id}"
+        : $"{Context.Request.Scheme}://{Context.Request.Host}/tutoriels/{Model.Slug}";
+}
+@section HeadExtras {
+@{
+    var _jTitle = Model.Title.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    var _jDesc = (Model.Summary ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"");
+    var _jThumb = string.IsNullOrEmpty(Model.ThumbnailUrl) ? "" : $",\n  \"image\": \"{Model.ThumbnailUrl}\"";
+    var _jBase = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var _jPublished = Model.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ");
+    var _jModified = Model.UpdatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ");
+}
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "Article",
+  "headline": "@Html.Raw(_jTitle)",
+  "description": "@Html.Raw(_jDesc)",
+  "datePublished": "@_jPublished",
+  "dateModified": "@_jModified"@Html.Raw(_jThumb),
+  "author": { "@@type": "Organization", "name": "INGENIUS" },
+  "publisher": {
+    "@@type": "Organization",
+    "name": "INGENIUS",
+    "logo": { "@@type": "ImageObject", "url": "@_jBase/images/og-default.png" }
+  }
+}
+</script>
 }
 
 <section class="features">
@@ -137,70 +172,4 @@
     letter-spacing:1px; transition:all 0.3s ease;
 }
 .cta-tuto-btn:hover { border-color:#FF5E00; color:#FF5E00; box-shadow:0 0 20px rgba(255,94,0,0.3); }
-</style>
-
-<section class="tutorial-detail-section">
-    <div class="container py-5" style="max-width: 900px;">
-        <div class="mb-4">
-            <a href="@Url.Action("Index", "Tutorials")" class="back-link">← Tous les tutoriels</a>
-            @if (Model.Category != null)
-            {
-                <a href="@Url.Action("Index", "Tutorials", new { category = Model.Category.Slug })"
-                   class="tuto-cat-badge ms-3">@Model.Category.Name</a>
-            }
-        </div>
-
-        <h1 class="tuto-detail-title">@Model.Title</h1>
-        <div class="tuto-detail-meta mb-4">
-            Publié le @Model.CreatedAt.ToString("dd/MM/yyyy")
-            @if (Model.UpdatedAt != Model.CreatedAt)
-            {
-                <span> · Mis à jour le @Model.UpdatedAt.ToString("dd/MM/yyyy")</span>
-            }
-        </div>
-
-        @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
-        {
-            <img src="@Model.ThumbnailUrl" alt="@Model.Title" class="tuto-hero-img mb-4" />
-        }
-
-        @if (!string.IsNullOrEmpty(Model.Summary))
-        {
-            <p class="tuto-detail-summary mb-4">@Model.Summary</p>
-        }
-
-        <div class="tuto-content">
-            @Html.Raw(Model.Content)
-        </div>
-    </div>
-</section>
-
-<style>
-.tutorial-detail-section { min-height: 80vh; }
-.back-link { color: #00d4ff; text-decoration: none; font-size: 0.9rem; }
-.back-link:hover { color: #fff; }
-.tuto-cat-badge {
-    display: inline-block; padding: 2px 10px; border-radius: 12px;
-    background: rgba(0,212,255,0.15); color: #00d4ff; font-size: 0.8rem; text-decoration: none;
-}
-.tuto-detail-title {
-    font-family: 'Orbitron', sans-serif; color: #fff; font-size: 2rem;
-    margin-bottom: 0.5rem;
-}
-.tuto-detail-meta { color: #888; font-size: 0.9rem; }
-.tuto-hero-img { width: 100%; border-radius: 12px; max-height: 400px; object-fit: cover; }
-.tuto-detail-summary {
-    color: #aaa; font-size: 1.05rem; border-left: 3px solid #00d4ff; padding-left: 1rem;
-}
-.tuto-content {
-    color: #ccc; line-height: 1.9; font-size: 1rem;
-}
-.tuto-content h1,.tuto-content h2,.tuto-content h3 { color: #00d4ff; margin-top: 2rem; font-family: 'Rajdhani', sans-serif; }
-.tuto-content pre, .tuto-content code {
-    background: rgba(0,0,0,0.5); border: 1px solid rgba(0,212,255,0.3);
-    border-radius: 6px; padding: 2px 6px; color: #00d4ff; font-size: 0.92em;
-}
-.tuto-content pre { padding: 1rem; overflow-x: auto; }
-.tuto-content a { color: #00d4ff; }
-.tuto-content ul, .tuto-content ol { padding-left: 1.5rem; }
 </style>

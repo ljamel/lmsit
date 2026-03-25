@@ -6,6 +6,8 @@ using System.ServiceModel.Syndication;
 using System.Xml;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using CrudDemo.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrudDemo.Controllers;
 
@@ -15,17 +17,20 @@ public class HomeController : Controller
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly ApplicationDbContext _context;
 
     public HomeController(
         ILogger<HomeController> logger,
         IEmailService emailService,
         IConfiguration configuration,
-        UserManager<IdentityUser> userManager)
+        UserManager<IdentityUser> userManager,
+        ApplicationDbContext context)
     {
         _logger = logger;
         _emailService = emailService;
         _configuration = configuration;
         _userManager = userManager;
+        _context = context;
     }
 
     private const string CyberResourceUrl = "https://docs.google.com/document/d/125qy1y56yMGLpjicOo6iudWR0a42itXenYFop2bqfdo/edit?tab=t.0";
@@ -157,6 +162,22 @@ public class HomeController : Controller
 
     public IActionResult Privacy()
     {
+        return View();
+    }
+
+    [ResponseCache(Duration = 3600)]
+    public async Task<IActionResult> Sitemap()
+    {
+        Response.ContentType = "application/xml; charset=utf-8";
+
+        var tutorials = await _context.Tutorials
+            .AsNoTracking()
+            .Where(t => t.IsPublished)
+            .Select(t => new { t.Id, t.Slug, t.UpdatedAt })
+            .OrderByDescending(t => t.UpdatedAt)
+            .ToListAsync();
+
+        ViewBag.Tutorials = tutorials;
         return View();
     }
 

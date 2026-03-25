@@ -1,0 +1,92 @@
+@{
+    Layout = null;
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var now = DateTime.UtcNow.ToString("yyyy-MM-dd");
+    var tutorials = ViewBag.Tutorials as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+    <!-- Page d'accueil -->
+    <url>
+        <loc>@baseUrl/</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+
+    <!-- Inscription / Connexion -->
+    <url>
+        <loc>@baseUrl/Account/Register</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>@baseUrl/Account/Login</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Pages publiques -->
+    <url>
+        <loc>@baseUrl/Home/Outils</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>@baseUrl/Home/Orientation</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>@baseUrl/Home/Recruting</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>@baseUrl/Home/Privacy</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+    <!-- Tutoriels — liste -->
+    <url>
+        <loc>@baseUrl/Tutorials</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Tutoriels — pages individuelles (publiés) -->
+    @foreach (var t in tutorials)
+    {
+        <url>
+            <loc>@(string.IsNullOrEmpty((string)t.Slug) ? $"{baseUrl}/Tutorials/Details/{t.Id}" : $"{baseUrl}/tutoriels/{t.Slug}")</loc>
+            <lastmod>@(((DateTime)t.UpdatedAt).ToString("yyyy-MM-dd"))</lastmod>
+            <changefreq>monthly</changefreq>
+            <priority>0.7</priority>
+        </url>
+    }
+
+    <!-- Challenges CTF -->
+    <url>
+        <loc>@baseUrl/Challenges</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+    <!-- Mentions légales -->
+    <url>
+        <loc>@baseUrl/Legal</loc>
+        <lastmod>@now</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+</urlset>

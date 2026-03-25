@@ -1,0 +1,16 @@
+User-agent: *
+Disallow: /AdminCourses/
+Disallow: /Admin/
+Disallow: /Account/Manage
+Disallow: /Account/ForgotPassword
+Disallow: /Account/ResetPassword
+Disallow: /Account/ConfirmEmail
+Disallow: /Payment/
+Disallow: /Dev/
+Disallow: /Challenges/Submit
+Disallow: /Tutorials/AdminIndex
+Disallow: /Tutorials/Create
+Disallow: /Tutorials/Edit
+Disallow: /Tutorials/Delete
+
+Sitemap: https://ingenius-cyber.fr/sitemap.xml

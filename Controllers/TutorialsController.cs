@@ -54,7 +54,7 @@ namespace CrudDemo.Controllers
             return View(tutorials);
         }
 
-        // GET: /Tutorials/Details/5
+        // GET: /Tutorials/Details/5 (redirige vers l'URL slug si disponible)
         public async Task<IActionResult> Details(int id)
         {
             var tutorial = await _context.Tutorials
@@ -64,7 +64,23 @@ namespace CrudDemo.Controllers
             if (tutorial == null)
                 return NotFound();
 
+            if (!string.IsNullOrEmpty(tutorial.Slug))
+                return RedirectPermanent($"/tutoriels/{tutorial.Slug}");
+
             return View(tutorial);
+        }
+
+        // GET: /tutoriels/{slug}
+        public async Task<IActionResult> DetailsBySlug(string slug)
+        {
+            var tutorial = await _context.Tutorials
+                .Include(t => t.Category)
+                .FirstOrDefaultAsync(t => t.Slug == slug && t.IsPublished);
+
+            if (tutorial == null)
+                return NotFound();
+
+            return View("Details", tutorial);
         }
 
         // -----------------------------------------------------------------
