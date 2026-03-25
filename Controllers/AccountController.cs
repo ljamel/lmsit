@@ -5,6 +5,8 @@ using CrudDemo.Services;
 using CrudDemo.Data;
 using System.Security.Cryptography;
 using System.Text;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace CrudDemo.Controllers
 {
@@ -443,5 +445,35 @@ namespace CrudDemo.Controllers
 			}
 
 			return View(model);
-		}	}
+		}
+
+		// POST: Account/SaveDomainPreference
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SaveDomainPreference(List<int>? courseIds)
+		{
+			var user = await _userManager.GetUserAsync(User);
+			if (user == null) return Unauthorized();
+
+			const string claimType = "user_domain_preference";
+
+			// Supprimer les anciennes valeurs si elles existent
+			var existing = await _userManager.GetClaimsAsync(user);
+			foreach (var c in existing.Where(c => c.Type == claimType))
+				await _userManager.RemoveClaimAsync(user, c);
+
+			// Normaliser : null ou liste vide = skip
+			var ids = courseIds?.Where(id => id > 0).Distinct().ToList() ?? new List<int>();
+			var value = JsonSerializer.Serialize(ids); // ex: "[1,3]" ou "[]"
+
+			await _userManager.AddClaimAsync(user, new Claim(claimType, value));
+
+			// Rafraîchir le cookie d'auth pour que le claim soit visible immédiatement
+			await _signInManager.RefreshSignInAsync(user);
+
+			return Request.Headers["X-Requested-With"] == "XMLHttpRequest"
+				? Ok()
+				: RedirectToAction("Index", "Courses");
+		}
+	}
 }

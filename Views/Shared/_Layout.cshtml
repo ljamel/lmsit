@@ -18,6 +18,27 @@
 <div class="gradient-overlay"></div>
 <div class="scanlines"></div>
 
+@{
+    var impersonatingAdminId = Context.Request.Cookies["AdminImpersonating"];
+}
+@if (!string.IsNullOrEmpty(impersonatingAdminId))
+{
+    <div style="position:fixed; top:0; left:0; right:0; z-index:99999; background:linear-gradient(90deg,#ff9800,#f44336); color:#fff; text-align:center; padding:10px 16px; font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:600; display:flex; align-items:center; justify-content:center; gap:16px; box-shadow:0 2px 12px rgba(244,67,54,0.5);">
+        <i class="fas fa-user-secret"></i>
+        <span>Mode impersonation actif — vous naviguez en tant qu'un autre utilisateur</span>
+        <a href="/AdminCourses/ReturnToAdmin" style="background:#fff; color:#f44336; padding:4px 14px; border-radius:20px; text-decoration:none; font-weight:700; font-size:0.9rem;">
+            <i class="fas fa-undo me-1"></i>Retourner en mode Admin
+        </a>
+    </div>
+    <div style="height:46px;"></div>
+}
+
+@* Modal de sélection du domaine (première connexion) *@
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    @await Component.InvokeAsync("DomainPreference")
+}
+
 <!-- Animated Shapes -->
 <div class="shapes-container">
     <div class="shape shape-circle"></div>

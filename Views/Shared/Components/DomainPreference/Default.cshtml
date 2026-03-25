@@ -1,0 +1,118 @@
+@model IEnumerable<CrudDemo.Models.Course>
+
+@if (Model != null && Model.Any())
+{
+    <!-- Overlay fond -->
+    <div id="domainPrefOverlay"
+         style="position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;padding:1rem;">
+
+        <div style="background:linear-gradient(135deg,#0d0d1a 0%,#16213e 100%);
+                    border:2px solid #00B2FF;
+                    border-radius:16px;
+                    max-width:600px;
+                    width:100%;
+                    max-height:90vh;
+                    overflow-y:auto;
+                    box-shadow:0 0 60px rgba(0,178,255,0.35);
+                    font-family:'Rajdhani',sans-serif;
+                    padding:2rem;">
+
+            <!-- En-tête -->
+            <div style="text-align:center;margin-bottom:1.8rem;">
+                <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#00B2FF,#0080FF);
+                            display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;
+                            box-shadow:0 0 24px rgba(0,178,255,0.5);">
+                    <i class="fas fa-compass" style="font-size:1.8rem;color:#fff;"></i>
+                </div>
+                <h2 style="color:#00B2FF;font-family:'Orbitron',sans-serif;font-size:1.3rem;margin:0 0 .5rem;">
+                    Bienvenue ! Choisissez votre domaine
+                </h2>
+                <p style="color:rgba(255,255,255,0.7);font-size:1rem;margin:0;">
+                    Sélectionnez le(s) module(s) sur lesquels vous souhaitez vous concentrer.<br>
+                    Ils seront mis en évidence dans toute la plateforme.
+                </p>
+            </div>
+
+            <!-- Formulaire de sélection -->
+            <form id="domainPrefForm" method="post" action="/Account/SaveDomainPreference">
+                @Html.AntiForgeryToken()
+
+                <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;">
+                    @foreach (var course in Model)
+                    {
+                        <label for="dp_@course.Id"
+                               class="domain-pref-option"
+                               style="display:flex;align-items:center;gap:1rem;
+                                      background:rgba(0,178,255,0.06);
+                                      border:1px solid rgba(0,178,255,0.25);
+                                      border-radius:10px;padding:.85rem 1rem;
+                                      cursor:pointer;transition:all .2s;">
+                            <input type="checkbox"
+                                   id="dp_@course.Id"
+                                   name="courseIds"
+                                   value="@course.Id"
+                                   style="width:20px;height:20px;accent-color:#00B2FF;flex-shrink:0;" />
+                            <div>
+                                <div style="color:#fff;font-weight:700;font-size:1.05rem;">
+                                    <i class="fas fa-book-open me-2" style="color:#00B2FF;"></i>@course.Title
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(course.Description) && course.Description.Length <= 120)
+                                {
+                                    <div style="color:rgba(255,255,255,0.55);font-size:.875rem;margin-top:.2rem;">
+                                        @course.Description
+                                    </div>
+                                }
+                            </div>
+                        </label>
+                    }
+                </div>
+
+                <!-- Boutons -->
+                <div style="display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;">
+                    <button type="button" onclick="skipDomainPref()"
+                            style="background:transparent;border:1px solid rgba(255,255,255,0.25);
+                                   color:rgba(255,255,255,0.6);padding:10px 20px;
+                                   border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1rem;">
+                        <i class="fas fa-times me-1"></i>Passer
+                    </button>
+                    <button type="submit" id="domainPrefSubmit"
+                            style="background:linear-gradient(135deg,#00B2FF,#0080FF);
+                                   border:none;color:#fff;padding:10px 24px;
+                                   border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;
+                                   font-size:1rem;font-weight:700;
+                                   box-shadow:0 4px 16px rgba(0,178,255,0.35);">
+                        <i class="fas fa-check me-1"></i>Confirmer ma sélection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .domain-pref-option:hover {
+            border-color: #00B2FF !important;
+            background: rgba(0,178,255,0.12) !important;
+        }
+        .domain-pref-option:has(input:checked) {
+            border-color: #00B2FF !important;
+            background: rgba(0,178,255,0.18) !important;
+            box-shadow: 0 0 0 2px rgba(0,178,255,0.3);
+        }
+    </style>
+
+    <script>
+        function skipDomainPref() {
+            // Appel silencieux pour enregistrer "skip" (aucun cours sélectionné)
+            fetch('/Account/SaveDomainPreference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: '__skip=1'
+            }).then(() => {
+                document.getElementById('domainPrefOverlay').style.display = 'none';
+            });
+        }
+    </script>
+}

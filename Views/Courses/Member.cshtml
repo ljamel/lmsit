@@ -156,6 +156,134 @@
         </div>
     </div>
 
+@{
+    var allCourses = ViewBag.AllCourses as IEnumerable<CrudDemo.Models.Course> ?? Enumerable.Empty<CrudDemo.Models.Course>();
+    var preferredCourseIds = ViewBag.PreferredCourseIds as HashSet<int> ?? new HashSet<int>();
+}
+
+    <div class="card shadow-sm mb-4" style="border:1px solid rgba(255,215,0,0.35);">
+        <div class="card-header" style="background:linear-gradient(135deg,#1a1a00,#2a2200); border-bottom:1px solid rgba(255,215,0,0.25);">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0" style="color:#FFD700;">
+                    <i class="fas fa-star me-2"></i>Mes domaines prioritaires
+                </h2>
+                <button type="button" onclick="openDomainPrefModal()"
+                        style="background:linear-gradient(135deg,#FFD700,#b8860b); border:none; color:#1a1a00;
+                               padding:6px 16px; border-radius:8px; cursor:pointer;
+                               font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.9rem;">
+                    <i class="fas fa-pen me-1"></i>Modifier
+                </button>
+            </div>
+        </div>
+        <div class="card-body" style="background:#0d0d1a;">
+            @if (preferredCourseIds.Any())
+            {
+                <div style="display:flex;flex-wrap:wrap;gap:.5rem;">
+                    @foreach (var c in allCourses.Where(c => preferredCourseIds.Contains(c.Id)))
+                    {
+                        <span style="background:rgba(255,215,0,0.12);border:1px solid #FFD700;color:#FFD700;
+                                     padding:4px 14px;border-radius:20px;font-size:.9rem;font-weight:600;">
+                            <i class="fas fa-book-open me-1"></i>@c.Title
+                        </span>
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="color:rgba(255,255,255,0.5);margin:0;font-style:italic;">
+                    <i class="fas fa-info-circle me-1"></i>Aucun domaine prioritaire sélectionné.
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Modal modifier domaines -->
+    <div id="domainPrefEditOverlay"
+         style="display:none;position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.82);
+                align-items:center;justify-content:center;padding:1rem;">
+        <div style="background:linear-gradient(135deg,#0d0d1a 0%,#16213e 100%);
+                    border:2px solid #00B2FF;border-radius:16px;max-width:600px;width:100%;
+                    max-height:90vh;overflow-y:auto;box-shadow:0 0 60px rgba(0,178,255,0.35);
+                    font-family:'Rajdhani',sans-serif;padding:2rem;">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                <h2 style="color:#00B2FF;font-family:'Orbitron',sans-serif;font-size:1.2rem;margin:0;">
+                    <i class="fas fa-star me-2"></i>Mes domaines prioritaires
+                </h2>
+                <button type="button" onclick="closeDomainPrefModal()"
+                        style="background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:1.3rem;cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <p style="color:rgba(255,255,255,0.65);margin-bottom:1.2rem;">
+                Sélectionnez les domaines sur lesquels vous voulez vous concentrer. Ils seront mis en évidence dans toute la plateforme.
+            </p>
+
+            <form method="post" action="/Account/SaveDomainPreference">
+                @Html.AntiForgeryToken()
+                <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.4rem;">
+                    @foreach (var course in allCourses)
+                    {
+                        <label for="dp_edit_@course.Id"
+                               style="display:flex;align-items:center;gap:1rem;
+                                      background:rgba(0,178,255,0.06);border:1px solid rgba(0,178,255,0.25);
+                                      border-radius:10px;padding:.8rem 1rem;cursor:pointer;transition:all .2s;"
+                               class="domain-pref-edit-option @(preferredCourseIds.Contains(course.Id) ? "dp-checked" : "")">
+                            <input type="checkbox"
+                                   id="dp_edit_@course.Id"
+                                   name="courseIds"
+                                   value="@course.Id"
+                                   @(preferredCourseIds.Contains(course.Id) ? "checked" : "")
+                                   style="width:20px;height:20px;accent-color:#00B2FF;flex-shrink:0;" />
+                            <div style="color:#fff;font-weight:700;">
+                                <i class="fas fa-book-open me-2" style="color:#00B2FF;"></i>@course.Title
+                            </div>
+                        </label>
+                    }
+                </div>
+                <div style="display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;">
+                    <button type="button" onclick="closeDomainPrefModal()"
+                            style="background:transparent;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.6);
+                                   padding:8px 20px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1rem;">
+                        <i class="fas fa-times me-1"></i>Annuler
+                    </button>
+                    <button type="submit"
+                            style="background:linear-gradient(135deg,#00B2FF,#0080FF);border:none;color:#fff;
+                                   padding:8px 24px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;
+                                   font-size:1rem;font-weight:700;box-shadow:0 4px 16px rgba(0,178,255,0.35);">
+                        <i class="fas fa-save me-1"></i>Sauvegarder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .domain-pref-edit-option:hover { border-color:#00B2FF !important; background:rgba(0,178,255,0.12) !important; }
+        .dp-checked { border-color:#00B2FF !important; background:rgba(0,178,255,0.18) !important; box-shadow:0 0 0 2px rgba(0,178,255,0.3); }
+    </style>
+    <script>
+        function openDomainPrefModal() {
+            var el = document.getElementById('domainPrefEditOverlay');
+            el.style.display = 'flex';
+        }
+        function closeDomainPrefModal() {
+            document.getElementById('domainPrefEditOverlay').style.display = 'none';
+        }
+        document.getElementById('domainPrefEditOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeDomainPrefModal();
+        });
+        // Surligner dynamiquement les options cochées
+        document.querySelectorAll('.domain-pref-edit-option input').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var lbl = this.closest('label');
+                if (this.checked) lbl.classList.add('dp-checked');
+                else lbl.classList.remove('dp-checked');
+            });
+        });
+    </script>
+
     <div class="card shadow-sm mb-4">
         <div class="card-header">
             <h2 class="h5 mb-0"><i class="fas fa-compass"></i> Orientation Métier</h2>

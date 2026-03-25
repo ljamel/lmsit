@@ -11,8 +11,8 @@
     var searchQuery = (string?)ViewBag.SearchQuery;
     var bulkEmailModel = ViewBag.BulkEmailModel as CrudDemo.Models.AdminBulkEmailViewModel
         ?? new CrudDemo.Models.AdminBulkEmailViewModel();
-    var competencyRows = ViewBag.QuizCompetencyRows as IEnumerable<CrudDemo.Models.AdminUserQuizResultRowViewModel>
-        ?? Enumerable.Empty<CrudDemo.Models.AdminUserQuizResultRowViewModel>();
+    var competencyRows = ViewBag.QuizCompetencyRows as IEnumerable<CrudDemo.Models.AdminUserCompetencySummaryViewModel>
+        ?? Enumerable.Empty<CrudDemo.Models.AdminUserCompetencySummaryViewModel>();
 }
 
 
@@ -173,6 +173,8 @@
             Tri des utilisateurs par date (abonnement puis activité récente)
         </div>
 
+        <div id="pageAntiforgery" style="display:none;">@Html.AntiForgeryToken()</div>
+
         <div class="table-container">
             <table class="users-table">
                 <thead>
@@ -190,6 +192,7 @@
                         <th><i class="fas fa-clock me-2"></i>Dernière Activité</th>
                         <th><i class="fas fa-credit-card me-2"></i>ID Stripe</th>
                         <th><i class="fas fa-user-slash me-2"></i>Action</th>
+                        <th><i class="fas fa-user-secret me-2"></i>Connexion</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -280,11 +283,20 @@
                                 }
                             </td>
                             <td>
-                                <form asp-action="DeactivateMember" method="post" class="d-inline">
+                                <button type="button" class="btn-deactivate deactivate-btn"
+                                    @(hasActiveSubscription ? "" : "disabled")
+                                    data-userid="@item.UserId"
+                                    data-email="@item.Email"
+                                >
+                                    <i class="fas fa-user-slash me-1"></i>Désactiver
+                                </button>
+                            </td>
+                            <td>
+                                <form asp-action="LoginAs" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="userId" value="@item.UserId" />
-                                    <button type="submit" class="btn-deactivate" @(hasActiveSubscription ? "" : "disabled")>
-                                        <i class="fas fa-user-slash me-1"></i>Desactiver
+                                    <button type="submit" class="btn btn-sm" style="background: linear-gradient(135deg, #ff9800 0%, #f44336 100%); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer;" onclick="return confirm('Se connecter en tant que @item.Email ?');">
+                                        <i class="fas fa-user-secret me-1"></i>Se connecter
                                     </button>
                                 </form>
                             </td>
@@ -296,6 +308,64 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Modal confirmation désactivation -->
+        <div id="deactivateModal" style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(0,0,0,0.75); align-items:center; justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%); border:1px solid #f44336; border-radius:12px; padding:2rem; max-width:480px; width:90%; box-shadow:0 0 40px rgba(244,67,54,0.4); font-family:'Rajdhani',sans-serif;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.2rem;">
+                    <span style="background:#f44336; border-radius:50%; width:48px; height:48px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <i class="fas fa-exclamation-triangle" style="color:#fff; font-size:1.3rem;"></i>
+                    </span>
+                    <h4 style="color:#f44336; margin:0; font-family:'Orbitron',sans-serif; font-size:1.1rem;">Désactiver l'abonnement</h4>
+                </div>
+                <p style="color:rgba(255,255,255,0.9); margin-bottom:0.5rem;">
+                    Vous êtes sur le point de désactiver l'abonnement de :
+                </p>
+                <p id="deactivateUserEmail" style="color:#00B2FF; font-weight:700; font-size:1.05rem; margin-bottom:1rem; word-break:break-all;"></p>
+                <div style="background:rgba(244,67,54,0.1); border:1px solid rgba(244,67,54,0.4); border-radius:8px; padding:0.8rem 1rem; margin-bottom:1.4rem;">
+                    <p style="color:#ffb74d; margin:0; font-size:0.95rem;">
+                        <i class="fas fa-stripe-s me-1"></i>
+                        <strong>Attention :</strong> Cette action annule l'abonnement Stripe associé à cet utilisateur.
+                        L'accès aux cours sera révoqué immédiatement.
+                    </p>
+                </div>
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button type="button" onclick="closeDeactivateModal()" style="background:transparent; border:1px solid rgba(255,255,255,0.3); color:rgba(255,255,255,0.8); padding:8px 20px; border-radius:8px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:1rem;">
+                        <i class="fas fa-times me-1"></i>Annuler
+                    </button>
+                    <form id="deactivateForm" action="/AdminCourses/DeactivateMember" method="post" style="display:inline;">
+                        <input name="__RequestVerificationToken" type="hidden" value="" id="deactivateAntiforgery" />
+                        <input type="hidden" id="deactivateUserId" name="userId" value="" />
+                        <button type="submit" style="background:linear-gradient(135deg,#f44336 0%,#b71c1c 100%); border:none; color:#fff; padding:8px 20px; border-radius:8px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700;">
+                            <i class="fas fa-user-slash me-1"></i>Confirmer la désactivation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.querySelectorAll('.deactivate-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    openDeactivateModal(this.dataset.userid, this.dataset.email);
+                });
+            });
+            function openDeactivateModal(userId, email) {
+                document.getElementById('deactivateUserId').value = userId;
+                document.getElementById('deactivateUserEmail').textContent = email;
+                // Copier le token antiforgery depuis le div caché
+                var tokenInput = document.querySelector('#pageAntiforgery input[name="__RequestVerificationToken"]');
+                if (tokenInput) document.getElementById('deactivateAntiforgery').value = tokenInput.value;
+                var modal = document.getElementById('deactivateModal');
+                modal.style.display = 'flex';
+            }
+            function closeDeactivateModal() {
+                document.getElementById('deactivateModal').style.display = 'none';
+            }
+            document.getElementById('deactivateModal').addEventListener('click', function(e) {
+                if (e.target === this) closeDeactivateModal();
+            });
+        </script>
 
         @if (!userRows.Any())
         {
@@ -317,24 +387,22 @@
                         <tr>
                             <th><i class="fas fa-user me-2"></i>Utilisateur</th>
                             <th><i class="fas fa-compass me-2"></i>Orientation</th>
-                            <th><i class="fas fa-book me-2"></i>Cours</th>
-                            <th><i class="fas fa-list me-2"></i>Leçon</th>
-                            <th><i class="fas fa-question-circle me-2"></i>Quiz</th>
-                            <th><i class="fas fa-redo me-2"></i>Tentatives</th>
+                            <th><i class="fas fa-question-circle me-2"></i>Quizzes tentés</th>
+                            <th><i class="fas fa-redo me-2"></i>Total tentatives</th>
                             <th><i class="fas fa-check me-2"></i>Bonnes réponses</th>
                             <th><i class="fas fa-percentage me-2"></i>Taux de réussite</th>
-                            <th><i class="fas fa-signal me-2"></i>Niveau</th>
+                            <th><i class="fas fa-signal me-2"></i>Niveau global</th>
                             <th><i class="fas fa-clock me-2"></i>Dernier essai</th>
                         </tr>
                     </thead>
                     <tbody>
                     @foreach (var row in competencyRows)
                     {
-                        var badgeClass = row.SuccessRate >= 80
+                        var badgeClass = row.OverallSuccessRate >= 80
                             ? "badge-advanced"
-                            : row.SuccessRate >= 50
+                            : row.OverallSuccessRate >= 50
                                 ? "badge-intermediate"
-                                : row.SuccessRate > 0
+                                : row.OverallSuccessRate > 0
                                     ? "badge-beginner"
                                     : "badge-none";
 
@@ -355,21 +423,11 @@
                                     <span class="text-muted">-</span>
                                 }
                             </td>
-                            <td><span class="date-info">@row.CourseTitle</span></td>
-                            <td><span class="date-info">@row.LessonTitle</span></td>
-                            <td>
-                                <span class="date-info" title="@row.QuizQuestion">
-                                    @(row.QuizQuestion.Length > 80 ? row.QuizQuestion.Substring(0, 80) + "..." : row.QuizQuestion)
-                                </span>
-                            </td>
-                            <td><span class="date-info">@row.Attempts</span></td>
-                            <td><span class="date-info">@row.CorrectAnswers</span></td>
-                            <td><span class="date-info">@row.SuccessRate.ToString("0.0")%</span></td>
-                            <td>
-                                <span class="@badgeClass">
-                                    @row.CompetencyLevel
-                                </span>
-                            </td>
+                            <td><span class="date-info">@row.TotalQuizzes</span></td>
+                            <td><span class="date-info">@row.TotalAttempts</span></td>
+                            <td><span class="date-info">@row.TotalCorrectAnswers</span></td>
+                            <td><span class="date-info">@row.OverallSuccessRate.ToString("0.0")%</span></td>
+                            <td><span class="@badgeClass">@row.CompetencyLevel</span></td>
                             <td>
                                 @if (row.LastAttemptAt != null)
                                 {

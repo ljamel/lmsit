@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 public class CoursesListViewComponent : ViewComponent
 {
@@ -143,6 +144,28 @@ public class CoursesListViewComponent : ViewComponent
         ViewBag.UserCourseProgressPercent = progressPercent;
         ViewBag.IsCertificateEligible = isCertificateEligible;
         ViewBag.EarnedQuizPoints = earnedQuizPoints;
+
+        // Préférence de domaine
+        var preferredCourseIds = new HashSet<int>();
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            var prefClaim = await _context.UserClaims
+                .AsNoTracking()
+                .Where(c => c.UserId == userId && c.ClaimType == "user_domain_preference")
+                .Select(c => c.ClaimValue)
+                .FirstOrDefaultAsync();
+
+            if (!string.IsNullOrWhiteSpace(prefClaim))
+            {
+                try
+                {
+                    var ids = JsonSerializer.Deserialize<List<int>>(prefClaim);
+                    if (ids != null) preferredCourseIds = ids.ToHashSet();
+                }
+                catch { }
+            }
+        }
+        ViewBag.PreferredCourseIds = preferredCourseIds;
         ViewBag.TotalQuizPoints = totalQuizPoints;
         ViewBag.CertificateScorePercent = certificateScorePercent;
         ViewBag.CompletedQuizCount = completedQuizCount;

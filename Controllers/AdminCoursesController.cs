@@ -4,6 +4,7 @@ using CrudDemo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,14 +26,18 @@ namespace CrudDemo.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly ILogger<AdminCoursesController> _logger;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration, IEmailService emailService, ILogger<AdminCoursesController> logger)
+        public AdminCoursesController(ApplicationDbContext context, IWebHostEnvironment env, IConfiguration configuration, IEmailService emailService, ILogger<AdminCoursesController> logger, SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _env = env;
             _configuration = configuration;
             _emailService = emailService;
             _logger = logger;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -461,6 +466,54 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         }
 
         // -----------------------------
+        // RENAME COURSE
+        // -----------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RenameCourse(int courseId, string title)
+        {
+            var course = await _context.Courses.FindAsync(courseId);
+            if (course == null)
+            {
+                TempData["Error"] = "Cours introuvable.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                TempData["Error"] = "Le titre ne peut pas être vide.";
+                return RedirectToAction(nameof(Index));
+            }
+            course.Title = title.Trim();
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Nom du cours mis à jour.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // -----------------------------
+        // RENAME MODULE
+        // -----------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RenameModule(int moduleId, string title)
+        {
+            var module = await _context.Modules.FindAsync(moduleId);
+            if (module == null)
+            {
+                TempData["Error"] = "Module introuvable.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                TempData["Error"] = "Le titre ne peut pas être vide.";
+                return RedirectToAction(nameof(Details), new { id = module.CourseId });
+            }
+            module.Title = title.Trim();
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Nom du module mis à jour.";
+            return RedirectToAction(nameof(Details), new { id = module.CourseId });
+        }
+
+        // -----------------------------
         // DELETE LESSON
         // -----------------------------
         [HttpPost]
@@ -753,6 +806,65 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
         // -----------------------------
         // USERS MANAGEMENT
         // -----------------------------
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginAs(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                TempData["Error"] = "Identifiant utilisateur invalide.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var targetUser = await _userManager.FindByEmailAsync(userId)
+                ?? await _userManager.FindByIdAsync(userId);
+            if (targetUser == null)
+            {
+                TempData["Error"] = "Utilisateur introuvable.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Sauvegarder l'ID admin dans un cookie sécurisé
+            var adminId = _userManager.GetUserId(User)!;
+            Response.Cookies.Append("AdminImpersonating", adminId, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddHours(4)
+            });
+
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(targetUser, isPersistent: false);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ReturnToAdmin()
+        {
+            var adminId = Request.Cookies["AdminImpersonating"];
+            if (string.IsNullOrWhiteSpace(adminId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var adminUser = await _userManager.FindByIdAsync(adminId);
+            if (adminUser == null || !await _userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                Response.Cookies.Delete("AdminImpersonating");
+                return RedirectToAction("Index", "Home");
+            }
+
+            Response.Cookies.Delete("AdminImpersonating");
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(adminUser, isPersistent: false);
+
+            return RedirectToAction(nameof(Users));
+        }
+
         private sealed class UserTrackingSummary
         {
             public int CoursesTracked { get; set; }
@@ -1039,31 +1151,30 @@ public async Task<IActionResult> CreateLesson(Lesson lesson)
                         .FirstOrDefault()));
 
             var quizCompetencyRows = quizCompetencyRowsRaw
-                .Select(row =>
+                .GroupBy(row => row.UserId)
+                .Select(group =>
                 {
-                    var successRate = row.Attempts == 0 ? 0 : (row.CorrectAnswers * 100.0) / row.Attempts;
-                    orientationRoleByUserId.TryGetValue(row.UserId, out var orientationRole);
+                    var totalAttempts = group.Sum(r => r.Attempts);
+                    var totalCorrect = group.Sum(r => r.CorrectAnswers);
+                    var successRate = totalAttempts == 0 ? 0 : (totalCorrect * 100.0) / totalAttempts;
+                    orientationRoleByUserId.TryGetValue(group.Key, out var orientationRole);
+                    var first = group.First();
 
-                    return new AdminUserQuizResultRowViewModel
+                    return new AdminUserCompetencySummaryViewModel
                     {
-                        UserId = row.UserId,
-                        UserEmail = row.Email ?? string.Empty,
-                        UserName = row.UserName,
+                        UserId = group.Key,
+                        UserEmail = first.Email ?? string.Empty,
+                        UserName = first.UserName,
                         OrientationRole = orientationRole,
-                        QuizId = row.QuizId,
-                        QuizQuestion = row.QuizQuestion,
-                        LessonTitle = row.LessonTitle,
-                        CourseTitle = row.CourseTitle,
-                        Attempts = row.Attempts,
-                        CorrectAnswers = row.CorrectAnswers,
-                        SuccessRate = Math.Round(successRate, 1),
-                        LastAttemptAt = row.LastAttemptAt,
-                        CompetencyLevel = GetCompetencyLevel(successRate)
+                        TotalQuizzes = group.Select(r => r.QuizId).Distinct().Count(),
+                        TotalAttempts = totalAttempts,
+                        TotalCorrectAnswers = totalCorrect,
+                        OverallSuccessRate = Math.Round(successRate, 1),
+                        CompetencyLevel = GetCompetencyLevel(successRate),
+                        LastAttemptAt = group.Max(r => r.LastAttemptAt)
                     };
                 })
                 .OrderBy(row => row.UserEmail)
-                .ThenByDescending(row => row.LastAttemptAt)
-                .ThenBy(row => row.QuizId)
                 .ToList();
 
             ViewBag.TotalUsers = totalUsers;

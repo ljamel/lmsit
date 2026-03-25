@@ -5,11 +5,31 @@
 }
 
 <div class="admin-courses-container">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
     <div class="animated-section mb-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="animated-title">
                     <i class="fas fa-book"></i> @Model.Title
+                    <button type="button" class="btn btn-sm btn-outline-warning ms-2 btn-rename-course"
+                            data-courseid="@Model.Id"
+                            data-title="@Model.Title"
+                            title="Renommer le cours">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
                 </h1>
                 <p class="text-muted animated-description">
                     <i class="fas fa-user-circle"></i> Créé par: <strong>@Model.CreatedBy</strong>
@@ -54,6 +74,12 @@
                             <div>
                                 <h5 class="mb-1">
                                     <i class="fas fa-layer-group"></i> @m.Title
+                                    <button type="button" class="btn btn-sm btn-outline-light ms-2 btn-rename-module"
+                                            data-moduleid="@m.Id"
+                                            data-title="@m.Title"
+                                            title="Renommer le module">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
                                 </h5>
                                 @if (!string.IsNullOrEmpty(m.Description))
                                 {
@@ -135,6 +161,78 @@
         </div>
     }
 </div>
+
+<!-- Modal: Renommer le cours -->
+<div class="modal fade" id="renameCourseModal" tabindex="-1" aria-labelledby="renameCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white border border-warning">
+            <div class="modal-header border-warning">
+                <h5 class="modal-title" id="renameCourseModalLabel"><i class="fas fa-pencil-alt text-warning"></i> Renommer le cours</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="renameCourseForm" method="post" action="/AdminCourses/RenameCourse">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="courseId" id="renameCourseId" />
+                    <div class="mb-3">
+                        <label for="renameCourseTitle" class="form-label">Nouveau titre</label>
+                        <input type="text" class="form-control bg-dark text-white border-warning" id="renameCourseTitle" name="title" required maxlength="200" />
+                    </div>
+                </div>
+                <div class="modal-footer border-warning">
+                    <button type="submit" class="btn btn-warning" id="renameCourseSubmit" disabled><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Renommer un module -->
+<div class="modal fade" id="renameModuleModal" tabindex="-1" aria-labelledby="renameModuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white border border-primary">
+            <div class="modal-header border-primary">
+                <h5 class="modal-title" id="renameModuleModalLabel"><i class="fas fa-pencil-alt text-primary"></i> Renommer le module</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="renameModuleForm" method="post" action="/AdminCourses/RenameModule">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="moduleId" id="renameModuleId" />
+                    <div class="mb-3">
+                        <label for="renameModuleTitle" class="form-label">Nouveau titre</label>
+                        <input type="text" class="form-control bg-dark text-white border-primary" id="renameModuleTitle" name="title" required maxlength="200" />
+                    </div>
+                </div>
+                <div class="modal-footer border-primary">
+                    <button type="submit" class="btn btn-primary" id="renameModuleSubmit" disabled><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    document.querySelectorAll('.btn-rename-course').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('renameCourseId').value = this.dataset.courseid;
+            document.getElementById('renameCourseTitle').value = this.dataset.title;
+            document.getElementById('renameCourseSubmit').disabled = false;
+            new bootstrap.Modal(document.getElementById('renameCourseModal')).show();
+        });
+    });
+
+    document.querySelectorAll('.btn-rename-module').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('renameModuleId').value = this.dataset.moduleid;
+            document.getElementById('renameModuleTitle').value = this.dataset.title;
+            document.getElementById('renameModuleSubmit').disabled = false;
+            new bootstrap.Modal(document.getElementById('renameModuleModal')).show();
+        });
+    });
+})();
+</script>
 
 <style>
     .admin-courses-container {

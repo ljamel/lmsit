@@ -269,7 +269,7 @@
                                             </h4>
                                             @if (!string.IsNullOrEmpty(quiz.Description))
                                             {
-                                                <small class="text-muted d-block mb-2">@quiz.Description</small>
+                                                <small class="text-muted d-block mb-2">@Html.Raw(@quiz.Description)</small>
                                             }
                                         </div>
                                         <span>
@@ -293,6 +293,25 @@
                                                     </div>
                                                     optionIndex++;
                                                 }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="flag-answer-wrap mt-2">
+                                                <div class="input-group">
+                                                    <span class="input-group-text" style="background:#16213e; border:1px solid #00B2FF; color:#00B2FF;">
+                                                        <i class="fas fa-flag"></i>
+                                                    </span>
+                                                    <input type="text"
+                                                           name="flagAnswers[@quiz.Id]"
+                                                           class="form-control"
+                                                           placeholder="Entrez votre réponse..."
+                                                           style="background:#16213e; border:1px solid #00B2FF; color:#fff;"
+                                                           required />
+                                                </div>
+                                                <small class="text-muted mt-1 d-block">
+                                                    <i class="fas fa-info-circle me-1"></i>Saisissez votre réponse pour valider cette question
+                                                </small>
                                             </div>
                                         }
                                     </div>

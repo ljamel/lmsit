@@ -17,6 +17,7 @@
     var completedQuizCount = (int?)ViewBag.CompletedQuizCount ?? 0;
     var totalQuizCount = (int?)ViewBag.TotalQuizCount ?? 0;
     var certificateAction = isCertificateEligible ? "Certif1" : "Member";
+    var preferredCourseIds = ViewBag.PreferredCourseIds as HashSet<int> ?? new HashSet<int>();
 }
 
 <div class="menu-dashboard">
@@ -199,6 +200,7 @@
             {
                 ++module;
                 var isLockedCourse = !canAccessPremium && firstCourseId > 0 && course.Id != firstCourseId;
+                var isPreferred = preferredCourseIds.Contains(course.Id);
                 var modules = course.Modules ?? new List<CrudDemo.Models.Module>();
                 if (hasLessonSearch)
                 {
@@ -215,7 +217,13 @@
                 }
 
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card h-100 shadow-sm @(isPreferred ? "course-preferred" : "")">
+                        @if (isPreferred)
+                        {
+                            <div class="preferred-badge-bar">
+                                <i class="fas fa-star me-1"></i>Votre domaine prioritaire
+                            </div>
+                        }
                         <div class="card-footer bg-white border-top">
                             @if (isLockedCourse)
                             {
@@ -228,8 +236,21 @@
                                 <a
                                     asp-controller="Courses"
                                     asp-action="Details"
-                                    asp-route-id="@course.Id">
-                                    <i class="fas fa-eye"></i> @course.Title
+                                    asp-route-id="@course.Id"
+                                    class="@(isPreferred ? "preferred-course-link" : "")">
+                                    @if (isPreferred)
+                                    {
+                                        <i class="fas fa-star me-1" style="color:#FFD700;"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-eye me-1"></i>
+                                    }
+                                    @course.Title
+                                    @if (isPreferred)
+                                    {
+                                        <span class="preferred-course-badge">Prioritaire</span>
+                                    }
                                 </a>
                             }
 
@@ -322,6 +343,39 @@
 </div>
 
 <style>
+    /* ===== Mise en évidence cours prioritaires ===== */
+    .course-preferred {
+        border: 2px solid #FFD700 !important;
+        box-shadow: 0 0 18px rgba(255,215,0,0.35), 0 4px 16px rgba(0,0,0,0.15) !important;
+        position: relative;
+    }
+    .preferred-badge-bar {
+        background: linear-gradient(90deg, #b8860b, #FFD700, #b8860b);
+        color: #1a1a00;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 700;
+        font-size: .8rem;
+        text-align: center;
+        padding: 4px 8px;
+        letter-spacing: .05em;
+    }
+    .preferred-course-link {
+        color: #c9a200 !important;
+        font-weight: 700;
+    }
+    .preferred-course-badge {
+        background: #FFD700;
+        color: #1a1a00;
+        font-size: .7rem;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 20px;
+        margin-left: 6px;
+        vertical-align: middle;
+        letter-spacing: .04em;
+    }
+    /* ===== Fin mise en évidence ===== */
+
     .d-none {
         display: none;
     }
@@ -917,43 +971,67 @@
 
 <script>
 
-// On écoute le clic sur TOUTE la page
+
+
 document.addEventListener('click', async (e) => {
-    
-    // On vérifie si l'élément cliqué (ou son parent) a la classe 'monBouton'
+    // Détection du bouton ou d'un de ses enfants
     const btn = e.target.closest('.monBouton');
     
     if (btn) {
-        e.preventDefault(); // On stoppe le lien <a>
-        console.log("Bouton détecté dans le tuto !");
-
+        e.preventDefault();
+        
         const url = 'http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/';
-        const specs = "width=800,height=600";
+        const windowSpecs = {
+            width: 800,
+            height: 600,
+        };
 
+        // 1. Tentative avec l'API Document Picture-in-Picture
         if ('documentPictureInPicture' in window) {
             try {
-                const pipWindow = await window.documentPictureInPicture.requestWindow({
-                    width: 800,
-                    height: 600,
-                });
+                const pipWindow = await window.documentPictureInPicture.requestWindow(windowSpecs);
 
-                const iframe = document.createElement('iframe');
-                iframe.src = url;
-                iframe.style.width = "100%";
-                iframe.style.height = "100%";
-                iframe.style.border = "none";
+                // On prépare le style de la fenêtre PiP pour éviter la page blanche
+                const style = pipWindow.document.createElement('style');
+                style.textContent = `
+                    body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+                    iframe { width: 100vw; height: 100vh; border: none; display: block; }
+                `;
+                pipWindow.document.head.appendChild(style);
+
+                // Création de l'iframe
+                const iframe = pipWindow.document.createElement('iframe');
                 
-                pipWindow.document.body.style.margin = "0";
+                // Si ça reste blanc, le problème vient de l'URL elle-même.
+                iframe.src = url;
+                
+                // On ajoute l'iframe au body de la nouvelle fenêtre
                 pipWindow.document.body.appendChild(iframe);
+
+                console.log("Fenêtre PiP ouverte avec succès.");
+
             } catch (err) {
-                window.open(url, "_blank", specs);
+                console.error("Échec du mode PiP, repli sur window.open :", err);
+                ouvrirFenetreClassique(url);
             }
         } else {
-            window.open(url, "_blank", specs);
+            // 2. Fallback pour les navigateurs non compatibles (Firefox, vieux Edge)
+            ouvrirFenetreClassique(url);
         }
     }
 });
 
+// Fonction utilitaire pour l'ouverture classique
+function ouvrirFenetreClassique(url) {
+    const specs = "width=800,height=600,menubar=no,toolbar=no,location=no,status=no";
+    window.open(url, "_blank", specs);
+}
+
+
 </script>
+
+
+
+
 
 

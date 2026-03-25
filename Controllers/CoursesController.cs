@@ -159,6 +159,35 @@ namespace CrudDemo.Controllers
                 IsCertificateEligible = isCertificateEligible
             };
 
+            // Préférences de domaine
+            var allCourses = await _context.Courses
+                .AsNoTracking()
+                .OrderBy(c => c.CreatedAt)
+                .ToListAsync();
+
+            var preferredCourseIds = new HashSet<int>();
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                var prefClaim = await _context.UserClaims
+                    .AsNoTracking()
+                    .Where(c => c.UserId == userId && c.ClaimType == "user_domain_preference")
+                    .Select(c => c.ClaimValue)
+                    .FirstOrDefaultAsync();
+
+                if (!string.IsNullOrWhiteSpace(prefClaim))
+                {
+                    try
+                    {
+                        var ids = System.Text.Json.JsonSerializer.Deserialize<List<int>>(prefClaim);
+                        if (ids != null) preferredCourseIds = ids.ToHashSet();
+                    }
+                    catch { }
+                }
+            }
+
+            ViewBag.AllCourses = allCourses;
+            ViewBag.PreferredCourseIds = preferredCourseIds;
+
             return View(memberProfile);
         }
 
@@ -881,8 +910,11 @@ namespace CrudDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitLessonQuizAnswers(int lessonId, Dictionary<int, int> answers)
+        public async Task<IActionResult> SubmitLessonQuizAnswers(int lessonId, Dictionary<int, int> answers, Dictionary<int, string>? flagAnswers = null)
         {
+            answers ??= new Dictionary<int, int>();
+            flagAnswers ??= new Dictionary<int, string>();
+
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized();
@@ -891,6 +923,7 @@ namespace CrudDemo.Controllers
                 .AsNoTracking()
                 .Where(l => l.Id == lessonId)
                 .Include(l => l.Quizzes)
+                    .ThenInclude(q => q.Options)
                 .Include(l => l.Module)
                 .FirstOrDefaultAsync();
 
@@ -905,25 +938,33 @@ namespace CrudDemo.Controllers
                 return RedirectToAction("SubscriptionCheckout", "Payment");
             }
 
-            var lessonQuizIds = lesson.Quizzes.Select(q => q.Id).ToList();
+            var lessonQuizzes = lesson.Quizzes.ToList();
+            var lessonQuizIds = lessonQuizzes.Select(q => q.Id).ToList();
             if (!lessonQuizIds.Any())
                 return RedirectToAction(nameof(Lesson), new { id = lessonId });
 
-            if (answers.Count != lessonQuizIds.Count)
+            // Quizzes with options = multiple choice; without = free-text/flag
+            var choiceQuizIds = lessonQuizzes.Where(q => q.Options.Any()).Select(q => q.Id).ToHashSet();
+            var flagQuizIds   = lessonQuizzes.Where(q => !q.Options.Any()).Select(q => q.Id).ToHashSet();
+
+            var totalAnswered = answers.Keys.Count(k => choiceQuizIds.Contains(k))
+                              + flagAnswers.Keys.Count(k => flagQuizIds.Contains(k));
+
+            if (totalAnswered != lessonQuizIds.Count)
             {
                 TempData["Error"] = "Veuillez répondre à toutes les questions du quiz avant de valider.";
                 return RedirectToAction(nameof(Lesson), new { id = lessonId });
             }
 
+            // Validate multiple-choice answers
             var selectedOptionIds = answers.Values.Distinct().ToList();
             var selectedOptions = await _context.QuizOptions
                 .AsNoTracking()
                 .Where(o => selectedOptionIds.Contains(o.Id))
                 .ToListAsync();
-
             var optionsById = selectedOptions.ToDictionary(o => o.Id);
 
-            foreach (var quizId in lessonQuizIds)
+            foreach (var quizId in choiceQuizIds)
             {
                 if (!answers.TryGetValue(quizId, out var optionId)
                     || !optionsById.TryGetValue(optionId, out var option)
@@ -934,27 +975,50 @@ namespace CrudDemo.Controllers
                 }
             }
 
+            // Prepare flag quiz map (quizId -> expected flag)
+            var flagQuizMap = lessonQuizzes
+                .Where(q => flagQuizIds.Contains(q.Id))
+                .ToDictionary(q => q.Id, q => ExtractCtfPayload(q.Description).Item2);
+
+            // Persist results
             var existingResults = await _context.UserQuizResults
                 .Where(r => r.UserId == userId && lessonQuizIds.Contains(r.QuizId))
                 .ToListAsync();
-
             if (existingResults.Any())
-            {
                 _context.UserQuizResults.RemoveRange(existingResults);
-            }
 
             var now = DateTime.UtcNow;
-            foreach (var quizId in lessonQuizIds)
+
+            // Save multiple-choice results
+            foreach (var quizId in choiceQuizIds)
             {
                 var optionId = answers[quizId];
                 var option = optionsById[optionId];
-
                 _context.UserQuizResults.Add(new UserQuizResult
                 {
                     UserId = userId,
                     QuizId = quizId,
                     SelectedOptionId = optionId,
                     IsCorrect = option.IsCorrect,
+                    AttemptedAt = now
+                });
+            }
+
+            // Save flag/free-text results
+            foreach (var quizId in flagQuizIds)
+            {
+                var submitted = flagAnswers.TryGetValue(quizId, out var raw) ? raw?.Trim() ?? "" : "";
+                flagQuizMap.TryGetValue(quizId, out var expectedFlag);
+                bool isCorrect = !string.IsNullOrWhiteSpace(expectedFlag)
+                    ? string.Equals(submitted, expectedFlag, StringComparison.Ordinal)
+                    : !string.IsNullOrWhiteSpace(submitted); // no flag configured: any non-empty answer counts
+
+                _context.UserQuizResults.Add(new UserQuizResult
+                {
+                    UserId = userId,
+                    QuizId = quizId,
+                    SelectedOptionId = 0,
+                    IsCorrect = isCorrect,
                     AttemptedAt = now
                 });
             }

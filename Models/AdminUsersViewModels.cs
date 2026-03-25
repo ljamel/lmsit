@@ -19,6 +19,20 @@ namespace CrudDemo.Models
         public string CompetencyLevel { get; set; } = "Non évalué";
     }
 
+    public class AdminUserCompetencySummaryViewModel
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
+        public string? UserName { get; set; }
+        public string? OrientationRole { get; set; }
+        public int TotalQuizzes { get; set; }
+        public int TotalAttempts { get; set; }
+        public int TotalCorrectAnswers { get; set; }
+        public double OverallSuccessRate { get; set; }
+        public string CompetencyLevel { get; set; } = "Non évalué";
+        public DateTime? LastAttemptAt { get; set; }
+    }
+
     public class AdminUserRowViewModel
     {
         public string UserId { get; set; } = string.Empty;
