@@ -87,15 +87,38 @@
     var quill = new Quill('#quillEditor', {
         theme: 'snow',
         modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                ['blockquote', 'code-block'],
-                ['link', 'image'],
-                ['clean']
-            ]
+            toolbar: {
+                container: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ],
+                handlers: {
+                    image: function() {
+                        var url = prompt('URL de l\'image :');
+                        if (!url) return;
+                        var alt = prompt('Texte alternatif (attribut alt) :') || '';
+                        var range = this.quill.getSelection(true);
+                        var index = range ? range.index : this.quill.getLength();
+                        this.quill.insertEmbed(index, 'image', url, 'user');
+                        var q = this.quill;
+                        setTimeout(function() {
+                            var imgs = q.root.querySelectorAll('img');
+                            for (var i = imgs.length - 1; i >= 0; i--) {
+                                if (imgs[i].getAttribute('src') === url && !imgs[i].hasAttribute('alt')) {
+                                    imgs[i].setAttribute('alt', alt);
+                                    break;
+                                }
+                            }
+                        }, 0);
+                        this.quill.setSelection(index + 1, 'silent');
+                    }
+                }
+            }
         },
         placeholder: 'Rédigez votre tutoriel ici...'
     });
@@ -246,15 +269,38 @@
     var quill = new Quill('#quillEditor', {
         theme: 'snow',
         modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                ['blockquote', 'code-block'],
-                ['link', 'image'],
-                ['clean']
-            ]
+            toolbar: {
+                container: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ],
+                handlers: {
+                    image: function() {
+                        var url = prompt('URL de l\'image :');
+                        if (!url) return;
+                        var alt = prompt('Texte alternatif (attribut alt) :') || '';
+                        var range = this.quill.getSelection(true);
+                        var index = range ? range.index : this.quill.getLength();
+                        this.quill.insertEmbed(index, 'image', url, 'user');
+                        var q = this.quill;
+                        setTimeout(function() {
+                            var imgs = q.root.querySelectorAll('img');
+                            for (var i = imgs.length - 1; i >= 0; i--) {
+                                if (imgs[i].getAttribute('src') === url && !imgs[i].hasAttribute('alt')) {
+                                    imgs[i].setAttribute('alt', alt);
+                                    break;
+                                }
+                            }
+                        }, 0);
+                        this.quill.setSelection(index + 1, 'silent');
+                    }
+                }
+            }
         },
         placeholder: 'Rédigez votre tutoriel ici...'
     });
