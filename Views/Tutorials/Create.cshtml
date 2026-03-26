@@ -99,23 +99,34 @@
                 ],
                 handlers: {
                     image: function() {
-                        var url = prompt('URL de l\'image :');
-                        if (!url) return;
-                        var alt = prompt('Texte alternatif (attribut alt) :') || '';
-                        var range = this.quill.getSelection(true);
-                        var index = range ? range.index : this.quill.getLength();
-                        this.quill.insertEmbed(index, 'image', url, 'user');
-                        var q = this.quill;
-                        setTimeout(function() {
-                            var imgs = q.root.querySelectorAll('img');
-                            for (var i = imgs.length - 1; i >= 0; i--) {
-                                if (imgs[i].getAttribute('src') === url && !imgs[i].hasAttribute('alt')) {
-                                    imgs[i].setAttribute('alt', alt);
-                                    break;
-                                }
-                            }
-                        }, 0);
-                        this.quill.setSelection(index + 1, 'silent');
+                        var self = this;
+                        var input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+                        input.onchange = function() {
+                            var file = input.files[0];
+                            if (!file) return;
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                var base64 = e.target.result;
+                                var alt = prompt('Texte alternatif (attribut alt) pour le SEO :') || '';
+                                var range = self.quill.getSelection(true);
+                                var index = range ? range.index : self.quill.getLength();
+                                self.quill.insertEmbed(index, 'image', base64, 'user');
+                                setTimeout(function() {
+                                    var imgs = self.quill.root.querySelectorAll('img');
+                                    for (var i = imgs.length - 1; i >= 0; i--) {
+                                        if (imgs[i].getAttribute('src') === base64 && !imgs[i].hasAttribute('alt')) {
+                                            imgs[i].setAttribute('alt', alt);
+                                            break;
+                                        }
+                                    }
+                                }, 0);
+                                self.quill.setSelection(index + 1, 'silent');
+                            };
+                            reader.readAsDataURL(file);
+                        };
                     }
                 }
             }
@@ -281,23 +292,34 @@
                 ],
                 handlers: {
                     image: function() {
-                        var url = prompt('URL de l\'image :');
-                        if (!url) return;
-                        var alt = prompt('Texte alternatif (attribut alt) :') || '';
-                        var range = this.quill.getSelection(true);
-                        var index = range ? range.index : this.quill.getLength();
-                        this.quill.insertEmbed(index, 'image', url, 'user');
-                        var q = this.quill;
-                        setTimeout(function() {
-                            var imgs = q.root.querySelectorAll('img');
-                            for (var i = imgs.length - 1; i >= 0; i--) {
-                                if (imgs[i].getAttribute('src') === url && !imgs[i].hasAttribute('alt')) {
-                                    imgs[i].setAttribute('alt', alt);
-                                    break;
-                                }
-                            }
-                        }, 0);
-                        this.quill.setSelection(index + 1, 'silent');
+                        var self = this;
+                        var input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+                        input.onchange = function() {
+                            var file = input.files[0];
+                            if (!file) return;
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                var base64 = e.target.result;
+                                var alt = prompt('Texte alternatif (attribut alt) pour le SEO :') || '';
+                                var range = self.quill.getSelection(true);
+                                var index = range ? range.index : self.quill.getLength();
+                                self.quill.insertEmbed(index, 'image', base64, 'user');
+                                setTimeout(function() {
+                                    var imgs = self.quill.root.querySelectorAll('img');
+                                    for (var i = imgs.length - 1; i >= 0; i--) {
+                                        if (imgs[i].getAttribute('src') === base64 && !imgs[i].hasAttribute('alt')) {
+                                            imgs[i].setAttribute('alt', alt);
+                                            break;
+                                        }
+                                    }
+                                }, 0);
+                                self.quill.setSelection(index + 1, 'silent');
+                            };
+                            reader.readAsDataURL(file);
+                        };
                     }
                 }
             }
