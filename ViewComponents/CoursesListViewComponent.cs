@@ -29,11 +29,11 @@ public class CoursesListViewComponent : ViewComponent
                 .ThenInclude(m => m.Lessons.OrderBy(l => l.OrderIndex))
                     .ThenInclude(l => l.Quizzes)
             .AsSplitQuery()
+            .OrderBy(c => c.OrderIndex)
+            .ThenBy(c => c.CreatedAt)
             .ToListAsync();
 
         var firstCourseId = courses
-            .OrderBy(c => c.CreatedAt)
-            .ThenBy(c => c.Id)
             .Select(c => c.Id)
             .FirstOrDefault();
 

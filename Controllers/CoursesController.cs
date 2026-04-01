@@ -379,7 +379,8 @@ namespace CrudDemo.Controllers
                 .Include(c => c.Modules)
                     .ThenInclude(m => m.Lessons)
                 .AsSplitQuery()
-                .OrderByDescending(c => c.CreatedAt);
+                .OrderBy(c => c.OrderIndex)
+                .ThenByDescending(c => c.CreatedAt);
 
             if (!hasPaidAccess)
             {
@@ -390,7 +391,8 @@ namespace CrudDemo.Controllers
 
                 coursesQuery = coursesQuery
                     .Where(c => c.Id == allowedCourseId.Value)
-                    .OrderByDescending(c => c.CreatedAt);
+                    .OrderBy(c => c.OrderIndex)
+                    .ThenByDescending(c => c.CreatedAt);
 
                 TempData["Info"] = "Accès limité: seul le premier cours est disponible sans abonnement.";
             }

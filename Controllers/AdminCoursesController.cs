@@ -46,9 +46,31 @@ namespace CrudDemo.Controllers
             var courses = await _context.Courses
                 .AsNoTracking()
                 .Include(c => c.Modules)
-                .OrderByDescending(c => c.CreatedAt)
+                .OrderBy(c => c.OrderIndex)
+                .ThenByDescending(c => c.CreatedAt)
                 .ToListAsync();
             return View(courses);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReorderCourses([FromBody] List<int> orderedIds)
+        {
+            if (orderedIds == null || orderedIds.Count == 0)
+                return BadRequest("Liste vide.");
+
+            var courses = await _context.Courses
+                .Where(c => orderedIds.Contains(c.Id))
+                .ToListAsync();
+
+            for (int i = 0; i < orderedIds.Count; i++)
+            {
+                var course = courses.FirstOrDefault(c => c.Id == orderedIds[i]);
+                if (course != null)
+                    course.OrderIndex = i;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         public async Task<IActionResult> Challenges()

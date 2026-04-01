@@ -74,6 +74,9 @@ namespace CrudDemo.Migrations
                     b.Property<bool>("IsFree")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("longtext");

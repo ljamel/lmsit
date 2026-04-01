@@ -15,6 +15,8 @@ namespace CrudDemo.Models
 
 	public bool IsFree { get; set; } = true; // true = gratuit, false = payant
 
+	public int OrderIndex { get; set; } = 0;
+
 	public string CreatedBy { get; set; } = string.Empty;
 
 	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
