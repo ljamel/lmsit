@@ -12,5 +12,16 @@ Disallow: /Tutorials/AdminIndex
 Disallow: /Tutorials/Create
 Disallow: /Tutorials/Edit
 Disallow: /Tutorials/Delete
+Allow: /Tutorials/
+Allow: /Home/Outils
+Allow: /Home/Actual
+Allow: /Home/Orientation
+Allow: /Account/Register
+Allow: /Account/Login
 
-Sitemap: https://ingenius-cyber.fr/sitemap.xml
+# Autoriser les ressources statiques
+Allow: /images/
+Allow: /*.css
+Allow: /*.js
+
+Sitemap: https://ingenius-cyber.fr/Home/Sitemap

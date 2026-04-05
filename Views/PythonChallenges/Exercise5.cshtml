@@ -1,5 +1,36 @@
 @{
-    ViewData["Title"] = "Challenge Python 5 - Doublons";
+    ViewData["Title"] = "Challenge Python 5 — Détecter les doublons";
+    ViewData["Description"] = "Challenge Python pratique : identifiez les valeurs dupliquées dans une liste. Exercice interactif INGENIUS pour maîtriser les sets et la manipulation de données en Python.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise5";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 5 — Détecter les doublons",
+      "description": "Exercice pratique Python : trouver les doublons dans une liste. Maîtrisez les structures set et la manipulation de données en Python sur INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise5",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Intermédiaire",
+      "teaches": ["Programmation Python", "Structures set", "Détection de doublons"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 5 — Détecter les doublons", "item": "@(_baseUrl)/PythonChallenges/Exercise5" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">

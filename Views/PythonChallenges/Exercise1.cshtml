@@ -1,5 +1,36 @@
 @{
-    ViewData["Title"] = "Challenge Python 1 - Inverser la liste";
+    ViewData["Title"] = "Challenge Python 1 — Inverser une liste";
+    ViewData["Description"] = "Challenge Python pratique : écrivez un script qui inverse l'ordre d'une liste. Exercice interactif du parcours Python INGENIUS, idéal pour les débutants.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise1";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 1 — Inverser une liste",
+      "description": "Exercice pratique Python : inverser l'ordre d'une liste. Valider votre code directement en ligne sur INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise1",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Débutant",
+      "teaches": ["Programmation Python", "Manipulation de listes", "Méthodes Python"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 1 — Inverser une liste", "item": "@(_baseUrl)/PythonChallenges/Exercise1" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">

@@ -1,5 +1,36 @@
 @{
-    ViewData["Title"] = "Challenge Python 7 - Moyenne des notes par âge";
+    ViewData["Title"] = "Challenge Python 7 — Moyenne des notes par tranche d'âge";
+    ViewData["Description"] = "Challenge Python avancé : calculez la moyenne des notes par tranche d'âge. Exercice interactif INGENIUS pour maîtriser le groupement et l'agrégation de données en Python.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise7";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 7 — Moyenne des notes par tranche d'âge",
+      "description": "Exercice avancé Python : grouper des données par âge et calculer leur moyenne. Maîtrisez les dictionnaires et l'agrégation sur INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise7",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Intermédiaire",
+      "teaches": ["Programmation Python", "Dictionnaires Python", "Groupement de données", "Agrégation"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 7 — Moyenne par tranche d'âge", "item": "@(_baseUrl)/PythonChallenges/Exercise7" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">

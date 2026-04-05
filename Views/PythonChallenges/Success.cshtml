@@ -1,5 +1,35 @@
 @{
-    ViewData["Title"] = "Félicitations - Challenges Python !";
+    ViewData["Title"] = "Félicitations — Parcours Python INGENIUS complété !";
+    ViewData["Description"] = "Félicitations ! Vous avez réussi les 10 challenges du parcours Python INGENIUS. Continuez votre progression en cybersécurité avec nos labs pratiques et tutoriels.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Success";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "WebPage",
+      "name": "Félicitations — Parcours Python INGENIUS complété !",
+      "description": "Page de validation du parcours Python INGENIUS : 10 challenges Python réussis. Prochaine étape : les labs de cybersécurité pratique.",
+      "url": "@(_baseUrl)/PythonChallenges/Success",
+      "inLanguage": "fr-FR",
+      "isPartOf": { "@@id": "@(_baseUrl)/#website" },
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Parcours complété !", "item": "@(_baseUrl)/PythonChallenges/Success" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">

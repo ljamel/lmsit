@@ -1,6 +1,37 @@
 @{
-    ViewData["Title"] = "Challenge Python 9 - Calcul simple";
+    ViewData["Title"] = "Challenge Python 9 — Calcul simple";
+    ViewData["Description"] = "Challenge Python pratique : effectuez des opérations arithmétiques simples. Exercice introductif INGENIUS idéal pour les débutants absolus en programmation Python.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise9";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
     bool showPromoPopup = ViewBag.ShowPromoPopup == true;
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 9 — Calcul simple",
+      "description": "Exercice Python débutant : opérations arithmétiques et syntaxe de base. Lancez-vous dans le parcours Python INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise9",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Débutant",
+      "teaches": ["Programmation Python", "Opérations arithmétiques", "Syntaxe Python de base"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 9 — Calcul simple", "item": "@(_baseUrl)/PythonChallenges/Exercise9" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 @if (showPromoPopup)

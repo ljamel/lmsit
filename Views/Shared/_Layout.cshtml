@@ -10,10 +10,11 @@
             : _pageTitle + " | INGENIUS";
         var _seoDesc = ViewData["Description"]?.ToString()
             ?? "INGENIUS — Formez-vous en cybersécurité avec 40+ labs pratiques, tutoriels guidés et challenges CTF.";
+        var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
         var _canonicalUrl = ViewData["CanonicalUrl"]?.ToString()
-            ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+            ?? $"{_baseUrl}{Context.Request.Path}";
         var _ogImage = ViewData["OgImage"]?.ToString()
-            ?? $"{Context.Request.Scheme}://{Context.Request.Host}/images/og-default.png";
+            ?? $"{_baseUrl}/images/og-default.png";
         var _ogType = ViewData["OgType"]?.ToString() ?? "website";
     }
     <title>@_seoTitle</title>
@@ -30,6 +31,59 @@
     <meta name="twitter:title" content="@_seoTitle">
     <meta name="twitter:description" content="@_seoDesc">
     <meta name="twitter:image" content="@_ogImage">
+    <!-- SEO + GEO essentiels -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="Jamal Lamri">
+    <meta name="geo.region" content="FR-IDF">
+    <meta name="geo.placename" content="Paris">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/Home/Sitemap">
+    <!-- JSON-LD : Organisation + Site Web (toutes pages) -->
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@graph": [
+        {
+          "@@type": "Organization",
+          "@@id": "@(_baseUrl)/#organization",
+          "name": "INGENIUS",
+          "url": "@(_baseUrl)",
+          "logo": {
+            "@@type": "ImageObject",
+            "url": "@(_baseUrl)/images/og-default.png",
+            "width": 1200,
+            "height": 630
+          },
+          "foundingDate": "2024",
+          "description": "INGENIUS est une plateforme française de formation en cybersécurité proposant des labs pratiques, tutoriels guidés, challenges CTF et préparation aux certifications.",
+          "areaServed": "FR",
+          "knowsAbout": ["cybersécurité", "hacking éthique", "pentest", "CTF", "certifications sécurité"],
+          "contactPoint": {
+            "@@type": "ContactPoint",
+            "email": "lamri87-ingenius@yahoo.com",
+            "contactType": "customer support",
+            "availableLanguage": "French"
+          }
+        },
+        {
+          "@@type": "WebSite",
+          "@@id": "@(_baseUrl)/#website",
+          "url": "@(_baseUrl)",
+          "name": "INGENIUS — Formation Cybersécurité Pratique",
+          "description": "Formez-vous en cybersécurité avec 40+ labs pratiques, tutoriels guidés, challenges CTF et préparation aux certifications.",
+          "publisher": { "@@id": "@(_baseUrl)/#organization" },
+          "inLanguage": "fr-FR",
+          "potentialAction": {
+            "@@type": "SearchAction",
+            "target": {
+              "@@type": "EntryPoint",
+              "urlTemplate": "@(_baseUrl)/Tutorials?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="/templatemo-electric-xtra.css?v=20260325" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />

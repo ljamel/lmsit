@@ -1,5 +1,36 @@
 @{
-    ViewData["Title"] = "Challenge Python 6 - Valeurs supérieures à la moyenne";
+    ViewData["Title"] = "Challenge Python 6 — Valeurs supérieures à la moyenne";
+    ViewData["Description"] = "Challenge Python pratique : filtrez les éléments d'une liste qui dépassent la moyenne calculée. Exercice interactif INGENIUS combinant calcul et filtrage en Python.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise6";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 6 — Valeurs supérieures à la moyenne",
+      "description": "Exercice Python : filtrer les éléments d'une liste supérieurs à la moyenne. Apprenez à combiner calcul et list comprehension sur INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise6",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Intermédiaire",
+      "teaches": ["Programmation Python", "Filtrage de listes", "List comprehension", "Calcul de moyenne"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 6 — Valeurs supérieures à la moyenne", "item": "@(_baseUrl)/PythonChallenges/Exercise6" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">

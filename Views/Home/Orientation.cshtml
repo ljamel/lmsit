@@ -1,12 +1,42 @@
 ﻿@{
-    ViewData["Title"] = "Quiz d'orientation cyber";
-    ViewData["Description"] = "Découvrez votre profil idéal en cybersécurité grâce à notre quiz d'orientation : pentesteur, analyste SOC, GRC, développeur sécurité...";
+    ViewData["Title"] = "Quiz d'orientation cybersécurité — Trouvez votre profil";
+    ViewData["Description"] = "Découvrez votre profil idéal en cybersécurité en 5 questions : pentesteur, analyste SOC, expert GRC ou développeur sécurité. Quiz d'orientation gratuit par INGENIUS.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Home/Orientation";
+    ViewData["OgType"] = "website";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
     var orientationRole = ViewBag.OrientationRole as string;
     var orientationDescription = ViewBag.OrientationDescription as string;
 }
 
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "WebPage",
+      "@@id": "@(_baseUrl)/Home/Orientation",
+      "name": "Quiz d'orientation cybersécurité — Trouvez votre profil",
+      "description": "Répondez à 5 questions et découvrez votre profil idéal en cybersécurité : pentesteur, analyste SOC, expert GRC ou développeur sécurité. Quiz gratuit proposé par INGENIUS.",
+      "url": "@(_baseUrl)/Home/Orientation",
+      "inLanguage": "fr-FR",
+      "isPartOf": { "@@id": "@(_baseUrl)/#website" },
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Quiz d'orientation cybersécurité", "item": "@(_baseUrl)/Home/Orientation" }
+      ]
+    }
+  ]
+}
+</script>
+}
+
 <section class="features">
-<h1>@ViewData["Title"]</h1>
+<h1>Quiz d'orientation cybersécurité</h1>
 
 
     <style>

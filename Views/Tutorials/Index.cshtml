@@ -2,8 +2,38 @@
 @{
     ViewData["Title"] = "Tutoriels Cybersécurité";
     ViewData["Description"] = "Découvrez tous les tutoriels INGENIUS sur la cybersécurité : pentest, réseaux, forensic, OSINT, outils offensifs et bien plus.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Tutorials";
+    ViewData["OgType"] = "website";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
     var categories = ViewBag.Categories as IEnumerable<CrudDemo.Models.TutorialCategory> ?? Enumerable.Empty<CrudDemo.Models.TutorialCategory>();
     string? currentCategory = ViewBag.CurrentCategory;
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "CollectionPage",
+      "@@id": "@(_baseUrl)/Tutorials",
+      "name": "Tutoriels Cybersécurité — INGENIUS",
+      "description": "Tous les tutoriels INGENIUS sur la cybersécurité : pentest, réseaux, forensic, OSINT, outils offensifs et défensifs.",
+      "url": "@(_baseUrl)/Tutorials",
+      "inLanguage": "fr-FR",
+      "isPartOf": { "@@id": "@(_baseUrl)/#website" },
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Tutoriels Cybersécurité", "item": "@(_baseUrl)/Tutorials" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <section class="features" id="tutorials">

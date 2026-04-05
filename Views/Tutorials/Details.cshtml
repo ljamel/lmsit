@@ -36,6 +36,19 @@
   }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_jBase)/" },
+    { "@@type": "ListItem", "position": 2, "name": "Tutoriels", "item": "@(_jBase)/Tutorials" }@if (Model.Category != null){<text>,
+    { "@@type": "ListItem", "position": 3, "name": "@Model.Category.Name", "item": "@(_jBase)/Tutorials?category=@Model.Category.Slug" },
+    { "@@type": "ListItem", "position": 4, "name": "@Html.Raw(_jTitle)", "item": "@(_jBase)/Tutorials/Details/@Model.Id" }</text>}else{<text>,
+    { "@@type": "ListItem", "position": 3, "name": "@Html.Raw(_jTitle)", "item": "@(_jBase)/Tutorials/Details/@Model.Id" }</text>}
+  ]
+}
+</script>
 }
 
 <section class="features">

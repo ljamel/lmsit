@@ -1,5 +1,36 @@
 @{
-    ViewData["Title"] = "Challenge Python 3 - Médiane";
+    ViewData["Title"] = "Challenge Python 3 — Calculer la médiane";
+    ViewData["Description"] = "Challenge Python pratique : calculez la médiane d'une liste de valeurs. Exercice interactif INGENIUS pour maîtriser les statistiques de base en Python.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise3";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 3 — Calculer la médiane",
+      "description": "Exercice pratique Python : calculer la médiane d'une liste. Apprenez les statistiques de base en Python sur INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise3",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Débutant",
+      "teaches": ["Programmation Python", "Statistiques Python", "Médiane"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 3 — Calculer la médiane", "item": "@(_baseUrl)/PythonChallenges/Exercise3" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">

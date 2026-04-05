@@ -1,5 +1,36 @@
 @{
-    ViewData["Title"] = "Challenge Python 4 - Moyenne";
+    ViewData["Title"] = "Challenge Python 4 — Calculer la moyenne";
+    ViewData["Description"] = "Challenge Python pratique : calculez la moyenne d'une liste de valeurs numériques. Exercice interactif INGENIUS pour apprendre les calculs numériques en Python.";
+    ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise4";
+    var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+@section HeadExtras {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "LearningResource",
+      "name": "Challenge Python 4 — Calculer la moyenne",
+      "description": "Exercice pratique Python : calculer la moyenne d'une liste. Maîtrisez sum() et len() en Python sur INGENIUS.",
+      "url": "@(_baseUrl)/PythonChallenges/Exercise4",
+      "inLanguage": "fr-FR",
+      "educationalLevel": "Débutant",
+      "teaches": ["Programmation Python", "Calcul de moyenne", "sum() et len()"],
+      "provider": { "@@type": "Organization", "@@id": "@(_baseUrl)/#organization", "name": "INGENIUS" }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Accueil", "item": "@(_baseUrl)/" },
+        { "@@type": "ListItem", "position": 2, "name": "Challenges Python", "item": "@(_baseUrl)/PythonChallenges/Exercise1" },
+        { "@@type": "ListItem", "position": 3, "name": "Exercice 4 — Calculer la moyenne", "item": "@(_baseUrl)/PythonChallenges/Exercise4" }
+      ]
+    }
+  ]
+}
+</script>
 }
 
 <div class="container mt-5">
