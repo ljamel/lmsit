@@ -244,6 +244,12 @@ https://templatemo.com/tm-596-electric-xtra
             list-style: none;
         }
 
+        .nav-links-ressources {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
         .nav-links li {
             padding: 5px;
         }
