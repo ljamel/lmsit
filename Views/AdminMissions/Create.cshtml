@@ -1,0 +1,101 @@
+@model CrudDemo.Models.Mission
+
+@{
+    ViewData["Title"] = "Créer une Mission Rémunérée";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> @ViewData["Title"]
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Ex: Terminer 3 leçons du module Python" maxlength="200" required />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <textarea asp-for="Description" rows="5" class="form-control" placeholder="Décrivez précisément ce que l'utilisateur doit faire pour valider la mission..." maxlength="2000" required></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="text-muted">Instructions claires pour que l'utilisateur sache exactement quoi faire.</small>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="RewardAmount" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <input asp-for="RewardAmount" class="form-control" type="number" step="0.01" min="0.01" max="50" placeholder="Ex: 2.50" required />
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                <span asp-validation-for="RewardAmount" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label asp-for="MaxCompletions" class="form-label fw-bold"></label>
+                                <input asp-for="MaxCompletions" class="form-control" type="number" min="0" placeholder="0 = illimité" />
+                                <small class="text-muted">0 = pas de limite d'utilisateurs.</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="StartsAt" class="form-label fw-bold"></label>
+                                <input asp-for="StartsAt" class="form-control" type="datetime-local" />
+                                <small class="text-muted">Laissez vide = disponible immédiatement.</small>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="EndsAt" class="form-label fw-bold"></label>
+                                <input asp-for="EndsAt" class="form-control" type="datetime-local" />
+                                <small class="text-muted">Laissez vide = pas de date limite.</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <div class="form-check form-switch mt-2">
+                                    <input asp-for="RequiresAdminValidation" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="RequiresAdminValidation" class="form-check-label fw-bold"></label>
+                                    <small class="text-muted d-block">Si décoché, la récompense est accordée automatiquement à la soumission.</small>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-check form-switch mt-2">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="IsActive" class="form-check-label fw-bold"></label>
+                                    <small class="text-muted d-block">Décochez pour masquer aux utilisateurs.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fas fa-check"></i> Enregistrer
+                            </button>
+
+                            <a asp-controller="AdminCourses" asp-action="Index" class="btn btn-secondary px-4">
+                                <i class="fas fa-arrow-left"></i> Retour Admin Cours
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

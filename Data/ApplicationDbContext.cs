@@ -25,6 +25,9 @@ namespace CrudDemo.Data
 	public DbSet<Comment> Comments { get; set; }
 	public DbSet<TutorialCategory> TutorialCategories { get; set; }
 	public DbSet<Tutorial> Tutorials { get; set; }
+	public DbSet<MonthlyEarning> MonthlyEarnings { get; set; }
+	public DbSet<Mission> Missions { get; set; }
+	public DbSet<UserMissionCompletion> UserMissionCompletions { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -139,6 +142,37 @@ namespace CrudDemo.Data
 				.HasIndex(c => c.Slug)
 				.IsUnique()
 				.HasDatabaseName("UX_TutorialCategories_Slug");
+
+			// Index unique sur MonthlyEarnings (un enregistrement par utilisateur/mois/année)
+			modelBuilder.Entity<MonthlyEarning>()
+				.HasIndex(e => new { e.UserId, e.Year, e.Month })
+				.IsUnique()
+				.HasDatabaseName("UX_MonthlyEarnings_UserId_Year_Month");
+
+			modelBuilder.Entity<MonthlyEarning>()
+				.HasIndex(e => new { e.UserId, e.Year })
+				.HasDatabaseName("IX_MonthlyEarnings_UserId_Year");
+
+			// Index Missions
+			modelBuilder.Entity<Mission>()
+				.HasMany(m => m.Completions)
+				.WithOne(c => c.Mission)
+				.HasForeignKey(c => c.MissionId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<Mission>()
+				.HasIndex(m => new { m.IsActive, m.CreatedAt })
+				.HasDatabaseName("IX_Missions_IsActive_CreatedAt");
+
+			// Index unique : un utilisateur ne peut soumettre qu'une fois par mission
+			modelBuilder.Entity<UserMissionCompletion>()
+				.HasIndex(c => new { c.UserId, c.MissionId })
+				.IsUnique()
+				.HasDatabaseName("UX_UserMissionCompletions_UserId_MissionId");
+
+			modelBuilder.Entity<UserMissionCompletion>()
+				.HasIndex(c => new { c.Status, c.SubmittedAt })
+				.HasDatabaseName("IX_UserMissionCompletions_Status_SubmittedAt");
 		}
 	}
 }

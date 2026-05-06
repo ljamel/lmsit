@@ -1,0 +1,242 @@
+@using System.Security.AccessControl
+@model CrudDemo.Models.EarningsViewModel
+
+@{
+    ViewData["Title"] = "Mes Gains Mensuels";
+
+    // Couleur de la barre selon le taux de remplissage
+    string barColor = Model.ProgressPercentage >= 100
+        ? "bg-success"
+        : Model.ProgressPercentage >= 60
+            ? "bg-info"
+            : Model.ProgressPercentage >= 25
+                ? "bg-warning"
+                : "bg-danger";
+
+    string badgeClass = Model.HasReachedMaxGain ? "bg-success" : "bg-secondary";
+    string badgeLabel = Model.HasReachedMaxGain ? "Plafond atteint ✔" : "Payout à partir de 5,00 €";
+}
+
+<div class="container mt-4">
+
+
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-1"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* ── En-tête ──────────────────────────────────────────────────────────*@
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0">
+                <i class="fas fa-euro-sign me-2 text-success"></i>Mes Gains Mensuels
+            </h1>
+            <span class="badge @badgeClass">@badgeLabel</span>
+        </div>
+
+
+        <div class="card-body py-2">
+            <div class="d-flex justify-content-end">
+
+                <p class="lead">
+                    <br />
+                    <strong>Comment ça marche ?</strong> Chaque leçon terminée vous rapporte des points qui sont convertis en gains mensuels. 
+                    Plus vous complétez de leçons, plus vous gagnez ! Les missions bonus offrent également des récompenses supplémentaires.
+                    <br />
+                    Le calcul des gains et encouragement à continuer à compléter des leçons pour augmenter les gains mensuels.<br />
+                    Vous avez gagné  ce mois-ci grâce à vos leçons et missions terminées !
+                    <strong class="text-success">@Model.EarnedAmount.ToString("0.00") €</strong>
+                </p>
+
+                <span class="text-muted small" role="button" tabindex="0"
+                      title="Comment sont calculés vos gains ? gain_cours = min((leçons_terminées / total_leçons_plateforme) × 5, 15) ÷ 5. Le gain des cours affiché ici est plafonné à 3,00 € / mois. Il est recalculé et mis à jour en base de données à chaque visite.">
+                    <i class="fas fa-circle-info me-1"></i>
+                </span>
+            </div>
+        </div>@* /card-body*@
+    </div>@* /card*@
+
+    @* ── Historique des 12 derniers mois ─────────────────────────────────*@
+    @if (Model.History.Any())
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h2 class="h5 mb-0">
+                    <i class="fas fa-history me-2"></i>Cours rémunérés - Historique des 12 derniers mois
+                </h2>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">Mois</th>
+                                <th scope="col" class="text-center">Leçons terminées</th>
+                                <th scope="col" class="text-center">Total leçons</th>
+                                <th scope="col" class="text-center">Taux</th>
+                                <th scope="col" class="text-center">Gain</th>
+                                <th scope="col" class="text-center">Calculé le</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var cultureInfo = new System.Globalization.CultureInfo("fr-FR");
+                            }
+                            @foreach (var entry in Model.History)
+                            {
+                                var monthName  = cultureInfo.DateTimeFormat.GetMonthName(entry.Month);
+                                monthName = char.ToUpper(monthName[0]) + monthName[1..];
+                                var isCurrentMonth = entry.Month == Model.CurrentMonth && entry.Year == Model.CurrentYear;
+                                var entryRowClass  = isCurrentMonth ? "table-active fw-bold" : string.Empty;
+
+                                double entryRate = entry.TotalLessonsForMonth > 0
+                                    ? Math.Min(100.0, Math.Round((double)entry.LessonsCompleted / entry.TotalLessonsForMonth * 100.0, 1))
+                                    : 0.0;
+
+                                @:<tr class="@entryRowClass">
+                                    @:<td>@monthName @entry.Year @(isCurrentMonth ? Html.Raw("<span class=\"badge bg-primary ms-1\">En cours</span>") : Html.Raw(""))</td>
+                                    @:<td class="text-center">@entry.LessonsCompleted</td>
+                                    @:<td class="text-center">@entry.TotalLessonsForMonth</td>
+                                    @:<td class="text-center">@entryRate.ToString("0.0")%</td>
+                                    @:<td class="text-center text-success fw-semibold">@entry.EarnedAmount.ToString("0.00") €</td>
+                                    @:<td class="text-center text-muted small">@entry.CalculatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                @:</tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Total cumulé :</td>
+                                <td class="text-center fw-bold text-success">@Model.TotalEarned.ToString("0.00") €</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary">
+            <i class="fas fa-info-circle me-1"></i>
+            Aucun historique disponible pour l'instant. Terminez des leçons pour commencer à cumuler des gains !
+        </div>
+    }
+
+    @* ── Missions rémunérées ─────────────────────────────────────────────*@
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+                <i class="fas fa-trophy me-2 text-warning"></i>Missions Rémunérées
+            </h2>
+            @if (Model.PendingMissionsCount > 0)
+            {
+                <span class="badge bg-warning text-dark">@Model.PendingMissionsCount en attente de validation</span>
+            }
+        </div>
+        <div class="card-body">
+            @if (!Model.Missions.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-1"></i>Aucune mission disponible pour l'instant. Revenez bientôt !
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var mission in Model.Missions)
+                    {
+                        string cardBorder = mission.IsApproved ? "border-success"
+                            : mission.IsPending ? "border-warning"
+                            : mission.IsRejected ? "border-danger"
+                            : "";
+                        string statusBadge = mission.IsApproved ? "<span class=\"badge bg-success\">✔ Validé</span>"
+                            : mission.IsPending ? "<span class=\"badge bg-warning text-dark\">⏳ En attente</span>"
+                            : mission.IsRejected ? "<span class=\"badge bg-danger\">✗ Refusé</span>"
+                            : "";
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 @cardBorder border-2">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0 fw-semibold">@mission.Title</h6>
+                                        <span class="badge bg-success ms-2 flex-shrink-0">+@mission.RewardAmount.ToString("0.00")&nbsp;€</span>
+                                    </div>
+                                    <p class="card-text text-muted small flex-grow-1">@mission.Description</p>
+
+                                    @if (mission.IsExpired && !mission.IsSubmitted)
+                                    {
+                                        <div class="alert alert-secondary py-1 px-2 small mb-2">Mission expirée.</div>
+                                    }
+                                    @if (mission.IsRejected && !string.IsNullOrWhiteSpace(mission.AdminNote))
+                                    {
+                                        <div class="alert alert-danger py-1 px-2 small mb-2">
+                                            <i class="fas fa-info-circle me-1"></i>@mission.AdminNote
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(statusBadge))
+                                    {
+                                        <div class="mb-2">@Html.Raw(statusBadge)</div>
+                                    }
+
+                                    @if (!mission.IsSubmitted && !mission.IsExpired)
+                                    {
+                                        <form asp-controller="Courses" asp-action="SubmitMission" method="post" class="mt-auto">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="missionId" value="@mission.MissionId" />
+                                            @if (mission.RequiresAdminValidation)
+                                            {
+                                                <div class="mb-2">
+                                                    <textarea name="proofNote" class="form-control form-control-sm" rows="2"
+                                                              placeholder="Décrivez votre preuve (optionnel)…" maxlength="1000"></textarea>
+                                                </div>
+                                            }
+                                            <button type="submit" class="btn btn-sm btn-warning fw-semibold w-100">
+                                                <i class="fas fa-check me-1"></i>
+                                                @(mission.RequiresAdminValidation ? "J'ai accompli cette mission" : "Réclamer la récompense")
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (mission.IsApproved)
+                                    {
+                                        <div class="text-success fw-bold mt-auto text-center">
+                                            <i class="fas fa-euro-sign me-1"></i>+@mission.RewardAwarded.ToString("0.00") € reçus
+                                        </div>
+                                    }
+                                    else if (mission.IsRejected)
+                                    {
+                                        <form asp-controller="Courses" asp-action="SubmitMission" method="post" class="mt-auto">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="missionId" value="@mission.MissionId" />
+                                            <button type="submit" class="btn btn-sm btn-outline-warning w-100">
+                                                <i class="fas fa-redo me-1"></i>Resoumettre
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (mission.IsPending)
+                                    {
+                                        <div class="text-muted small mt-auto text-center fst-italic">
+                                            <i class="fas fa-clock me-1"></i>En attente de validation par un admin
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+</div>@* /container*@

@@ -19,7 +19,7 @@ namespace CrudDemo.Data
             // Utiliser une chaîne de connexion par défaut pour les migrations
             var connectionString = "Server=127.0.0.1;Port=3307;Database=NomDeTaBase;User=root;Password=StrongPass123!;";
             
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            optionsBuilder.UseMySql(connectionString, new MariaDbServerVersion(new Version(10, 6, 0)));
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }

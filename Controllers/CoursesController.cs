@@ -1429,5 +1429,254 @@ namespace CrudDemo.Controllers
         return View();
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GAINS MENSUELS DE L'UTILISATEUR
+    // Route : GET /Courses/Earnings
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Affiche les gains réels de l'utilisateur connecté pour le mois en cours
+    /// ainsi que l'historique des 12 derniers mois.
+    /// La donnée est persistée dans la table MonthlyEarnings.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Earnings()
+    {
+        var userId = _userManager.GetUserId(User);
+        var userEmail = User.Identity?.Name ?? string.Empty;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        // Calcule, persiste et retourne les gains du mois courant
+        var currentEarning = await CalculateAndPersistMonthlyEarningsAsync(userId, userEmail);
+
+        // Historique des 12 derniers mois (mois courant inclus), du plus récent au plus ancien
+        var history = await _context.MonthlyEarnings
+            .AsNoTracking()
+            .Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.Year)
+            .ThenByDescending(e => e.Month)
+            .Take(12)
+            .ToListAsync();
+
+        // ── Missions rémunérées ───────────────────────────────────────────────
+        var now = DateTime.UtcNow;
+
+        var activeMissions = await _context.Missions
+            .AsNoTracking()
+            .Where(m => m.IsActive
+                        && (m.StartsAt == null || m.StartsAt <= now))
+            .OrderByDescending(m => m.CreatedAt)
+            .ToListAsync();
+
+        var userCompletions = await _context.UserMissionCompletions
+            .AsNoTracking()
+            .Where(c => c.UserId == userId)
+            .ToListAsync();
+        var completionByMissionId = userCompletions.ToDictionary(c => c.MissionId);
+
+        var missionStatuses = activeMissions.Select(m =>
+        {
+            completionByMissionId.TryGetValue(m.Id, out var comp);
+            return new MissionStatus
+            {
+                MissionId                = m.Id,
+                Title                    = m.Title,
+                Description              = m.Description,
+                RewardAmount             = m.RewardAmount,
+                RequiresAdminValidation  = m.RequiresAdminValidation,
+                EndsAt                   = m.EndsAt,
+                CompletionStatus         = comp?.Status,
+                RewardAwarded            = comp?.RewardAwarded ?? 0m,
+                CompletionId             = comp?.Id,
+                ProofNote                = comp?.ProofNote,
+                AdminNote                = comp?.AdminNote
+            };
+        }).ToList();
+
+        var monthLabel = new System.Globalization.CultureInfo("fr-FR")
+            .DateTimeFormat
+            .GetMonthName(now.Month);
+        monthLabel = char.ToUpper(monthLabel[0]) + monthLabel[1..];
+
+        var viewModel = new EarningsViewModel
+        {
+            CurrentMonth             = currentEarning.Month,
+            CurrentYear              = currentEarning.Year,
+            CurrentMonthLabel        = $"{monthLabel} {currentEarning.Year}",
+            LessonsCompleted         = currentEarning.LessonsCompleted,
+            TotalLessonsOnPlatform   = currentEarning.TotalLessonsForMonth,
+            EarnedAmount             = currentEarning.EarnedAmount,
+            History                  = history,
+            Missions                 = missionStatuses
+        };
+
+        return View(viewModel);
+    }
+
+    /// <summary>
+    /// Permet à l'utilisateur de soumettre une mission qu'il déclare avoir accomplie.
+    /// Route : POST /Courses/SubmitMission
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubmitMission(int missionId, string? proofNote)
+    {
+        var userId = _userManager.GetUserId(User);
+        if (string.IsNullOrEmpty(userId))
+            return RedirectToAction("Login", "Account");
+
+        var mission = await _context.Missions
+            .FirstOrDefaultAsync(m => m.Id == missionId && m.IsActive);
+
+        if (mission == null)
+        {
+            TempData["Error"] = "Mission introuvable ou inactive.";
+            return RedirectToAction(nameof(Earnings));
+        }
+
+        // Vérifier si l'utilisateur a déjà soumis cette mission
+        var existing = await _context.UserMissionCompletions
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.MissionId == missionId);
+
+        if (existing != null)
+        {
+            TempData["Error"] = "Vous avez déjà soumis cette mission.";
+            return RedirectToAction(nameof(Earnings));
+        }
+
+        // Vérifier le plafond de complétions si applicable
+        if (mission.MaxCompletions > 0)
+        {
+            var approvedCount = await _context.UserMissionCompletions
+                .CountAsync(c => c.MissionId == missionId && c.Status == "approved");
+            if (approvedCount >= mission.MaxCompletions)
+            {
+                TempData["Error"] = "Cette mission a atteint son nombre maximum de complétions.";
+                return RedirectToAction(nameof(Earnings));
+            }
+        }
+
+        var completion = new UserMissionCompletion
+        {
+            UserId      = userId,
+            MissionId   = missionId,
+            SubmittedAt = DateTime.UtcNow,
+            ProofNote   = proofNote?.Trim(),
+            Status      = mission.RequiresAdminValidation ? "pending" : "approved",
+            RewardAwarded = mission.RequiresAdminValidation ? 0m : mission.RewardAmount,
+            ReviewedAt  = mission.RequiresAdminValidation ? null : DateTime.UtcNow
+        };
+
+        _context.UserMissionCompletions.Add(completion);
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = mission.RequiresAdminValidation
+            ? "Mission soumise ! Elle sera vérifiée par un administrateur."
+            : $"Mission validée automatiquement — {mission.RewardAmount:0.00} € ajoutés à vos gains.";
+
+        return RedirectToAction(nameof(Earnings));
+    }
+
+    /// <summary>
+    /// Calcule les gains réels de l'utilisateur pour le mois en cours et persiste
+    /// le résultat dans la table MonthlyEarnings (INSERT ou UPDATE).
+    ///
+    /// Formule officielle :
+    ///   gain = (leçons_terminées / total_leçons_plateforme) * 5
+    ///   gain = gain / 5
+    ///   gain = Math.Min(gain, 15.0)   ← plafond à 15 € par mois
+    ///
+    /// Les leçons terminées sont calculées de la même façon que la progression
+    /// affichée dans le composant CoursesList : tous les LessonEngagements actifs
+    /// (IsActive = true) de l'utilisateur, sans filtre de date.
+    /// LessonEngagements.UserId stocke l'email de l'utilisateur (User.Identity.Name),
+    /// identique à la logique du ViewComponent CoursesListViewComponent.
+    /// </summary>
+    /// <param name="userId">GUID Identity de l'utilisateur (pour MonthlyEarnings).</param>
+    /// <param name="userEmail">Email de l'utilisateur (pour LessonEngagements).</param>
+    private async Task<MonthlyEarning> CalculateAndPersistMonthlyEarningsAsync(string userId, string userEmail)
+    {
+        var now = DateTime.UtcNow;
+        int currentMonth = now.Month;
+        int currentYear  = now.Year;
+
+        // ── 1. Leçons terminées par l'utilisateur ────────────────────────────
+        // Même logique que CoursesListViewComponent :
+        //   - UserId dans LessonEngagements = email (User.Identity.Name)
+        //   - Pas de filtre sur le mois : on compte tous les engagements actifs
+        //   - Distinct sur LessonId pour éviter les doublons
+        var allLessonsEngaged = await _context.LessonEngagements
+            .AsNoTracking()
+            .Where(e => e.UserId == userEmail && e.IsActive)
+            .Select(e => e.LessonId)
+            .Distinct()
+            .ToListAsync();
+
+        // On ne garde que les LessonIds qui existent réellement dans la plateforme
+        var allLessonIds = await _context.Lessons
+            .AsNoTracking()
+            .Select(l => l.Id)
+            .ToListAsync();
+
+        var allLessonIdsSet = allLessonIds.ToHashSet();
+        var lessonsCompleted = allLessonsEngaged.Count(id => allLessonIdsSet.Contains(id));
+
+        // ── 2. Total des leçons disponibles sur la plateforme ────────────────
+        var totalLessonsOnPlatform = allLessonIds.Count;
+
+        // ── 3. Application de la formule ─────────────────────────────────────
+        //   gain = (leçons_terminées / total_leçons) * 5
+        //   Plafond : 15 € par mois
+        const double gainMultiplier = 5.0;
+        const double maxMonthlyGain = 15.0;
+
+        double rawGain = totalLessonsOnPlatform > 0
+            ? (double)lessonsCompleted / totalLessonsOnPlatform * gainMultiplier
+            : 0.0;
+
+        decimal earnedAmount = (decimal)Math.Min(rawGain, maxMonthlyGain);
+        earnedAmount /= 5m;
+        earnedAmount = Math.Round(earnedAmount, 2); // deux décimales
+
+        // ── 4. Persistance (INSERT ou UPDATE) ────────────────────────────────
+        var existingRecord = await _context.MonthlyEarnings
+            .FirstOrDefaultAsync(e => e.UserId == userId
+                                      && e.Year  == currentYear
+                                      && e.Month == currentMonth);
+
+        if (existingRecord is null)
+        {
+            // Première visite du mois : insertion
+            var newRecord = new MonthlyEarning
+            {
+                UserId               = userId,
+                Month                = currentMonth,
+                Year                 = currentYear,
+                LessonsCompleted     = lessonsCompleted,
+                TotalLessonsForMonth = totalLessonsOnPlatform,
+                EarnedAmount         = earnedAmount,
+                CalculatedAt         = DateTime.UtcNow
+            };
+            _context.MonthlyEarnings.Add(newRecord);
+            await _context.SaveChangesAsync();
+            return newRecord;
+        }
+        else
+        {
+            // Mise à jour de l'enregistrement existant
+            existingRecord.LessonsCompleted     = lessonsCompleted;
+            existingRecord.TotalLessonsForMonth = totalLessonsOnPlatform;
+            existingRecord.EarnedAmount         = earnedAmount;
+            existingRecord.CalculatedAt         = DateTime.UtcNow;
+
+            _context.MonthlyEarnings.Update(existingRecord);
+            await _context.SaveChangesAsync();
+            return existingRecord;
+        }
+    }
+
     }
 }

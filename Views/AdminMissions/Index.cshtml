@@ -1,0 +1,152 @@
+@model IEnumerable<CrudDemo.Models.Mission>
+
+@{
+    ViewData["Title"] = "Gestion des Missions";
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-1"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-0"><i class="fas fa-euro-sign me-2 text-warning"></i>Missions rémunérées</h1>
+            <small class="text-muted">Créez des missions que les utilisateurs peuvent accomplir pour gagner des euros.</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Submissions" class="btn btn-outline-warning position-relative">
+                <i class="fas fa-inbox me-1"></i>Soumissions
+                @{
+                    var pendingCount = Model.Sum(m => m.Completions.Count(c => c.Status == "pending"));
+                }
+                @if (pendingCount > 0)
+                {
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        @pendingCount
+                    </span>
+                }
+            </a>
+            <a asp-action="Create" class="btn btn-warning">
+                <i class="fas fa-plus me-1"></i>Nouvelle Mission
+            </a>
+            <a asp-controller="AdminCourses" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Retour Cours
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-1"></i>
+            Aucune mission créée pour l'instant. Cliquez sur <strong>Nouvelle Mission</strong> pour commencer.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Mission</th>
+                        <th class="text-center">Récompense</th>
+                        <th class="text-center">Max</th>
+                        <th class="text-center">Complétions</th>
+                        <th class="text-center">En attente</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mission in Model)
+                    {
+                        var approvedCount = mission.Completions.Count(c => c.Status == "approved");
+                        var pendingMission = mission.Completions.Count(c => c.Status == "pending");
+                        var rowClass = mission.IsActive ? "" : "table-secondary text-muted";
+
+                        <tr class="@rowClass">
+                            <td>
+                                <div class="fw-semibold">@mission.Title</div>
+                                <small class="text-muted">@(mission.Description.Length > 80 ? mission.Description[..80] + "…" : mission.Description)</small>
+                                @if (mission.EndsAt.HasValue && mission.EndsAt < DateTime.UtcNow)
+                                {
+                                    <span class="badge bg-secondary ms-1">Expirée</span>
+                                }
+                                @if (!mission.RequiresAdminValidation)
+                                {
+                                    <span class="badge bg-info ms-1">Auto</span>
+                                }
+                            </td>
+                            <td class="text-center fw-bold text-success">@mission.RewardAmount.ToString("0.00") €</td>
+                            <td class="text-center text-muted">@(mission.MaxCompletions == 0 ? "∞" : mission.MaxCompletions.ToString())</td>
+                            <td class="text-center">
+                                <span class="badge bg-success">@approvedCount validées</span>
+                            </td>
+                            <td class="text-center">
+                                @if (pendingMission > 0)
+                                {
+                                    <span class="badge bg-warning text-dark">@pendingMission en attente</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (mission.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@mission.Id" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <form asp-action="ToggleActive" asp-route-id="@mission.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm @(mission.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                                                title="@(mission.IsActive ? "Désactiver" : "Activer")">
+                                            <i class="fas fa-@(mission.IsActive ? "pause" : "play")"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" asp-route-id="@mission.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Supprimer la mission « @mission.Title » et toutes ses soumissions ?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <td colspan="3" class="fw-bold text-end">Total récompenses accordées :</td>
+                        <td class="text-center fw-bold text-success" colspan="4">
+                            @Model.Sum(m => m.Completions.Where(c => c.Status == "approved").Sum(c => c.RewardAwarded)).ToString("0.00") €
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+</div>

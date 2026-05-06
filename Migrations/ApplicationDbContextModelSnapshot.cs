@@ -490,6 +490,154 @@ namespace CrudDemo.Migrations
                     b.ToTable("Tutorials");
                 });
 
+            modelBuilder.Entity("CrudDemo.Models.MonthlyEarning", b =>
+                {                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CalculatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("EarnedAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("LessonsCompleted")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalLessonsForMonth")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Year")
+                        .HasDatabaseName("IX_MonthlyEarnings_UserId_Year");
+
+                    b.HasIndex("UserId", "Year", "Month")
+                        .IsUnique()
+                        .HasDatabaseName("UX_MonthlyEarnings_UserId_Year_Month");
+
+                    b.ToTable("MonthlyEarnings");
+                });
+
+            modelBuilder.Entity("CrudDemo.Models.Mission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<decimal>("RewardAmount")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int>("MaxCompletions")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("RequiresAdminValidation")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("StartsAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("EndsAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive", "CreatedAt")
+                        .HasDatabaseName("IX_Missions_IsActive_CreatedAt");
+
+                    b.ToTable("Missions");
+                });
+
+            modelBuilder.Entity("CrudDemo.Models.UserMissionCompletion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.Property<int>("MissionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<decimal>("RewardAwarded")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ProofNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "MissionId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_UserMissionCompletions_UserId_MissionId");
+
+                    b.HasIndex("Status", "SubmittedAt")
+                        .HasDatabaseName("IX_UserMissionCompletions_Status_SubmittedAt");
+
+                    b.HasIndex("MissionId");
+
+                    b.ToTable("UserMissionCompletions");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -865,6 +1013,22 @@ namespace CrudDemo.Migrations
             modelBuilder.Entity("CrudDemo.Models.Quiz", b =>
                 {
                     b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("CrudDemo.Models.UserMissionCompletion", b =>
+                {
+                    b.HasOne("CrudDemo.Models.Mission", "Mission")
+                        .WithMany("Completions")
+                        .HasForeignKey("MissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mission");
+                });
+
+            modelBuilder.Entity("CrudDemo.Models.Mission", b =>
+                {
+                    b.Navigation("Completions");
                 });
 #pragma warning restore 612, 618
         }

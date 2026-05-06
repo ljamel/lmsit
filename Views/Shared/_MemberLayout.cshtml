@@ -1,3 +1,8 @@
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CrudDemo.Data
+@inject ApplicationDbContext DbContext
+
 <head>
     <link rel="stylesheet" href="~/MemberLayout.css?v=20260325" />
     <link rel="stylesheet" href="~/css/member-dashboard.css" />
@@ -8,8 +13,100 @@
 @{
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
     var currentUserName = User.Identity?.Name ?? string.Empty;
+    var requestPath = Context?.Request?.Path.Value ?? string.Empty;
+    var isCoursesRoute = requestPath.StartsWith("/Courses", StringComparison.OrdinalIgnoreCase);
+
+    decimal quickbarCourseGain = 0m;
+    if (isAuthenticated && isCoursesRoute)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var now = DateTime.UtcNow;
+            quickbarCourseGain = await DbContext.MonthlyEarnings
+                .AsNoTracking()
+                .Where(e => e.UserId == userId && e.Month == now.Month && e.Year == now.Year)
+                .Select(e => e.EarnedAmount)
+                .FirstOrDefaultAsync();
+        }
+    }
 }
 <body data-authenticated="@(isAuthenticated.ToString().ToLowerInvariant())" data-user="@currentUserName">
+    @if (isCoursesRoute)
+    {
+        <style>
+            .quickbar {
+                position: fixed;
+                top: 16px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(10, 10, 20, 0.55);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 50px;
+                padding: 6px 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+            }
+            .quickbar-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 5px 14px;
+                border-radius: 50px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                text-decoration: none;
+                transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+                white-space: nowrap;
+            }
+            .quickbar-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+                opacity: 0.92;
+            }
+            .quickbar-btn:active {
+                transform: translateY(0);
+            }
+            .quickbar-btn-profil {
+                background: rgba(255,255,255,0.08);
+                color: #e0e0e0;
+                border: 1px solid rgba(255,255,255,0.18);
+            }
+            .quickbar-btn-profil:hover {
+                background: rgba(255,255,255,0.15);
+                color: #ffffff;
+            }
+            .quickbar-btn-gains {
+                background: linear-gradient(135deg, #FF5E00 0%, #ff8c00 100%);
+                color: #ffffff;
+                border: none;
+            }
+            .quickbar-divider {
+                width: 1px;
+                height: 20px;
+                background: rgba(255,255,255,0.18);
+                flex-shrink: 0;
+            }
+        </style>
+
+        <div class="quickbar">
+            <a data-onboarding-app="profil" class="quickbar-btn quickbar-btn-profil" href="/Courses/Member">
+                <i class="fa-regular fa-circle-user"></i>
+                <span>Profil</span>
+            </a>
+            <div class="quickbar-divider"></div>
+            <a class="quickbar-btn quickbar-btn-gains" href="/Courses/Earnings">
+                <i class="fas fa-euro-sign"></i>
+                <span>Mes Gains (@quickbarCourseGain.ToString("0.00") €)</span>
+            </a>
+        </div>
+    }
+
     <div class="member-container">
         @RenderBody()
     </div>

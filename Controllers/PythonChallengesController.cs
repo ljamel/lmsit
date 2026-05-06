@@ -115,9 +115,9 @@ namespace CrudDemo.Controllers
         }
 
         [HttpPost]
-        public IActionResult Exercise5(string answer)
+        public IActionResult Exercise5(string code)
         {
-            var result = ExecutePythonCode(answer);
+            var result = ExecutePythonCode(code);
             
             string cleanOutput = Regex.Replace(result.output.Trim(), @"\s+", " ");
             if (result.success && cleanOutput == "[8, 7, 6, 5, 4, 3, 2, 1]")
@@ -137,9 +137,9 @@ namespace CrudDemo.Controllers
         }
 
         [HttpPost]
-        public IActionResult Exercise6(string answer)
+        public IActionResult Exercise6(string code)
         {
-            var result = ExecutePythonCode(answer);
+            var result = ExecutePythonCode(code);
             
             string cleanOutput = result.output.Trim();
             if (result.success && (cleanOutput == "7" || cleanOutput == "7.0"))

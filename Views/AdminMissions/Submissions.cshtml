@@ -1,0 +1,158 @@
+@model IEnumerable<CrudDemo.Models.UserMissionCompletion>
+
+@{
+    ViewData["Title"] = "Soumissions à valider";
+    var userEmailById = ViewBag.UserEmailById as Dictionary<string, string> ?? new Dictionary<string, string>();
+    int pendingCount = ViewBag.PendingCount ?? 0;
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle me-1"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-0">
+                <i class="fas fa-inbox me-2 text-warning"></i>Soumissions de Missions
+                @if (pendingCount > 0)
+                {
+                    <span class="badge bg-danger ms-2">@pendingCount en attente</span>
+                }
+            </h1>
+            <small class="text-muted">Approuvez ou refusez les missions déclarées par les utilisateurs.</small>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Retour Missions
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-1"></i>Aucune soumission pour l'instant.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Mission</th>
+                        <th class="text-center">Récompense</th>
+                        <th>Preuve / Note</th>
+                        <th class="text-center">Soumis le</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        var email = userEmailById.TryGetValue(c.UserId, out var em) ? em : c.UserId;
+                        var rowClass = c.Status == "pending" ? "table-warning" : c.Status == "approved" ? "" : "table-secondary";
+                        <tr class="@rowClass">
+                            <td>
+                                <small class="text-muted d-block"><i class="fas fa-user me-1"></i>@email</small>
+                            </td>
+                            <td class="fw-semibold">@c.Mission?.Title</td>
+                            <td class="text-center text-success fw-bold">
+                                @c.Mission?.RewardAmount.ToString("0.00") €
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(c.ProofNote))
+                                {
+                                    <small class="text-muted">@c.ProofNote</small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted fst-italic">—</small>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(c.AdminNote))
+                                {
+                                    <div><small class="badge bg-secondary">Note admin : @c.AdminNote</small></div>
+                                }
+                            </td>
+                            <td class="text-center small text-muted">
+                                @c.SubmittedAt.ToLocalTime().ToString("dd/MM/yy HH:mm")
+                            </td>
+                            <td class="text-center">
+                                @switch (c.Status)
+                                {
+                                    case "pending":
+                                        <span class="badge bg-warning text-dark">En attente</span>
+                                        break;
+                                    case "approved":
+                                        <span class="badge bg-success">Approuvé (+@c.RewardAwarded.ToString("0.00") €)</span>
+                                        break;
+                                    case "rejected":
+                                        <span class="badge bg-danger">Refusé</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (c.Status == "pending")
+                                {
+                                    <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                        <form asp-action="Approve" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="adminNote" value="" />
+                                            <button type="submit" class="btn btn-sm btn-success" title="Approuver">
+                                                <i class="fas fa-check"></i> Approuver
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal" data-bs-target="#rejectModal-@c.Id"
+                                                title="Refuser">
+                                            <i class="fas fa-times"></i> Refuser
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal de refus -->
+                                    <div class="modal fade" id="rejectModal-@c.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-sm">
+                                            <div class="modal-content">
+                                                <form asp-action="Reject" asp-route-id="@c.Id" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <div class="modal-header">
+                                                        <h6 class="modal-title">Motif du refus</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <textarea name="adminNote" class="form-control" rows="3"
+                                                                  placeholder="Expliquez pourquoi la mission est refusée (optionnel)"></textarea>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        <button type="submit" class="btn btn-sm btn-danger">Confirmer le refus</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">@c.ReviewedAt?.ToLocalTime().ToString("dd/MM/yy HH:mm")</small>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
