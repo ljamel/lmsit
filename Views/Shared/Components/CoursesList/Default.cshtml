@@ -204,8 +204,8 @@
                 {
                     modules = modules
                         .Where(m => m.Lessons != null && m.Lessons.Any(l =>
-                            !string.IsNullOrEmpty(l.Description)
-                            && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase)))
+                            (!string.IsNullOrEmpty(l.Title) && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))
+                            || (!string.IsNullOrEmpty(l.Description) && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))))
                         .ToList();
 
                     if (!modules.Any())
@@ -236,13 +236,15 @@
 
                             @foreach (var m in modules)
                             {
-                                var lessons = m.Lessons ?? new List<CrudDemo.Models.Lesson>();
+                                var lessons = (m.Lessons ?? new List<CrudDemo.Models.Lesson>()).OrderBy(l => l.OrderIndex).ToList();
                                 if (hasLessonSearch)
                                 {
                                     lessons = lessons
                                         .Where(l =>
-                                            !string.IsNullOrEmpty(l.Description)
-                                            && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))
+                                            (!string.IsNullOrEmpty(l.Title) && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))
+                                            || (!string.IsNullOrEmpty(l.Description) && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase)))
+                                        .OrderBy(l => l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                                        .ThenBy(l => l.OrderIndex)
                                         .ToList();
                                 }
 
@@ -266,7 +268,7 @@
                                     @if (lessons.Any())
                                     {
                                         <ul class="list-unstyled ms-3 mt-2">
-                                            @foreach (var lesson in lessons.OrderBy(l => l.OrderIndex))
+                                            @foreach (var lesson in lessons)
                                             {
                                                 if (hasLessonSearch)
                                                 {
@@ -328,7 +330,7 @@
         @if (hasLessonSearch && !hasAnyLessonMatch)
         {
             <div class="alert alert-info mt-3">
-                <p>Aucune leçon trouvée dans les descriptions.</p>
+                <p>Aucune leçon trouvée pour « @lessonSearchTerm ».</p>
             </div>
         }
     }

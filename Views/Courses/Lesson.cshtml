@@ -265,7 +265,7 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div>
                                             <h4 class="mb-1">
-                                                <i class="fas fa-question"></i> @quiz.Question
+                                                <i class="fas fa-question"></i> @Html.Raw(quiz.Question)
                                             </h4>
                                             @if (!string.IsNullOrEmpty(quiz.Description))
                                             {
@@ -288,7 +288,7 @@
                                                                name="answers[@quiz.Id]" id="option_@option.Id"
                                                                value="@option.Id" @(optionIndex == 0 ? "required" : string.Empty) />
                                                         <label class="form-check-label" for="option_@option.Id">
-                                                            <span class="option-text">@option.Text</span>
+                                                            <span class="option-text">@Html.Raw(option.Text)</span>
                                                         </label>
                                                     </div>
                                                     optionIndex++;
