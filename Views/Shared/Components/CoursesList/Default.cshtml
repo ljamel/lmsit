@@ -160,6 +160,21 @@
         var lessonSearchTerm = (Context.Request.Query["lessonSearch"].ToString() ?? string.Empty).Trim();
         var hasLessonSearch = !string.IsNullOrEmpty(lessonSearchTerm);
         var hasAnyLessonMatch = false;
+
+        Func<string?, string> stripHtml = (html) => {
+            if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+            var decoded = System.Net.WebUtility.HtmlDecode(html);
+            return System.Text.RegularExpressions.Regex.Replace(decoded, "<[^>]*>", " ").Trim();
+        };
+
+        Func<CrudDemo.Models.Lesson, bool> lessonMatchesSearch = (l) => {
+            if (!hasLessonSearch) return true;
+            var titleMatch = !string.IsNullOrEmpty(l.Title) &&
+                l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase);
+            var descPlain = stripHtml(l.Description);
+            var descMatch = descPlain.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase);
+            return titleMatch || descMatch;
+        };
         var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty).Trim();
         var currentIdRaw = (ViewContext.RouteData.Values["id"]?.ToString() ?? string.Empty).Trim();
         var hasCurrentId = int.TryParse(currentIdRaw, out var currentId);
@@ -203,9 +218,7 @@
                 if (hasLessonSearch)
                 {
                     modules = modules
-                        .Where(m => m.Lessons != null && m.Lessons.Any(l =>
-                            (!string.IsNullOrEmpty(l.Title) && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))
-                            || (!string.IsNullOrEmpty(l.Description) && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))))
+                        .Where(m => m.Lessons != null && m.Lessons.Any(l => lessonMatchesSearch(l)))
                         .ToList();
 
                     if (!modules.Any())
@@ -240,10 +253,8 @@
                                 if (hasLessonSearch)
                                 {
                                     lessons = lessons
-                                        .Where(l =>
-                                            (!string.IsNullOrEmpty(l.Title) && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase))
-                                            || (!string.IsNullOrEmpty(l.Description) && l.Description.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase)))
-                                        .OrderBy(l => l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                                        .Where(l => lessonMatchesSearch(l))
+                                        .OrderBy(l => l.Title != null && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
                                         .ThenBy(l => l.OrderIndex)
                                         .ToList();
                                 }
