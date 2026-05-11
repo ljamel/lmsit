@@ -720,19 +720,40 @@ namespace CrudDemo.Controllers
             ViewBag.OrientationDescription = TempData["OrientationDescription"] as string;
             ViewBag.OrientationCourse = TempData["OrientationCourse"] as string;
 
+            // Strip [[FLAG:...]] markers from quiz questions/descriptions before rendering
+            if (lesson.Quizzes != null)
+            {
+                foreach (var quiz in lesson.Quizzes)
+                {
+                    var (cleanDescription, _) = ExtractCtfPayload(quiz.Description);
+                    quiz.Description = cleanDescription;
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(lessonSearch))
             {
                 var term = lessonSearch.Trim();
-                var likePattern = $"%{term}%";
 
-                var relatedLessons = await _context.Lessons
+                // Load all lessons of this course then filter in memory on plain text
+                // (avoids false positives caused by HTML markup in Description)
+                var allCourseLessons = await _context.Lessons
                     .AsNoTracking()
                     .Include(l => l.Module)
                     .Where(l => l.Module != null && l.Module.CourseId == courseId)
-                    .Where(l => l.Description != null && EF.Functions.Like(l.Description, likePattern))
                     .OrderBy(l => l.Module!.OrderIndex)
                     .ThenBy(l => l.OrderIndex)
                     .ToListAsync();
+
+                var relatedLessons = allCourseLessons
+                    .Where(l =>
+                    {
+                        var titleMatch = l.Title != null &&
+                            l.Title.Contains(term, StringComparison.OrdinalIgnoreCase);
+                        var descPlain = StripHtmlTags(l.Description ?? string.Empty);
+                        var descMatch = descPlain.Contains(term, StringComparison.OrdinalIgnoreCase);
+                        return titleMatch || descMatch;
+                    })
+                    .ToList();
 
                 ViewBag.LessonSearchTerm = term;
                 ViewBag.LessonSearchResults = relatedLessons;
@@ -1321,6 +1342,14 @@ namespace CrudDemo.Controllers
 
             var publicDescription = rawDescription.Remove(markerIndex, (endIndex + 2) - markerIndex).Trim();
             return (publicDescription, string.IsNullOrWhiteSpace(flag) ? null : flag);
+        }
+
+        private static string StripHtmlTags(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+            // Decode HTML entities first, then remove all tags
+            var decoded = System.Net.WebUtility.HtmlDecode(html);
+            return System.Text.RegularExpressions.Regex.Replace(decoded, "<[^>]*>", " ").Trim();
         }
 
         private static string NormalizeCtfTitle(string question)
