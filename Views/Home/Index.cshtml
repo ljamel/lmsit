@@ -202,6 +202,20 @@
     </div>
 </section>
 
+<!-- Video Présentation Section -->
+<section class="video-presentation" id="video-presentation">
+    <div class="container">
+        <h2 class="section-title">Découvrez la formation en vidéo</h2>
+        <p class="section-subtitle">Regardez comment INGENIUS vous emmène de zéro à pro en cybersécurité.</p>
+        <div class="video-wrapper">
+            <video controls preload="metadata" poster="" aria-label="Vidéo de présentation INGENIUS">
+                <source src="https://progfacil.fr/videos/accueilpresentation1.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+        </div>
+    </div>
+</section>
+
 <!-- Features Section -->
 <section class="features" id="features">
     <h2 class="section-title">Compétences enseignées - Parcours</h2>
@@ -818,6 +832,36 @@
         border-radius: 50%;
         font-size: 12px;
         border: 2px solid #fff;
+    }
+
+    /* Video Présentation */
+    .video-presentation {
+        padding: 80px 20px;
+        background: linear-gradient(180deg, #060d1c 0%, #0a1328 100%);
+        text-align: center;
+    }
+    .video-presentation .section-subtitle {
+        color: #8dabc4;
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+    }
+    .video-wrapper {
+        max-width: 860px;
+        margin: 0 auto;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 2px solid rgba(0, 178, 255, 0.35);
+        box-shadow: 0 0 40px rgba(0, 178, 255, 0.18), 0 8px 32px rgba(0,0,0,0.55);
+    }
+    .video-wrapper video {
+        width: 100%;
+        display: block;
+        background: #000;
+    }
+    @@media (max-width: 768px) {
+        .video-presentation {
+            padding: 50px 15px;
+        }
     }
 </style>
 

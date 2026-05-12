@@ -3,6 +3,7 @@
     ViewData["Description"] = "Challenge Python pratique : filtrez les éléments d'une liste qui dépassent la moyenne calculée. Exercice interactif INGENIUS combinant calcul et filtrage en Python.";
     ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/PythonChallenges/Exercise6";
     var _baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    bool showPromoPopup = ViewBag.ShowPromoPopup == true;
 }
 
 @section HeadExtras {
@@ -31,6 +32,39 @@
   ]
 }
 </script>
+}
+
+
+@if (showPromoPopup)
+{
+    <div id="promoOverlay" class="promo-overlay" role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+        <div class="promo-popup card shadow border-success">
+            <button type="button" class="promo-close" id="promoClose" aria-label="Fermer">&times;</button>
+            <div class="card-header bg-success text-white text-center py-3">
+                <h3 id="promoTitle" class="mb-0"><i class="fas fa-gift mr-2"></i>Bravo !</h3>
+            </div>
+            <div class="card-body text-center position-relative">
+            <div class="snow-layer" aria-hidden="true">
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+                <span class="snowflake">❄</span>
+            </div>
+                <p class="mb-2">Tu as réussi l'exercice 1.</p>
+                <p class="mb-2">Code promo inscription de 30% de réduction:</p>
+                <div class="alert alert-success d-inline-block px-4 py-2 mb-3" role="status">
+                    <strong class="h5 mb-0">SUPER50</strong>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-success" id="promoOk">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 <div class="container mt-5">
@@ -110,4 +144,101 @@
         -ms-user-select: none;
         user-select: none;
     }
+
+  .promo-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        padding: 1rem;
+    }
+
+    .promo-popup {
+        position: relative;
+        width: 100%;
+        max-width: 440px;
+        overflow: hidden;
+        background-color: black;
+
+    }
+
+    .promo-close {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        z-index: 2;
+        border: 0;
+        background: transparent;
+        font-size: 26px;
+        line-height: 1;
+        cursor: pointer;
+        color: #fff;
+        opacity: 0.9;
+    }
+
+    .snow-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .snowflake {
+        position: absolute;
+        top: -12%;
+        color: rgba(40, 167, 69, 0.35);
+        font-size: 1.1rem;
+        opacity: 0.6;
+        animation: snowfall 5s linear infinite;
+    }
+
+    .snowflake:nth-child(1) { left: 8%; animation-delay: 0s; }
+    .snowflake:nth-child(2) { left: 20%; animation-delay: 0.8s; }
+    .snowflake:nth-child(3) { left: 33%; animation-delay: 1.4s; }
+    .snowflake:nth-child(4) { left: 46%; animation-delay: 2.1s; }
+    .snowflake:nth-child(5) { left: 60%; animation-delay: 0.4s; }
+    .snowflake:nth-child(6) { left: 73%; animation-delay: 1.7s; }
+    .snowflake:nth-child(7) { left: 86%; animation-delay: 2.7s; }
+    .snowflake:nth-child(8) { left: 94%; animation-delay: 3.2s; }
+
+    @@keyframes snowfall {
+        0% { transform: translateY(0) translateX(0); }
+        100% { transform: translateY(420px) translateX(20px); }
+    }
 </style>
+
+@if (showPromoPopup)
+{
+    <script>
+        (function () {
+            const overlay = document.getElementById('promoOverlay');
+            const closeButton = document.getElementById('promoClose');
+            const okButton = document.getElementById('promoOk');
+
+            function closePromo() {
+                if (overlay) {
+                    overlay.remove();
+                }
+            }
+
+            if (closeButton) {
+                closeButton.addEventListener('click', closePromo);
+            }
+
+            if (okButton) {
+                okButton.addEventListener('click', closePromo);
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', function (event) {
+                    if (event.target === overlay) {
+                        closePromo();
+                    }
+                });
+            }
+        })();
+    </script>
+}
