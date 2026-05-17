@@ -935,7 +935,7 @@ namespace CrudDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitLessonQuizAnswers(int lessonId, Dictionary<int, int> answers, Dictionary<int, string>? flagAnswers = null)
+        public async Task<IActionResult> SubmitLessonQuizAnswers([FromRoute] int lessonId, Dictionary<int, int> answers, Dictionary<int, string>? flagAnswers = null)
         {
             answers ??= new Dictionary<int, int>();
             flagAnswers ??= new Dictionary<int, string>();

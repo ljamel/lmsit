@@ -255,9 +255,8 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form asp-action="SubmitLessonQuizAnswers" method="post">
+                        <form asp-action="SubmitLessonQuizAnswers" asp-route-lessonId="@Model.Id" method="post">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="lessonId" value="@Model.Id" />
 
                             @foreach (var quiz in Model.Quizzes)
                             {
