@@ -935,10 +935,25 @@ namespace CrudDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitLessonQuizAnswers([FromRoute] int lessonId, Dictionary<int, int> answers, Dictionary<int, string>? flagAnswers = null)
+        public async Task<IActionResult> SubmitLessonQuizAnswers([FromRoute] int lessonId)
         {
-            answers ??= new Dictionary<int, int>();
-            flagAnswers ??= new Dictionary<int, string>();
+            // Parse manually to avoid DictionaryModelBinder crashing on non-int keys
+            var form = await Request.ReadFormAsync();
+            var answers = new Dictionary<int, int>();
+            var flagAnswers = new Dictionary<int, string>();
+            foreach (var key in form.Keys)
+            {
+                if (key.StartsWith("answers[") && key.EndsWith("]"))
+                {
+                    if (int.TryParse(key[8..^1], out var qId) && int.TryParse(form[key], out var oId))
+                        answers[qId] = oId;
+                }
+                else if (key.StartsWith("flagAnswers[") && key.EndsWith("]"))
+                {
+                    if (int.TryParse(key[12..^1], out var qId))
+                        flagAnswers[qId] = form[key].ToString();
+                }
+            }
 
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(userId))
