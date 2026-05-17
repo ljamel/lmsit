@@ -48,7 +48,7 @@ namespace CrudDemo.Controllers
                 .OrderByDescending(s => s.StartDate)
                 .FirstOrDefaultAsync();
 
-            var currentSubscriptionPriceEur = 19m;
+            var currentSubscriptionPriceEur = 249m;
 
             var quizAttempts = 0;
             var quizCorrectAnswers = 0;

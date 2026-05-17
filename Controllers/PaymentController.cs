@@ -56,23 +56,19 @@ namespace CrudDemo.Controllers
                             Currency = "eur",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Abonnement Mensuel - Accès Illimité",
+                                Name = "Accès à Vie - Accès Illimité",
                                 Description = 
                                 "• 1 heure de visio pour définir votre parcours.\u2028" +
                                 "• Garantie satisfait ou remboursé.\u2028" +
                                 "• Ajout de contenu personnalisé selon vos demandes.\u2028" +
                                 "• Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
                             },
-                            UnitAmount = 1900, // 19 EUR en centimes
-                            Recurring = new SessionLineItemPriceDataRecurringOptions
-                            {
-                                Interval = "month",
-                            }
+                            UnitAmount = 24900, // 249 EUR en centimes
                         },
                         Quantity = 1,
                     },
                 },
-                Mode = "subscription",
+                Mode = "payment",
                 BillingAddressCollection = "auto",
                 Locale = "fr",
                 AllowPromotionCodes = true,
@@ -96,9 +92,11 @@ namespace CrudDemo.Controllers
             if (session.PaymentStatus == "paid" || session.Status == "complete")
             {
                 // Récupérer l'email depuis le customer Stripe
-                string? email = null;
-                
-                if (!string.IsNullOrEmpty(session.CustomerId))
+                // Priorité : CustomerDetails.Email (payment mode) > CustomerEmail > CustomerId API call
+                string? email = session.CustomerDetails?.Email
+                             ?? session.CustomerEmail;
+
+                if (string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(session.CustomerId))
                 {
                     var customerService = new Stripe.CustomerService();
                     var customer = await customerService.GetAsync(session.CustomerId);
@@ -159,19 +157,15 @@ namespace CrudDemo.Controllers
                             Currency = "eur",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Abonnement Mensuel - Accès Illimité",
+                                Name = "Accès à Vie - Accès Illimité",
                                 Description = "Accès complet à tous les cours de la plateforme",
                             },
-                            UnitAmount = 1900, // 19 EUR en centimes
-                            Recurring = new SessionLineItemPriceDataRecurringOptions
-                            {
-                                Interval = "month",
-                            }
+                            UnitAmount = 24900, // 249 EUR en centimes
                         },
                         Quantity = 1,
                     },
                 },
-                Mode = "subscription",
+                Mode = "payment",
                 BillingAddressCollection = "auto",
                 Locale = "fr",
                 AllowPromotionCodes = true,
@@ -222,8 +216,8 @@ namespace CrudDemo.Controllers
                         await _emailService.SendSubscriptionEmailAsync(
                             userId, 
                             userId.Split('@')[0], 
-                            "Abonnement Mensuel - Accès Illimité", 
-                            19.00m);
+                            "Accès à Vie - Accès Illimité", 
+                            249.00m);
                     }
                     catch (Exception ex)
                     {
@@ -231,10 +225,13 @@ namespace CrudDemo.Controllers
                         // Ne pas bloquer le processus si l'email échoue
                     }
                 }
+
+                TempData["Success"] = "Votre accès à vie est activé ! Bienvenue sur la plateforme.";
+                return RedirectToAction("Index", "Courses");
             }
 
-            TempData["Success"] = "Votre abonnement est activé ! Bienvenue sur la plateforme.";
-            return View();
+            TempData["Error"] = "Le paiement n'a pas été confirmé. Veuillez réessayer ou contacter le support.";
+            return RedirectToAction("SubscriptionCheckout");
         }
 
         // Page d'annulation abonnement
