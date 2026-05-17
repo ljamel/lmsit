@@ -935,7 +935,7 @@ namespace CrudDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitLessonQuizAnswers([FromRoute] int lessonId)
+        public async Task<IActionResult> SubmitLessonQuizAnswers([FromQuery] int lessonId)
         {
             // Parse manually to avoid DictionaryModelBinder crashing on non-int keys
             var form = await Request.ReadFormAsync();
