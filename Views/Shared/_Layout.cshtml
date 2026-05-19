@@ -149,8 +149,23 @@
         </a>
         
         <ul class="nav-links" id="navLinks">
-            <li>
-                <a asp-area="" asp-controller="Home" asp-action="Outils" class="nav-link">CyberLab</a>
+            <li class="nav-item nav-dropdown">
+                <a href="/Home/Outils" class="nav-link nav-dropdown-toggle">CyberLab</a>
+                <ul class="nav-submenu">
+                    <li>
+                        <a href="/PythonChallenges/Exercise1" class="nav-submenu-link">Exercice (Python en ligne)</a>
+                    </li>
+                    <li class="submenu-separator"></li>
+                    <li>
+                        <a href="http://progfacil.fr:7681/" class="nav-submenu-link" target="_blank">BASH (bac à sable bash Linux)</a>
+                    </li>
+                    <li>
+                        <a href="http://progfacil.fr:8080/" class="nav-submenu-link" target="_blank">Hack mon site web</a>
+                    </li>
+                    <li>
+                        <a href="/Home/Orientation" class="nav-submenu-link">Quiz d'orientation en cybersécurité</a>
+                    </li>
+                </ul>
             </li>
             <li>
                 <a asp-area="" asp-controller="Home" asp-action="Actual" class="nav-link">Actualités</a>
@@ -160,7 +175,7 @@
             @if (User?.Identity?.IsAuthenticated ?? false)
             {
                 <li>
-                    <a asp-area="" asp-controller="Courses" asp-action="Index">COURS</a>
+                    <a asp-area="" asp-controller="Courses" asp-action="Index">ESPACE_MEMBRE</a>
                 </li>
             }
             @if ((User?.Identity?.IsAuthenticated ?? false) && (User?.IsInRole("Admin") ?? false))
