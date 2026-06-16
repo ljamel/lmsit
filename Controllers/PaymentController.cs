@@ -64,7 +64,7 @@ namespace CrudDemo.Controllers
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = "Abonnement Annuel - Accès Illimité",
-                                Description = "Accès complet aux formations et laboratoires. Essai gratuit de 3 jours, puis 249,00 EUR par an. Annulable à tout moment.",
+                                Description = "Accès complet aux formations et laboratoires. Essai de 3 jours, puis 249,00 EUR par an. Annulable à tout moment.",
                             },
                             UnitAmount = 24900, // 249 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
@@ -190,8 +190,8 @@ namespace CrudDemo.Controllers
                             Currency = "eur",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Abonnement Annuel - Accès Illimité",
-                                Description = "Accès complet à tous les cours de la plateforme. Gratuit pendant 3 jours, puis 249,00 EUR par an.",
+                                Name = "Abonnement Annuel - Accès Illimité avec accompagnement personnalisé via Discord",
+                                Description = "Accès complet à tous les cours de la plateforme. pendant 3 jours, puis 249,00 EUR par an.",
                             },
                             UnitAmount = 24900,
                             Recurring = new SessionLineItemPriceDataRecurringOptions
