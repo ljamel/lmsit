@@ -7,6 +7,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Security.Claims;
 using System.Text.Json;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace CrudDemo.Controllers
 {
@@ -20,8 +25,8 @@ namespace CrudDemo.Controllers
 		private readonly ApplicationDbContext _context;
 
 		public AccountController(
-			UserManager<IdentityUser> userManager, 
-			SignInManager<IdentityUser> signInManager, 
+			UserManager<IdentityUser> userManager,
+			SignInManager<IdentityUser> signInManager,
 			RoleManager<IdentityRole> roleManager,
 			IEmailService emailService,
 			ILogger<AccountController> logger,
@@ -35,37 +40,32 @@ namespace CrudDemo.Controllers
 			_context = context;
 		}
 
-// GET: Account/Register - Redirige directement vers Stripe
-	public IActionResult Register()
-	{
-		if (User.Identity?.IsAuthenticated == true)
+		// GET: Account/Register
+		public IActionResult Register()
 		{
-			return RedirectToAction("Index", "Courses");
+			if (User.Identity?.IsAuthenticated == true)
+			{
+				return RedirectToAction("Index", "Courses");
+			}
+
+			var isFirstUser = !_userManager.Users.Any();
+
+			if (isFirstUser)
+			{
+				return View("RegisterForm");
+			}
+
+			return RedirectToAction("CreatePreRegistrationSession", "Payment");
 		}
 
-		// Vérifier si c'est le premier utilisateur (Admin)
-		var isFirstUser = !_userManager.Users.Any();
-
-		if (isFirstUser)
-		{
-			// Premier utilisateur (Admin) - accès direct au formulaire
-			return View("RegisterForm");
-		}
-
-		// Rediriger directement vers la création de session Stripe
-		return RedirectToAction("CreatePreRegistrationSession", "Payment");
-		}
-
-		// GET: Account/RegisterForm - Formulaire accessible APRÈS paiement
+		// GET: Account/RegisterForm
 		public IActionResult RegisterForm(string? sessionId)
 		{
-			// Vérifier si c'est le premier utilisateur (Admin)
 			var isFirstUser = !_userManager.Users.Any();
 
 			if (!isFirstUser && string.IsNullOrEmpty(sessionId))
 			{
-				// Pas de session de paiement - rediriger vers le paiement
-				TempData["Error"] = "Vous devez d'abord effectuer le paiement.";
+				TempData["Error"] = "Vous devez d'abord valider votre accès d'essai de 3 jours pour 1 euro.";
 				return RedirectToAction("PreRegistrationCheckout", "Payment");
 			}
 
@@ -74,24 +74,21 @@ namespace CrudDemo.Controllers
 			return View();
 		}
 
-		// POST: Account/RegisterForm - Créer le compte après paiement
+		// POST: Account/RegisterForm
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> RegisterForm(RegisterViewModel model, string? sessionId)
 		{
 			if (ModelState.IsValid)
 			{
-				// Vérifier si c'est le premier utilisateur (Admin)
 				var isFirstUser = !_userManager.Users.Any();
 
-				// Si ce n'est pas le premier utilisateur, vérifier la session de paiement
 				if (!isFirstUser && string.IsNullOrEmpty(sessionId))
 				{
-					ModelState.AddModelError("", "Session de paiement invalide. Veuillez recommencer.");
+					ModelState.AddModelError("", "Session d'abonnement d'essai invalide. Veuillez recommencer.");
 					return RedirectToAction("Register");
 				}
 
-				// Vérifier si l'utilisateur existe déjà
 				var existingUser = await _userManager.FindByEmailAsync(model.Email);
 				if (existingUser != null)
 				{
@@ -104,29 +101,68 @@ namespace CrudDemo.Controllers
 
 				if (result.Succeeded)
 				{
-					// Créer l'abonnement si ce n'est pas le premier utilisateur
-					if (!isFirstUser && !string.IsNullOrEmpty(sessionId))
+					if (!isFirstUser)
 					{
 						var stripeSubscriptionId = TempData["StripeSubscriptionId"]?.ToString();
 						var stripeCustomerId = TempData["StripeCustomerId"]?.ToString();
-						
-						if (!string.IsNullOrEmpty(stripeSubscriptionId))
+
+						string? effectiveSessionId = sessionId;
+						if (stripeSubscriptionId != null && stripeSubscriptionId.StartsWith("cs_"))
+						{
+							effectiveSessionId = stripeSubscriptionId;
+							stripeSubscriptionId = null;
+						}
+
+						if (!string.IsNullOrEmpty(effectiveSessionId))
+						{
+							try
+							{
+								var sessionService = new Stripe.Checkout.SessionService();
+								var stripeSession = await sessionService.GetAsync(effectiveSessionId);
+
+								stripeCustomerId = stripeSession.CustomerId;
+								stripeSubscriptionId = stripeSession.SubscriptionId;
+							}
+							catch (Exception ex)
+							{
+								_logger.LogError(ex, "Erreur lors de la récupération de la session {SessionId} dans RegisterForm", effectiveSessionId);
+							}
+						}
+						else if (!string.IsNullOrEmpty(stripeSubscriptionId) && string.IsNullOrEmpty(stripeCustomerId))
+						{
+							try
+							{
+								var subscriptionService = new Stripe.SubscriptionService();
+								var stripeSubscription = await subscriptionService.GetAsync(stripeSubscriptionId);
+								stripeCustomerId = stripeSubscription.CustomerId;
+							}
+							catch (Exception ex)
+							{
+								_logger.LogError(ex, "Erreur lors de la récupération de l'abonnement {SubscriptionId} dans RegisterForm", stripeSubscriptionId);
+							}
+						}
+
+						if (!string.IsNullOrEmpty(stripeSubscriptionId) && stripeSubscriptionId.StartsWith("sub_"))
 						{
 							var subscription = new Models.Subscription
 							{
 								UserId = user.Email!,
 								StripeSubscriptionId = stripeSubscriptionId,
 								StripeCustomerId = stripeCustomerId ?? "",
-								Status = "active",
+								Status = "trialing", // Conserve le statut trialing car la période d'essai est active
 								IsActive = true
 							};
-							
+
 							_context.Subscriptions.Add(subscription);
 							await _context.SaveChangesAsync();
 						}
+						else
+						{
+							_logger.LogCritical("Abonnement d'essai introuvable pour {Email} (Valeur lue : {SubId}).", user.Email, stripeSubscriptionId);
+							TempData["Warning"] = "Compte créé, mais la liaison avec vos 3 jours d'essai a échoué. Contactez le support.";
+						}
 					}
 
-					// Envoyer un email de bienvenue
 					try
 					{
 						await _emailService.SendRegistrationEmailAsync(user.Email!, model.Email);
@@ -147,7 +183,7 @@ namespace CrudDemo.Controllers
 					}
 
 					await _signInManager.SignInAsync(user, isPersistent: false);
-					TempData["Success"] = "Votre compte a été créé avec succès ! Bienvenue sur la plateforme.";
+					TempData["Success"] = "Votre compte a été configuré avec succès et vos 3 jours d'essai sont ouverts !";
 					return RedirectToAction("Index", "Home");
 				}
 
@@ -161,46 +197,81 @@ namespace CrudDemo.Controllers
 			return View(model);
 		}
 
-		// Créer automatiquement le compte après paiement avec mot de passe aléatoire
+		// CompleteRegistrationAfterPayment (Inscription automatique après paiement)
 		public async Task<IActionResult> CompleteRegistrationAfterPayment(string email)
 		{
-			// Vérifier si l'utilisateur existe déjà
 			var existingUser = await _userManager.FindByEmailAsync(email);
 			if (existingUser != null)
 			{
-				// L'utilisateur existe déjà, le connecter et rediriger vers changement de mot de passe
 				await _signInManager.SignInAsync(existingUser, isPersistent: false);
 				return RedirectToAction("SetPassword");
 			}
 
-			// Générer un mot de passe aléatoire sécurisé
 			var randomPassword = GenerateRandomPassword(16);
-			
+
 			var user = new IdentityUser { UserName = email, Email = email };
 			var result = await _userManager.CreateAsync(user, randomPassword);
 
 			if (result.Succeeded)
 			{
-				// Créer l'abonnement
 				var stripeSubscriptionId = TempData["StripeSubscriptionId"]?.ToString();
 				var stripeCustomerId = TempData["StripeCustomerId"]?.ToString();
-				
-				if (!string.IsNullOrEmpty(stripeSubscriptionId))
+
+				string? effectiveSessionId = null;
+				if (stripeSubscriptionId != null && stripeSubscriptionId.StartsWith("cs_"))
+				{
+					effectiveSessionId = stripeSubscriptionId;
+					stripeSubscriptionId = null;
+				}
+
+				if (!string.IsNullOrEmpty(effectiveSessionId))
+				{
+					try
+					{
+						var sessionService = new Stripe.Checkout.SessionService();
+						var stripeSession = await sessionService.GetAsync(effectiveSessionId);
+
+						stripeCustomerId = stripeSession.CustomerId;
+						stripeSubscriptionId = stripeSession.SubscriptionId;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Erreur lors du traitement Stripe dans CompleteRegistrationAfterPayment pour la session {SessionId}", effectiveSessionId);
+					}
+				}
+				else if (!string.IsNullOrEmpty(stripeSubscriptionId) && string.IsNullOrEmpty(stripeCustomerId))
+				{
+					try
+					{
+						var subscriptionService = new Stripe.SubscriptionService();
+						var stripeSubscription = await subscriptionService.GetAsync(stripeSubscriptionId);
+						stripeCustomerId = stripeSubscription.CustomerId;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Erreur lors de la récupération de l'abonnement Stripe {SubscriptionId} dans CompleteRegistrationAfterPayment", stripeSubscriptionId);
+					}
+				}
+
+				if (!string.IsNullOrEmpty(stripeSubscriptionId) && stripeSubscriptionId.StartsWith("sub_"))
 				{
 					var subscription = new Models.Subscription
 					{
 						UserId = user.Email!,
 						StripeSubscriptionId = stripeSubscriptionId,
 						StripeCustomerId = stripeCustomerId ?? "",
-						Status = "active",
+						Status = "trialing",
 						IsActive = true
 					};
-					
+
 					_context.Subscriptions.Add(subscription);
 					await _context.SaveChangesAsync();
 				}
+				else
+				{
+					_logger.LogCritical("Abonnement d'essai annuel introuvable lors de la création automatique pour {Email}.", email);
+				}
 
-				// Envoyer un email de bienvenue
 				try
 				{
 					await _emailService.SendRegistrationEmailAsync(user.Email!, email);
@@ -210,10 +281,9 @@ namespace CrudDemo.Controllers
 					_logger.LogError(ex, "Erreur lors de l'envoi de l'email de bienvenue à {Email}", user.Email);
 				}
 
-				// Connecter automatiquement l'utilisateur
 				await _signInManager.SignInAsync(user, isPersistent: false);
-				
-				TempData["Success"] = "Bienvenue ! Veuillez définir votre mot de passe pour sécuriser votre compte.";
+
+				TempData["Success"] = "Bienvenue ! Votre essai de 3 jours a été validé par votre paiement de 1 euro. Définissez votre mot de passe.";
 				return RedirectToAction("SetPassword");
 			}
 
@@ -221,18 +291,18 @@ namespace CrudDemo.Controllers
 			{
 				TempData["Error"] = error.Description;
 			}
-			
+
 			return RedirectToAction("Register");
 		}
 
-		// GET: Page pour définir le mot de passe
+		// GET: Account/SetPassword
 		[Microsoft.AspNetCore.Authorization.Authorize]
 		public IActionResult SetPassword()
 		{
 			return View();
 		}
 
-		// POST: Définir le nouveau mot de passe
+		// POST: Account/SetPassword
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[Microsoft.AspNetCore.Authorization.Authorize]
@@ -256,7 +326,6 @@ namespace CrudDemo.Controllers
 				return RedirectToAction("Login");
 			}
 
-			// Supprimer l'ancien mot de passe et définir le nouveau
 			var removeResult = await _userManager.RemovePasswordAsync(user);
 			if (removeResult.Succeeded)
 			{
@@ -283,7 +352,6 @@ namespace CrudDemo.Controllers
 			return View();
 		}
 
-		// Méthode pour générer un mot de passe aléatoire sécurisé
 		private string GenerateRandomPassword(int length)
 		{
 			const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
@@ -364,18 +432,15 @@ namespace CrudDemo.Controllers
 			var user = await _userManager.FindByEmailAsync(email);
 			if (user == null)
 			{
-				// Ne pas révéler que l'utilisateur n'existe pas
 				TempData["Success"] = "Si cette adresse email existe, un lien de réinitialisation a été envoyé.";
 				return RedirectToAction("ForgotPasswordConfirmation");
 			}
 
-			// Générer le token de réinitialisation
 			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-			var callbackUrl = Url.Action("ResetPassword", "Account", 
-				new { token = token, email = email }, 
+			var callbackUrl = Url.Action("ResetPassword", "Account",
+				new { token = token, email = email },
 				protocol: Request.Scheme);
 
-			// Envoyer l'email
 			try
 			{
 				await _emailService.SendEmailAsync(
@@ -427,7 +492,6 @@ namespace CrudDemo.Controllers
 			var user = await _userManager.FindByEmailAsync(model.Email);
 			if (user == null)
 			{
-				// Ne pas révéler que l'utilisateur n'existe pas
 				TempData["Success"] = "Votre mot de passe a été réinitialisé.";
 				return RedirectToAction("Login");
 			}
@@ -457,18 +521,14 @@ namespace CrudDemo.Controllers
 
 			const string claimType = "user_domain_preference";
 
-			// Supprimer les anciennes valeurs si elles existent
 			var existing = await _userManager.GetClaimsAsync(user);
 			foreach (var c in existing.Where(c => c.Type == claimType))
 				await _userManager.RemoveClaimAsync(user, c);
 
-			// Normaliser : null ou liste vide = skip
 			var ids = moduleIds?.Where(id => id > 0).Distinct().ToList() ?? new List<int>();
-			var value = JsonSerializer.Serialize(ids); // ex: "[1,3]" ou "[]"
+			var value = JsonSerializer.Serialize(ids);
 
 			await _userManager.AddClaimAsync(user, new Claim(claimType, value));
-
-			// Rafraîchir le cookie d'auth pour que le claim soit visible immédiatement
 			await _signInManager.RefreshSignInAsync(user);
 
 			return Request.Headers["X-Requested-With"] == "XMLHttpRequest"

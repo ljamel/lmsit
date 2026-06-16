@@ -42,7 +42,7 @@ namespace CrudDemo.Controllers
             return View();
         }
 
-        // Créer une session de paiement pour la pré-inscription - Redirection directe vers Stripe avec essai de 3 jours et frais de 1 euro
+        // Créer une session de paiement pour la pré-inscription - Redirection directe vers Stripe
         [AllowAnonymous]
         [HttpPost]
         [HttpGet]
@@ -55,7 +55,6 @@ namespace CrudDemo.Controllers
                 PaymentMethodTypes = new List<string> { "card" },
                 LineItems = new List<SessionLineItemOptions>
                 {
-                    // Ligne 1 : L'abonnement annuel de 249 euros avec essai de 3 jours
                     new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
@@ -64,38 +63,24 @@ namespace CrudDemo.Controllers
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = "Abonnement Annuel - Accès Illimité",
-                                Description = "Accès complet aux formations et laboratoires. Essai gratuit de 3 jours, puis 249,00 EUR par an. Annulable à tout moment.",
+                                Description =
+                                "Détails de l'offre : " +
+                                "1 heure de visio pour définir votre parcours. " +
+                                "Garantie satisfait ou remboursé. " +
+                                "Ajout de contenu personnalisé selon vos demandes. " +
+                                "Une équipe professionnelle toujours à vos côtés pour vous accompagner tout au long de votre parcours de formation.",
                             },
                             UnitAmount = 24900, // 249 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
-                                Interval = "year",
+                                Interval = "year", // Facturation récurrente annuelle
                                 IntervalCount = 1
                             }
                         },
                         Quantity = 1,
                     },
-                    // Ligne 2 : Le prélèvement immédiat de 1 euro pour la validation de l'essai
-                    new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency = "eur",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = "Frais de validation et d'ouverture de l'essai",
-                                Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
-                            },
-                            UnitAmount = 100 // 1 EUR en centimes (paiement unique, pas de récurrence)
-                        },
-                        Quantity = 1,
-                    }
                 },
-                Mode = "subscription", // Obligatoire pour combiner abonnement et frais uniques
-                SubscriptionData = new SessionSubscriptionDataOptions
-                {
-                    TrialPeriodDays = 3 // Application des 3 jours d'essai sur la partie abonnement
-                },
+                Mode = "subscription", // Mode abonnement obligatoire pour générer un sub_...
                 BillingAddressCollection = "auto",
                 Locale = "fr",
                 AllowPromotionCodes = true,
@@ -116,7 +101,6 @@ namespace CrudDemo.Controllers
             var service = new SessionService();
             var session = await service.GetAsync(session_id);
 
-            // Comme un montant de 1 euro a été facturé, le statut passe à "paid"
             if (session.PaymentStatus == "paid" || session.Status == "complete")
             {
                 // Récupérer l'email depuis le customer Stripe
@@ -138,22 +122,23 @@ namespace CrudDemo.Controllers
                 // Validation de sécurité : l'ID d'abonnement doit être présent
                 if (string.IsNullOrEmpty(session.SubscriptionId))
                 {
-                    _logger.LogCritical("Erreur critique : La session d'abonnement {SessionId} n'a pas généré de SubscriptionId.", session_id);
-                    TempData["Error"] = "Le type de configuration de paiement retourné par Stripe est invalide. Veuillez contacter le support.";
+                    _logger.LogCritical("Erreur critique : La session de paiement d'abonnement annuel {SessionId} n'a pas généré de SubscriptionId.", session_id);
+                    TempData["Error"] = "Le type de paiement retourné par Stripe ne correspond pas à un abonnement annuel valide. Veuillez contacter le support.";
                     return RedirectToAction("Register", "Account");
                 }
 
                 // Stocker les informations de paiement pour créer l'abonnement
                 TempData["PaymentSessionId"] = session_id;
-                TempData["StripeSubscriptionId"] = session.SubscriptionId;
+                TempData["StripeSubscriptionId"] = session.SubscriptionId; // Contient obligatoirement le sub_...
                 TempData["StripeCustomerId"] = session.CustomerId ?? "";
                 TempData["UserEmail"] = email;
-                TempData["Success"] = "Paiement de 1 euro validé. Votre période d'essai de 3 jours a commencé. Veuillez définir votre mot de passe.";
+                TempData["Success"] = "Paiement réussi ! Votre compte a été créé. Veuillez définir votre mot de passe.";
 
+                // Rediriger vers la page de création du compte avec mot de passe aléatoire
                 return RedirectToAction("CompleteRegistrationAfterPayment", "Account", new { email = email });
             }
 
-            TempData["Error"] = "Le prélèvement initial de validation a échoué. Veuillez réessayer.";
+            TempData["Error"] = "Le paiement n'a pas été confirmé. Veuillez réessayer.";
             return RedirectToAction("Register", "Account");
         }
 
@@ -172,7 +157,7 @@ namespace CrudDemo.Controllers
             return View();
         }
 
-        // Créer une session de paiement pour l'abonnement annuel post-inscription avec 3 jours d'essai et prélèvement de 1 euro
+        // Créer une session de paiement pour l'abonnement annuel post-inscription
         [HttpPost]
         public async Task<IActionResult> CreateSubscriptionSession()
         {
@@ -191,9 +176,9 @@ namespace CrudDemo.Controllers
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = "Abonnement Annuel - Accès Illimité",
-                                Description = "Accès complet à tous les cours de la plateforme. Gratuit pendant 3 jours, puis 249,00 EUR par an.",
+                                Description = "Accès complet à tous les cours et laboratoires de la plateforme pendant un an.",
                             },
-                            UnitAmount = 24900,
+                            UnitAmount = 24900, // 249 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
                                 Interval = "year",
@@ -202,26 +187,8 @@ namespace CrudDemo.Controllers
                         },
                         Quantity = 1,
                     },
-                    new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency = "eur",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = "Frais de validation et d'ouverture de l'essai",
-                                Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
-                            },
-                            UnitAmount = 100
-                        },
-                        Quantity = 1,
-                    }
                 },
-                Mode = "subscription",
-                SubscriptionData = new SessionSubscriptionDataOptions
-                {
-                    TrialPeriodDays = 3
-                },
+                Mode = "subscription", // Passage obligatoire en mode abonnement
                 BillingAddressCollection = "auto",
                 Locale = "fr",
                 AllowPromotionCodes = true,
@@ -246,6 +213,7 @@ namespace CrudDemo.Controllers
             {
                 var userId = User.Identity?.Name ?? "";
 
+                // Vérifier si l'abonnement n'existe pas déjà avec AsNoTracking
                 var existingSubscription = await _context.Subscriptions
                     .AsNoTracking()
                     .Where(s => s.UserId == userId && s.IsActive)
@@ -255,28 +223,30 @@ namespace CrudDemo.Controllers
                 {
                     if (string.IsNullOrEmpty(session.SubscriptionId))
                     {
-                        _logger.LogCritical("Erreur critique : L'activation de l'essai annuel pour {UserId} a échoué car le SubscriptionId est nul.", userId);
-                        TempData["Error"] = "Une erreur technique est survenue lors de la configuration de votre abonnement.";
+                        _logger.LogCritical("Erreur critique : L'activation d'abonnement post-inscription pour {UserId} a échoué car le SubscriptionId est nul.", userId);
+                        TempData["Error"] = "Une erreur technique est survenue lors de la récupération de votre abonnement Stripe.";
                         return RedirectToAction("SubscriptionCheckout");
                     }
 
+                    // Créer l'abonnement annuel en base de données
                     var subscription = new Models.Subscription
                     {
                         UserId = userId,
-                        StripeSubscriptionId = session.SubscriptionId,
+                        StripeSubscriptionId = session.SubscriptionId, // Utilise strictement le sub_...
                         StripeCustomerId = session.CustomerId ?? "",
-                        Status = "trialing", // L'abonnement est considéré en cours d'essai chez Stripe
+                        Status = "active",
                         IsActive = true
                     };
                     _context.Subscriptions.Add(subscription);
                     await _context.SaveChangesAsync();
 
+                    // Envoyer un email de confirmation d'abonnement
                     try
                     {
                         await _emailService.SendSubscriptionEmailAsync(
                             userId,
                             userId.Split('@')[0],
-                            "Abonnement Annuel - Période d'essai lancée (Prélèvement de 1 EUR)",
+                            "Abonnement Annuel - Accès Illimité",
                             249.00m);
                     }
                     catch (Exception ex)
@@ -285,11 +255,11 @@ namespace CrudDemo.Controllers
                     }
                 }
 
-                TempData["Success"] = "Le prélèvement de 1 euro a réussi. Vos 3 jours d'essai sont actifs !";
+                TempData["Success"] = "Votre abonnement annuel est activé ! Bienvenue sur la plateforme.";
                 return RedirectToAction("Index", "Courses");
             }
 
-            TempData["Error"] = "Le paiement de validation a échoué. Veuillez réessayer.";
+            TempData["Error"] = "Le paiement n'a pas été confirmé. Veuillez réessayer ou contacter le support.";
             return RedirectToAction("SubscriptionCheckout");
         }
 
@@ -310,6 +280,7 @@ namespace CrudDemo.Controllers
             if (course == null)
                 return NotFound();
 
+            // Vérifier si l'utilisateur est déjà inscrit
             var userId = User.Identity?.Name ?? "";
             var existingEnrollment = await _context.CourseEnrollments
                 .AsNoTracking()
@@ -326,7 +297,7 @@ namespace CrudDemo.Controllers
             return View(course);
         }
 
-        // Créer une session de paiement Stripe pour un cours individuel (Achat à l'unité de 19€)
+        // Créer une session de paiement Stripe pour un cours individuel
         [HttpPost]
         public async Task<IActionResult> CreateCheckoutSession(int courseId)
         {
@@ -357,7 +328,7 @@ namespace CrudDemo.Controllers
                                     ? course.Description.Substring(0, 200) + "..."
                                     : course.Description,
                             },
-                            UnitAmount = 1900,
+                            UnitAmount = 1900, // Prix fixe : 19€ (en centimes)
                         },
                         Quantity = 1,
                     },
@@ -375,6 +346,7 @@ namespace CrudDemo.Controllers
             var service = new SessionService();
             var session = await service.CreateAsync(options);
 
+            // Enregistrer le paiement en attente
             var payment = new Payment
             {
                 UserId = User.Identity?.Name ?? "",

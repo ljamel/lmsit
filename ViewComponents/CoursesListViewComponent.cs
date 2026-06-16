@@ -197,7 +197,7 @@ public class CoursesListViewComponent : ViewComponent
             return false;
         }
 
-        if (subscription.IsActive && subscription.Status == "active")
+        if (subscription.IsActive && subscription.Status == "active" || subscription.Status == "trialing")
         {
             return true;
         }
