@@ -143,6 +143,7 @@
 
 @section Scripts {
     <script>
+        // Premier bloc : Animation des confettis et défilement
         (() => {
             const hasResult = @(string.IsNullOrWhiteSpace(orientationRole) ? "false" : "true");
             if (!hasResult) {
@@ -177,22 +178,28 @@
             }, 4200);
         })();
 
+        // Second bloc : Suivi de l'engagement de la leçon (Corrigé et sécurisé)
         (() => {
-            const courseId = @courseId;
-            const lessonId = @Model.Id;
-            const trackingDelayMs = 4 * 60 * 1000;
-            const retryDelayMs = 30 * 1000;
+            // Conversion explicite pour parer aux injections brutes de Razor
+            const courseId = parseInt('@courseId', 10);
+            const lessonId = parseInt('@Model.Id', 10);
+            
+            const trackingDelayMs = 4000; 
+            const retryDelayMs = 30 * 1000;        // 30 secondes
             const storageStartKey = `lesson_engagement_start_${lessonId}`;
             const storageTrackedKey = `lesson_engagement_tracked_${lessonId}`;
             let hasTracked = false;
 
             const trackEngagement = async () => {
-                if (hasTracked || !Number.isInteger(courseId) || courseId <= 0 || !Number.isInteger(lessonId) || lessonId <= 0) {
+                // Validation robuste des identifiants numériques
+                if (hasTracked || isNaN(courseId) || courseId <= 0 || isNaN(lessonId) || lessonId <= 0) {
+                    console.warn("Suivi annulé : Identifiants invalides ou déjà validé.", { courseId, lessonId, hasTracked });
                     return;
                 }
 
                 try {
-                    const postResponse = await fetch('/Courses/TrackCourseEngagement', {
+                    console.log("Envoi de la requête de suivi (POST)...");
+                    const postResponse = await fetch('/Courses/TrackCourseEngagementInternalAsync', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -204,6 +211,7 @@
 
                     let ok = postResponse.ok;
                     if (!ok) {
+                        console.warn("Échec du POST, tentative de secours en GET...");
                         const getResponse = await fetch(`/Courses/TrackCourseEngagementGet?courseId=${courseId}&lessonId=${lessonId}`, {
                             method: 'GET',
                             credentials: 'same-origin'
@@ -212,18 +220,25 @@
                     }
 
                     if (ok) {
+                        console.log("Suivi de l'engagement mis à jour avec succès.");
                         hasTracked = true;
                         localStorage.setItem(storageTrackedKey, '1');
                         localStorage.removeItem(storageStartKey);
                         return;
+                    } else {
+                        console.error("Le serveur a retourné un code d'erreur HTTP.");
                     }
-                } catch {
+                } catch (error) {
+                    console.error("Erreur réseau ou technique lors du suivi :", error);
                 }
 
+                console.log(`Nouvelle tentative de suivi dans ${retryDelayMs / 1000} secondes.`);
                 window.setTimeout(trackEngagement, retryDelayMs);
             };
 
+            // Vérification initiale du statut de complétion
             if (localStorage.getItem(storageTrackedKey) === '1') {
+                console.log("Leçon déjà enregistrée localement.");
                 hasTracked = true;
                 return;
             }
@@ -239,11 +254,12 @@
 
             const elapsedMs = now - effectiveStart;
             const remainingMs = Math.max(0, trackingDelayMs - elapsedMs);
+
+            console.log(`Temps de visionnage écoulé : ${Math.floor(elapsedMs / 1000)}s. Planification du suivi dans ${remainingMs / 1000}s.`);
             window.setTimeout(trackEngagement, remainingMs);
         })();
     </script>
 }
-
 
 
             @if (Model.Quizzes != null && Model.Quizzes.Any())

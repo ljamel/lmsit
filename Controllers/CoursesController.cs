@@ -762,7 +762,7 @@ namespace CrudDemo.Controllers
             return View(lesson);
         }
 
-        [HttpPost]
+        [HttpPost("TrackCourseEngagement")]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> TrackCourseEngagement([FromBody] TrackCourseEngagementRequest request)
         {
@@ -770,7 +770,7 @@ namespace CrudDemo.Controllers
         }
 
         [HttpGet]
-        [IgnoreAntiforgeryToken]
+        [IgnoreAntiforgeryToken] 
         public async Task<IActionResult> TrackCourseEngagementGet(int courseId, int? lessonId = null)
         {
             return await TrackCourseEngagementInternalAsync(courseId, lessonId);
