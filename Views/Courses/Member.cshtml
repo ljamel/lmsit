@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Espace Membre";
     var subscription = Model.Subscription;
-    var isActiveSubscription = subscription?.IsActive == true && subscription.Status == "active";
+    var isActiveSubscription = subscription?.IsActive == true && subscription.Status == "active" || subscription?.Status == "trialing";
 }
 
 <div class="container mt-4">
