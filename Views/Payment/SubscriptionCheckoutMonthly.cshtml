@@ -1,0 +1,205 @@
+@{
+    ViewData["Title"] = "Abonnement";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg animated-card">
+                <div class="card-header gradient-header-subscription text-white">
+                    <h2 class="mb-0 text-center">
+                        <i class="fas fa-star"></i> Abonnement
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-info">
+                            @TempData["Message"]
+                        </div>
+                    }
+                    
+                    <div class="text-center mb-4 pricing-section">
+                        <div class="price-badge">
+                            <span class="price-tag">Votre abonnement à expiré</span>
+                        </div>
+
+                        <form asp-action="CreatePreRegistrationMonthlySession" method="post">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 animated-btn">
+                                <i class="fas fa-lock"></i> Procéder au paiement
+                            </button>
+                        </form>
+
+                        <p class="price-description">
+                            Accès illimité à tous les cours
+                        </p>
+                        <p class="price-description">
+                            Sans engagement - Annulez à tout moment - Contactez-nous en cas de difficulté.
+                        </p>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="feature-content">
+                    <ul class="list-unstyled content-panel active feature-list">
+                        <h3>Ce qui est inclus :</h3>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Accès illimité</strong> à tous les cours
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Nouveau contenu</strong> ajouté régulièrement
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong> Compétences</strong> directement applicables (projets réels)
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Support technique</strong> par email
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                                <strong>Apprenez</strong> à votre rythme, quand vous voulez
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                                <strong>Ressources</strong> téléchargeables (fichiers, templates)
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                                <strong>Gagnez</strong> Gagnez des mois d’apprentissage et de recherches
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                                <strong>Moins cher</strong> qu’un seul cours ailleurs et plus de contenue
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Rejoigner</strong> notre équipe de pentesteur pour progresser
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success fs-5 me-2"></i>
+                            <strong>Annulation</strong> à tout moment
+                        </li>
+                    </ul>
+                    </div>
+       
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt"></i> Paiement 100% sécurisé par Stripe
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gradient-header-subscription {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+    }
+    
+    .animated-card {
+        animation: slideUp 0.5s ease-out;
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .pricing-section {
+        position: relative;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+    
+    .price-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .price-tag {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 2rem;
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        letter-spacing: 1px;
+    }
+    
+    .price-display {
+        margin-top: 1.5rem;
+        font-weight: 900;
+        line-height: 1;
+        color: #2c3e50;
+    }
+    
+    .currency {
+        font-size: 2rem;
+        vertical-align: super;
+        color: #667eea;
+    }
+    
+    .price-amount {
+        font-size: 4.5rem;
+        color: #667eea;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .price-period {
+        font-size: 1.5rem;
+        color: #6c757d;
+        font-weight: 400;
+    }
+    
+    .price-description {
+        font-size: 1.1rem;
+        color: #495057;
+        margin-top: 1rem;
+        font-weight: 500;
+    }
+    
+    .animated-btn {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        cursor: pointer;
+    }
+    
+    .animated-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .list-unstyled li {
+        transition: transform 0.2s ease;
+    }
+    
+    .list-unstyled li:hover {
+        transform: translateX(5px);
+    }
+    
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

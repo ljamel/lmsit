@@ -485,5 +485,142 @@ namespace CrudDemo.Controllers
 
             return View(payments);
         }
+
+        // Page de choix ou d'attente pour l'abonnement mensuel (optionnel, calqué sur le modèle annuel)
+        [Authorize]
+        public IActionResult SubscriptionCheckoutMonthly()
+        {
+            return View();
+        }
+
+        // Créer une session de paiement pour l'abonnement MENSUEL post-inscription (Ex: 10€/mois)
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CreateMonthlySubscriptionSession()
+        {
+            var domain = $"{Request.Scheme}://{Request.Host}";
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    Currency = "eur",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "Abonnement Mensuel - Accès Illimité avec accompagnement personnalisé",
+                        Description = "Accès complet à tous les cours de la plateforme. 3 jours d'essai, puis 10,00 EUR par mois. Annulable à tout moment.",
+                    },
+                    UnitAmount = 1000, // 10,00 EUR en centimes
+                    Recurring = new SessionLineItemPriceDataRecurringOptions
+                    {
+                        Interval = "month", // <--- CONFIGURATION MENSUELLE
+                        IntervalCount = 1
+                    }
+                },
+                Quantity = 1,
+            },
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    Currency = "eur",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "Frais de validation et d'ouverture de l'essai",
+                        Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
+                    },
+                    UnitAmount = 100 // 1,00 EUR
+                },
+                Quantity = 1,
+            }
+        },
+                Mode = "subscription",
+                SubscriptionData = new SessionSubscriptionDataOptions
+                {
+                    TrialPeriodDays = 3
+                },
+                BillingAddressCollection = "auto",
+                Locale = "fr",
+                AllowPromotionCodes = true,
+                // On redirige vers la même méthode de succès générique qui saura lire les détails de Stripe
+                SuccessUrl = $"{domain}/Payment/SubscriptionSuccess?session_id={{CHECKOUT_SESSION_ID}}",
+                CancelUrl = $"{domain}/Payment/SubscriptionCancel",
+                CustomerEmail = User.Identity?.Name,
+            };
+
+            var service = new SessionService();
+            var session = await service.CreateAsync(options);
+
+            return Redirect(session.Url);
+        }
+
+        // Créer une session de paiement pour l'abonnement MENSUEL AVANT l'inscription
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> CreatePreRegistrationMonthlySession()
+        {
+            var domain = $"{Request.Scheme}://{Request.Host}";
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    Currency = "eur",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "Abonnement Mensuel - Accès Illimité",
+                        Description = "Accès complet aux formations et laboratoires. Essai de 3 jours, puis 10,00 EUR par mois. Annulable à tout moment.",
+                    },
+                    UnitAmount = 1000,
+                    Recurring = new SessionLineItemPriceDataRecurringOptions
+                    {
+                        Interval = "month", // <--- CONFIGURATION MENSUELLE
+                        IntervalCount = 1
+                    }
+                },
+                Quantity = 1,
+            },
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    Currency = "eur",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "Frais de validation et d'ouverture de l'essai",
+                        Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
+                    },
+                    UnitAmount = 100
+                },
+                Quantity = 1,
+            }
+        },
+                Mode = "subscription",
+                SubscriptionData = new SessionSubscriptionDataOptions
+                {
+                    TrialPeriodDays = 3
+                },
+                BillingAddressCollection = "auto",
+                Locale = "fr",
+                AllowPromotionCodes = true,
+                SuccessUrl = $"{domain}/Payment/PreRegistrationSuccess?session_id={{CHECKOUT_SESSION_ID}}",
+                CancelUrl = $"{domain}/Payment/PreRegistrationCancel",
+            };
+
+            var service = new SessionService();
+            var session = await service.CreateAsync(options);
+
+            return Redirect(session.Url);
+        }
     }
 }
