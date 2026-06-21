@@ -486,8 +486,7 @@ namespace CrudDemo.Controllers
             return View(payments);
         }
 
-        // Page de choix ou d'attente pour l'abonnement mensuel (optionnel, calqué sur le modèle annuel)
-        [Authorize]
+
         public IActionResult SubscriptionCheckoutMonthly()
         {
             return View();
@@ -495,7 +494,6 @@ namespace CrudDemo.Controllers
 
         // Créer une session de paiement pour l'abonnement MENSUEL post-inscription (Ex: 10€/mois)
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateMonthlySubscriptionSession()
         {
             var domain = $"{Request.Scheme}://{Request.Host}";
