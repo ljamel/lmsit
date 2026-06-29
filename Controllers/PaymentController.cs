@@ -55,7 +55,7 @@ namespace CrudDemo.Controllers
                 PaymentMethodTypes = new List<string> { "card" },
                 LineItems = new List<SessionLineItemOptions>
                 {
-                    // Ligne 1 : L'abonnement annuel de 249 euros avec essai de 3 jours
+                    // Ligne 1 : L'abonnement mensuel de 24 euros avec essai de 3 jours
                     new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
@@ -63,13 +63,13 @@ namespace CrudDemo.Controllers
                             Currency = "eur",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Abonnement Annuel - Accès Illimité",
-                                Description = "Accès complet aux formations et laboratoires. Essai de 3 jours, puis 249,00 EUR par an. Annulable à tout moment.",
+                                Name = "Abonnement Mensuel - Accès Illimité",
+                                Description = "Accès complet aux formations et laboratoires. Essai de 3 jours, puis 24,00 EUR par mois. Annulable à tout moment.",
                             },
-                            UnitAmount = 24900, // 249 EUR en centimes
+                            UnitAmount = 2400, // 24 EUR en centimes
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
-                                Interval = "year",
+                                Interval = "month",
                                 IntervalCount = 1
                             }
                         },
@@ -190,13 +190,13 @@ namespace CrudDemo.Controllers
                             Currency = "eur",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Abonnement Annuel - Accès Illimité avec accompagnement personnalisé via Discord",
-                                Description = "Accès complet à tous les cours de la plateforme. pendant 3 jours, puis 249,00 EUR par an.",
+                                Name = "Abonnement Mensuel - Accès Illimité avec accompagnement personnalisé via Discord",
+                                Description = "Accès complet à tous les cours de la plateforme. pendant 3 jours, puis 24,00 EUR par mois.",
                             },
-                            UnitAmount = 24900,
+                            UnitAmount = 2400,
                             Recurring = new SessionLineItemPriceDataRecurringOptions
                             {
-                                Interval = "year",
+                                Interval = "month",
                                 IntervalCount = 1
                             }
                         },
