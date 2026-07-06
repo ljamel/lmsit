@@ -18,6 +18,29 @@ namespace CrudDemo.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<CoursesController> _logger;
 
+        private async Task<decimal?> GetStripeMonthlyPriceEurAsync()
+        {
+            var priceId = _configuration["Stripe:MonthlyPriceId"];
+            if (string.IsNullOrWhiteSpace(priceId))
+                return null; // ou valeur par défaut
+
+            try
+            {
+                StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+                var priceService = new PriceService();
+                var price = await priceService.GetAsync(priceId);
+
+                decimal? amount = price.UnitAmountDecimal
+                    ?? (price.UnitAmount.HasValue ? price.UnitAmount.Value / 100m : (decimal?)null);
+
+                return amount;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public CoursesController(
             ApplicationDbContext context,
             UserManager<IdentityUser> userManager,
@@ -48,7 +71,8 @@ namespace CrudDemo.Controllers
                 .OrderByDescending(s => s.StartDate)
                 .FirstOrDefaultAsync();
 
-            var currentSubscriptionPriceEur = 249m;
+            var stripePrice = await GetStripeMonthlyPriceEurAsync();
+            var currentSubscriptionPriceEur = stripePrice ?? 24m;
 
             var quizAttempts = 0;
             var quizCorrectAnswers = 0;

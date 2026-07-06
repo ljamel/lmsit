@@ -276,8 +276,8 @@ namespace CrudDemo.Controllers
                         await _emailService.SendSubscriptionEmailAsync(
                             userId,
                             userId.Split('@')[0],
-                            "Abonnement Annuel - Période d'essai lancée (Prélèvement de 1 EUR)",
-                            249.00m);
+                            "Abonnement mensuel - Période d'essai lancée (Prélèvement de 1 EUR)",
+                            24.00m);
                     }
                     catch (Exception ex)
                     {
