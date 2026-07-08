@@ -30,6 +30,9 @@ namespace CrudDemo.Controllers
                 var priceService = new PriceService();
                 var price = await priceService.GetAsync(priceId);
 
+                Console.WriteLine(price);
+                Console.WriteLine($"Price ID: {price.Id}, Unit Amount: {price.UnitAmount}, Unit Amount Decimal: {price.UnitAmountDecimal}, Currency: {price.Currency}");
+
                 decimal? amount = price.UnitAmountDecimal
                     ?? (price.UnitAmount.HasValue ? price.UnitAmount.Value / 100m : (decimal?)null);
 
