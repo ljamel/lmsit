@@ -118,12 +118,26 @@ public class HomeController : Controller
             feeds
         );
 
+        // ZATAZ – actualité cybercriminalité francophone
+        await LoadRss(
+            "https://www.zataz.com/feed/",
+            "ZATAZ",
+            feeds
+        );
+
+        // The Hacker News – actualité cyber internationale
+        await LoadRss(
+            "https://feeds.feedburner.com/TheHackersNews",
+            "The Hacker News",
+            feeds
+        );
 
         // Decipher (pas de RSS officiel → à surveiller autrement)
         feeds.Add(new CyberFeedItem
         {
             Source = "Decipher",
             Title = "Consulter les dernières analyses cybersécurité",
+            Summary = "Analyses et enquêtes approfondies sur les menaces, vulnérabilités et tendances en cybersécurité, par la rédaction de Decipher.",
             Link = "https://decipher.sc/",
             PublishedDate = DateTime.UtcNow.ToString("yyyy-MM-dd")
         });
@@ -149,6 +163,7 @@ public class HomeController : Controller
                 {
                     Source = sourceName,
                     Title = item.Title.Text,
+                    Summary = BuildSummary(item),
                     Link = item.Links.FirstOrDefault()?.Uri.ToString(),
                     PublishedDate = item.PublishDate.UtcDateTime.ToString("yyyy-MM-dd")
                 });
@@ -158,6 +173,35 @@ public class HomeController : Controller
         {
             _logger.LogError($"Error loading RSS from {rssUrl}: {ex.Message}");
         }
+    }
+
+    private static string? BuildSummary(SyndicationItem item)
+    {
+        // Récupère le résumé depuis le flux RSS (Summary ou, à défaut, le premier contenu texte)
+        var rawSummary = item.Summary?.Text;
+
+        if (string.IsNullOrWhiteSpace(rawSummary) && item.Content is TextSyndicationContent textContent)
+        {
+            rawSummary = textContent.Text;
+        }
+
+        if (string.IsNullOrWhiteSpace(rawSummary))
+        {
+            return null;
+        }
+
+        // Nettoyage : suppression des balises HTML et décodage des entités
+        var withoutTags = System.Text.RegularExpressions.Regex.Replace(rawSummary, "<.*?>", " ");
+        var decoded = System.Net.WebUtility.HtmlDecode(withoutTags);
+        var collapsedWhitespace = System.Text.RegularExpressions.Regex.Replace(decoded, @"\s+", " ").Trim();
+
+        const int maxLength = 180;
+        if (collapsedWhitespace.Length > maxLength)
+        {
+            collapsedWhitespace = collapsedWhitespace[..maxLength].TrimEnd() + "…";
+        }
+
+        return collapsedWhitespace;
     }
 
     public IActionResult Privacy()

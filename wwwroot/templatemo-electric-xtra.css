@@ -345,13 +345,12 @@ https://templatemo.com/tm-596-electric-xtra
 
         /* Hero Section */
         .hero {
-            min-height: 100vh;
+            min-height: 40vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
-            padding: 80px 20px 20px;
         }
 
         .hero-content {
@@ -516,7 +515,7 @@ https://templatemo.com/tm-596-electric-xtra
 
         .cta-container {
             position: absolute;
-            bottom: 90px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
