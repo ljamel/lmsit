@@ -20,22 +20,9 @@
     var preferredModuleIds = ViewBag.PreferredModuleIds as HashSet<int> ?? new HashSet<int>();
 }
 
-<div class="menu-dashboard">
-    <div class="mb-3" aria-label="Progression des cours">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <small class="text-muted">Progression des leçons</small>
-            <small class="text-muted">@trackedLessonsCount/@totalLessonsCount (@courseProgressPercent%)</small>
-        </div>
-        <div class="progress" style="height: 8px;">
-            <div
-                class="progress-bar"
-                role="progressbar"
-                style="width: @courseProgressPercent%;"
-                aria-valuenow="@courseProgressPercent"
-                aria-valuemin="0"
-                aria-valuemax="100"></div>
-        </div>
-    </div>
+<div class="ingenius-shell">
+    <div class="menu-dashboard">
+    <aside class="ingenius-nav" id="applications-onboarding-section" data-app-onboarding="section">
 
 <a class="logo-link" href="/Courses">
         <svg class="logo-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -52,8 +39,15 @@
         <span class="logo-text">INGENIUS</span>
     </a>
 
-    <div id="applications-onboarding-section" data-app-onboarding="section">
-        <h2>APPLICATIONS</h2>
+    <a data-onboarding-app="cours"
+       id="ingenius-cours-toggle"
+       asp-controller="Courses"
+       asp-action="Index"
+       class="ingenius-nav-link ingenius-nav-active"
+       aria-expanded="false"
+       aria-controls="ingenius-courses-panel">
+        <i class="fa-solid fa-book-open"></i> Mes cours
+    </a>
 
         <div class="onboarding-arrow-indicator" aria-hidden="true">
             <span class="onboarding-arrow-track"></span>
@@ -98,55 +92,84 @@
         </div>
         @if (canAccessKaliSandbox)
         {
-            <a data-onboarding-app="kali" href="#" class="monBouton"><i class="fa-solid fa-computer"></i> KALI LINUX SANDBOX</a>
+            <a data-onboarding-app="kali" href="#" class="monBouton ingenius-nav-link"><i class="fa-solid fa-computer"></i> Kali Linux Sandbox</a>
         }
         else
         {
-            <a data-onboarding-app="kali" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> KALI LINUX SANDBOX <span class="premium-badge">PREMIUM</span></a>
+            <a data-onboarding-app="kali" class="premium-link ingenius-nav-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Kali Linux Sandbox <span class="premium-badge">PREMIUM</span></a>
+        }
+
+        <p class="ingenius-nav-section-label">Communauté</p>
+
+        @if (canAccessEntraide)
+        {
+            <a data-onboarding-app="entraide" class="ingenius-nav-link" href="https://discord.gg/ZJGDPfVwMt" target="_blank" rel="noopener"><i class="fas fa-comments"></i> Entraide</a>
+        }
+        else
+        {
+            <a data-onboarding-app="entraide" class="premium-link ingenius-nav-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Entraide <span class="premium-badge">PREMIUM</span></a>
         }
         @if (canAccessPremium)
         {
-            <a data-onboarding-app="event" asp-controller="Courses" asp-action="Event"><i class="fas fa-comments"></i> Evenement (live, chall, new)</a>
+            <a data-onboarding-app="event" class="ingenius-nav-link" asp-controller="Courses" asp-action="Event"><i class="fa-regular fa-calendar"></i> Évènements</a>
         }
         else
         {
-            <a data-onboarding-app="event" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Evenement (live, chall, new) <span class="premium-badge">PREMIUM</span></a>
+            <a data-onboarding-app="event" class="premium-link ingenius-nav-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Évènements <span class="premium-badge">PREMIUM</span></a>
         }
         @if (canAccessPremium)
         {
-            <a data-onboarding-app="ctf" asp-controller="Challenges" asp-action="Index"><i class="fa-solid fa-hat-cowboy"></i> Plateforme CTF guidé</a>
+            <a data-onboarding-app="ctf" class="ingenius-nav-link" asp-controller="Challenges" asp-action="Index"><i class="fa-solid fa-hat-cowboy"></i> Plateforme CTF guidé</a>
         }
         else
         {
-            <a data-onboarding-app="ctf" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Plateforme CTF <span class="premium-badge">PREMIUM</span></a>
+            <a data-onboarding-app="ctf" class="premium-link ingenius-nav-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Plateforme CTF guidé <span class="premium-badge">PREMIUM</span></a>
         }
         @if (canAccessPremium)
         {
-            <a data-onboarding-app="challenges" asp-controller="Courses" asp-action="Ctf">🎁 Challenges cadeau à gagner</a>
+            <a data-onboarding-app="challenges" class="ingenius-nav-link" asp-controller="Courses" asp-action="Ctf"><i class="fa-solid fa-gift"></i> Challenges cadeaux</a>
         }
         else
         {
-            <a data-onboarding-app="challenges" class="premium-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> 🎁 Challenges <span class="premium-badge">PREMIUM</span></a>
+            <a data-onboarding-app="challenges" class="premium-link ingenius-nav-link" href="/Payment/SubscriptionCheckout"><i class="fa-solid fa-crown"></i> Challenges cadeaux <span class="premium-badge">PREMIUM</span></a>
         }
 
         <a data-onboarding-app="certification"
            asp-controller="Courses"
            asp-action="@certificateAction"
-           class="certification-link @(isCertificateEligible ? "certification-ready" : "certification-pending")"
+           class="certification-link ingenius-cert-btn @(isCertificateEligible ? "certification-ready" : "certification-pending")"
            data-certification-toggle="@(isCertificateEligible ? "disabled" : "pending")"
            aria-expanded="@(isCertificateEligible ? "true" : "false")">
             <i class="fas fa-certificate"></i>
-            @(isCertificateEligible ? "Certification disponible" : "Certification (voir conditions)")
+            @(isCertificateEligible ? "Certification disponible" : "Certifications (conditions)")
         </a>
         <div class="certification-conditions @(isCertificateEligible ? "is-ready" : "is-pending") @(isCertificateEligible ? string.Empty : "d-none")"
              data-certification-conditions="@(isCertificateEligible ? "ready" : "pending")">
             <div><strong>Points:</strong> @earnedQuizPoints / @totalQuizPoints (@certificateScorePercent.ToString("0.0")%)</div>
             <div><strong>Quiz:</strong> @completedQuizCount / @totalQuizCount complétés</div>
-            <div class="conditions-text">Compléter les quiz et <a data-onboarding-app="ctf" asp-controller="Challenges" asp-action="Index">Plateforme CTF</a> avec un score minimal de 80 %.</div>
+            <div class="conditions-text">Compléter les exercices avec un score minimal de 80 %.</div>
         </div>
+
+        <div class="ingenius-nav-progress mb-3" aria-label="Progression des cours">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted">Progression des leçons</small>
+                <small class="text-muted">@trackedLessonsCount/@totalLessonsCount (@courseProgressPercent%)</small>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div
+                    class="progress-bar"
+                    role="progressbar"
+                    style="width: @courseProgressPercent%;"
+                    aria-valuenow="@courseProgressPercent"
+                    aria-valuemin="0"
+                    aria-valuemax="100"></div>
+            </div>
+        </div>
+    </aside>
     </div>
 
-    <h2 data-onboarding-app="cours">COURS</h2>
+    <section class="ingenius-courses-panel d-none" id="ingenius-courses-panel">
+    <h2>Mes cours</h2>
 
     @{
         var lessonSearchTerm = (Context.Request.Query["lessonSearch"].ToString() ?? string.Empty).Trim();
@@ -180,7 +203,7 @@
                 name="lessonSearch"
                 type="search"
                 class="form-control"
-                placeholder="Ex: sécurité, réseau, injection"
+                placeholder="Ex : sécurité, réseaux, ..."
                 value="@lessonSearchTerm"
                 aria-label="Chercher une leçon"/><br/>
             <button data-onboarding-app="rechercher" class="btn btn-primary" type="submit">Rechercher</button>
@@ -199,7 +222,7 @@
     }
     else
     {
-        <div class="row">
+        <div class="ingenius-course-tree">
 
             @{ var module = 0; }
             @foreach (var course in Model)
@@ -219,113 +242,114 @@
                     }
                 }
 
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-footer bg-white border-top">
-                            @if (isLockedCourse)
-                            {
-                                <a class="premium-link" href="/Payment/SubscriptionCheckout">
-                                    <i class="fa-solid fa-crown"></i> @course.Title <span class="premium-badge">PREMIUM</span>
-                                </a>
-                            }
-                            else
-                            {
-                                <a
-                                    asp-controller="Courses"
-                                    asp-action="Details"
-                                    asp-route-id="@course.Id">
-                                    <i class="fas fa-eye me-1"></i>
-                                    @course.Title
-                                </a>
-                            }
+                <div class="ingenius-course-block">
+                    @if (isLockedCourse)
+                    {
+                        <a class="ingenius-course-title premium-link" href="/Payment/SubscriptionCheckout">
+                            <i class="fa-solid fa-crown"></i> @course.Title <span class="premium-badge">PREMIUM</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a
+                            class="ingenius-course-title"
+                            asp-controller="Courses"
+                            asp-action="Details"
+                            asp-route-id="@course.Id">
+                            @course.Title
+                        </a>
+                    }
 
-                            @foreach (var m in modules)
-                            {
-                                var lessons = (m.Lessons ?? new List<CrudDemo.Models.Lesson>()).OrderBy(l => l.OrderIndex).ToList();
-                                if (hasLessonSearch)
+                    @foreach (var m in modules)
+                    {
+                        var lessons = (m.Lessons ?? new List<CrudDemo.Models.Lesson>()).OrderBy(l => l.OrderIndex).ToList();
+                        if (hasLessonSearch)
+                        {
+                            lessons = lessons
+                                .Where(l => lessonMatchesSearch(l))
+                                .OrderBy(l => l.Title != null && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                                .ThenBy(l => l.OrderIndex)
+                                .ToList();
+                        }
+
+                        var moduleCollapseId = "module-collapse-" + m.Id;
+                        var expandModule = hasLessonSearch && lessons.Any();
+
+                        <div class="ingenius-module">
+                            <a
+                                class="ingenius-module-header @(preferredModuleIds.Contains(m.Id) ? "module-preferred-title" : string.Empty)"
+                                data-bs-toggle="collapse"
+                                href="#@moduleCollapseId"
+                                role="button"
+                                aria-expanded="@(expandModule ? "true" : "false")"
+                                aria-controls="@moduleCollapseId">
+                                <i class="fas fa-chevron-right ingenius-module-chevron"></i>
+                                @if (preferredModuleIds.Contains(m.Id))
                                 {
-                                    lessons = lessons
-                                        .Where(l => lessonMatchesSearch(l))
-                                        .OrderBy(l => l.Title != null && l.Title.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
-                                        .ThenBy(l => l.OrderIndex)
-                                        .ToList();
+                                    <i class="fas fa-star" style="color:#FFD700;"></i>
                                 }
+                                <span class="ingenius-module-title">@m.Title</span>
+                                @if (preferredModuleIds.Contains(m.Id))
+                                {
+                                    <span class="preferred-module-badge">Prioritaire</span>
+                                }
+                            </a>
 
-                                <div class="ms-3 mt-2">
-                                    <div class="fw-semibold @(preferredModuleIds.Contains(m.Id) ? "module-preferred-title" : "text-muted")">
-                                        @if (preferredModuleIds.Contains(m.Id))
+                            @if (lessons.Any())
+                            {
+                                <div class="collapse @(expandModule ? "show" : string.Empty)" id="@moduleCollapseId">
+                                    <ul class="ingenius-lesson-list">
+                                        @foreach (var lesson in lessons)
                                         {
-                                            <i class="fas fa-star" style="color:#FFD700;"></i>
-                                        }
-                                        else
-                                        {
-                                            <i class="fas fa-folder-open"></i>
-                                        }
-                                        @m.Title
-                                        @if (preferredModuleIds.Contains(m.Id))
-                                        {
-                                            <span class="preferred-module-badge">Prioritaire</span>
-                                        }
-                                    </div>
-
-                                    @if (lessons.Any())
-                                    {
-                                        <ul class="list-unstyled ms-3 mt-2">
-                                            @foreach (var lesson in lessons)
+                                            if (hasLessonSearch)
                                             {
-                                                if (hasLessonSearch)
-                                                {
-                                                    hasAnyLessonMatch = true;
-                                                }
-
-                                                var isSelectedLesson = currentAction.Equals("Lesson", StringComparison.OrdinalIgnoreCase)
-                                                    && hasCurrentId
-                                                    && currentId == lesson.Id;
-                                                var hasVideo = !string.IsNullOrWhiteSpace(lesson.Description)
-                                                    && (
-                                                        lesson.Description.Contains("<video", StringComparison.OrdinalIgnoreCase)
-                                                        || lesson.Description.Contains("<iframe", StringComparison.OrdinalIgnoreCase)
-                                                        || lesson.Description.Contains("&lt;video", StringComparison.OrdinalIgnoreCase)
-                                                        || lesson.Description.Contains("&lt;iframe", StringComparison.OrdinalIgnoreCase)
-                                                    );
-                                                var hasQuiz = lesson.Quizzes.Any();
-
-                                                <li class="mb-2">
-                                                    @if (isLockedCourse)
-                                                    {
-                                                        <a href="/Payment/SubscriptionCheckout" class="lesson-link premium-link">
-                                                            <i class="fa-solid fa-lock"></i> @lesson.Title <span class="premium-badge">PREMIUM</span>
-                                                        </a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
-                                                            @if (trackedLessonIds.Contains(lesson.Id))
-                                                            {
-                                                                <i class="fas fa-check text-success" aria-label="Leçon suivie"></i>
-                                                            }
-                                                            @if (hasVideo)
-                                                            {
-                                                                <i class="fas fa-play-circle"></i>
-                                                            }
-                                                            @if (hasQuiz)
-                                                            {
-                                                                <i class="fa-solid fa-circle-question" title="Quiz disponible"></i>
-                                                            }
-                                                            @lesson.Title
-                                                        </a>
-                                                    }
-                                                </li>
-
+                                                hasAnyLessonMatch = true;
                                             }
-                                        </ul>
-                                    }
+
+                                            var isSelectedLesson = currentAction.Equals("Lesson", StringComparison.OrdinalIgnoreCase)
+                                                && hasCurrentId
+                                                && currentId == lesson.Id;
+                                            var hasVideo = !string.IsNullOrWhiteSpace(lesson.Description)
+                                                && (
+                                                    lesson.Description.Contains("<video", StringComparison.OrdinalIgnoreCase)
+                                                    || lesson.Description.Contains("<iframe", StringComparison.OrdinalIgnoreCase)
+                                                    || lesson.Description.Contains("&lt;video", StringComparison.OrdinalIgnoreCase)
+                                                    || lesson.Description.Contains("&lt;iframe", StringComparison.OrdinalIgnoreCase)
+                                                );
+                                            var hasQuiz = lesson.Quizzes.Any();
+
+                                            <li>
+                                                @if (isLockedCourse)
+                                                {
+                                                    <a href="/Payment/SubscriptionCheckout" class="lesson-link premium-link">
+                                                        <i class="fa-solid fa-lock"></i> @lesson.Title <span class="premium-badge">PREMIUM</span>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-action="Lesson" asp-route-id="@lesson.Id" class="lesson-link @(isSelectedLesson ? "menu-item-active" : string.Empty)">
+                                                        @if (trackedLessonIds.Contains(lesson.Id))
+                                                        {
+                                                            <i class="fas fa-check text-success" aria-label="Leçon suivie"></i>
+                                                        }
+                                                        @if (hasVideo)
+                                                        {
+                                                            <i class="fas fa-play-circle"></i>
+                                                        }
+                                                        @if (hasQuiz)
+                                                        {
+                                                            <i class="fa-solid fa-circle-question" title="Quiz disponible"></i>
+                                                        }
+                                                        @lesson.Title
+                                                    </a>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
                                 </div>
                             }
-
-
                         </div>
-                    </div>
+                    }
                 </div>
             }
         </div>
@@ -337,9 +361,223 @@
             </div>
         }
     }
+    </section>
 </div>
 
+<script>
+    (function () {
+        var coursToggle = document.getElementById('ingenius-cours-toggle');
+        var coursesPanel = document.getElementById('ingenius-courses-panel');
+
+        if (!coursToggle || !coursesPanel) {
+            return;
+        }
+
+        coursToggle.addEventListener('click', function (event) {
+            event.preventDefault();
+            var isHidden = coursesPanel.classList.toggle('d-none');
+            coursToggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+        });
+    })();
+</script>
+
 <style>
+    /* ===== Ingenius sidebar / panneau cours ===== */
+    .ingenius-shell {
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .ingenius-shell > .menu-dashboard {
+        width: auto;
+        flex: 0 0 auto;
+        padding: 14px;
+        margin: 0;
+        height: 100%;
+    }
+
+    .ingenius-nav {
+        width: 210px;
+        box-sizing: border-box;
+    }
+
+    .ingenius-nav .logo-link {
+        margin-bottom: 14px;
+    }
+
+    .ingenius-nav-link {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 10px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-size: 11px;
+        text-transform: none;
+    }
+
+    .ingenius-nav-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .ingenius-nav-link.ingenius-nav-active {
+        border-color: #ff7a2f;
+        color: #ff7a2f !important;
+        background: rgba(255, 122, 47, 0.1);
+        font-weight: 700;
+    }
+
+    .ingenius-nav-section-label {
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.55);
+        margin: 16px 4px 6px;
+        font-weight: 700;
+    }
+
+    .ingenius-cert-btn {
+        margin-top: 18px;
+        border-radius: 999px !important;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+    }
+
+    .ingenius-nav-progress {
+        margin-top: 20px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .ingenius-nav-progress small.text-muted {
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-size: 10px;
+        text-transform: none;
+    }
+
+    .ingenius-nav-progress .progress {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .ingenius-courses-panel {
+        flex: 1;
+        min-width: 0;
+        background: #E7E8EC;
+        color: #23262f;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 4px;
+        box-sizing: border-box;
+        border: 1px solid #23262f;
+        max-width: 330px;
+    }
+
+    .ingenius-courses-panel h2 {
+        color: #1f2430 !important;
+        font-size: 15px;
+        font-weight: 800;
+        text-transform: none !important;
+        margin-bottom: 12px;
+    }
+
+    .ingenius-courses-panel a {
+        text-transform: none;
+        color: inherit;
+    }
+
+    .ingenius-course-block {
+        margin-bottom: 14px;
+    }
+
+    .ingenius-course-title {
+        display: block;
+        color: #1f9bff !important;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        text-transform: uppercase !important;
+        margin: 10px 0 6px;
+    }
+
+    .ingenius-module-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 4px;
+        border-radius: 6px;
+        color: #2d3340 !important;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .ingenius-module-header:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .ingenius-module-chevron {
+        font-size: 10px;
+        color: #8a93a6;
+        transition: transform 0.2s ease;
+        width: 10px;
+    }
+
+    .ingenius-module-header[aria-expanded="true"] .ingenius-module-chevron {
+        transform: rotate(90deg);
+    }
+
+    .ingenius-lesson-list {
+        list-style: none;
+        margin: 2px 0 8px 26px;
+        padding: 0;
+    }
+
+    .ingenius-lesson-list li {
+        margin: 3px 0;
+    }
+
+    .ingenius-lesson-list a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #3a4150 !important;
+        font-weight: 500;
+        font-size: 11.5px;
+        padding: 3px 6px;
+        border-radius: 6px;
+    }
+
+    .ingenius-lesson-list a:hover {
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+    .ingenius-lesson-list a.menu-item-active {
+        color: #ff7a2f !important;
+        font-weight: 700;
+        background: rgba(255, 122, 47, 0.1);
+    }
+
+    @@media (max-width: 860px) {
+        .ingenius-shell {
+            flex-direction: column;
+        }
+
+        .ingenius-shell > .menu-dashboard {
+            width: 100%;
+        }
+
+        .ingenius-nav {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+    }
+    /* ===== Fin layout Ingenius ===== */
+
     /* ===== Mise en évidence modules prioritaires ===== */
     .module-preferred-title {
         color: #FFD700 !important;

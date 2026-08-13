@@ -9,35 +9,214 @@
 }
 
 <div class="container mt-4">
-    <h1 class="mb-4">
-        <i class="fas fa-graduation-cap"></i>Bienvenue. Choisissez un cours.
+    <h1 class="mb-4 welcome-title">
+        <i class="fas fa-graduation-cap"></i>Bienvenue, choisissez un cours
     </h1>
-    
 
-    <div style="text-align: justify;">
-        <video controls="" width="100%"><source src="https://progfacil.fr/videos/bienvenue1.mp4"></video>
-        <p data-start="55" data-end="287">Bienvenue dans la le&ccedil;on <strong data-start="79" data-end="110">&laquo; Introduction au Hacking &raquo;</strong>. Dans cette le&ccedil;on, nous allons explorer les bases du hacking, y compris ce qu&rsquo;est le hacking, les diff&eacute;rents types de hackers et les consid&eacute;rations &eacute;thiques li&eacute;es au hacking.</p>
-        <br /><p data-start="289" data-end="797">Le hacking consiste en l&rsquo;acc&egrave;s ou le contr&ocirc;le non conventionnel de syst&egrave;mes informatiques ou de r&eacute;seaux. Il existe trois principaux types de hackers : les <strong data-start="439" data-end="460">hackers white hat</strong>, qui utilisent leurs comp&eacute;tences &agrave; des fins positives, les <strong data-start="520" data-end="541">hackers black hat</strong>, qui utilisent leurs comp&eacute;tences &agrave; des fins malveillantes, et les <strong data-start="608" data-end="628">hackers grey hat</strong>, qui se situent quelque part entre les deux. Il est important de comprendre les implications &eacute;thiques du hacking et d&rsquo;utiliser ses comp&eacute;tences de mani&egrave;re responsable.</p>
-        <br /><p data-start="799" data-end="1199">En conclusion, le hacking est un sujet complexe et controvers&eacute; qui n&eacute;cessite une compr&eacute;hension approfondie de la technologie et de l&rsquo;&eacute;thique. En apprenant les diff&eacute;rents types de hackers et les consid&eacute;rations &eacute;thiques impliqu&eacute;es, vous pouvez prendre des d&eacute;cisions &eacute;clair&eacute;es sur la mani&egrave;re d&rsquo;utiliser vos comp&eacute;tences en hacking. N&rsquo;oubliez pas : avec un grand pouvoir vient une grande responsabilit&eacute;.</p>
+    <div class="intro-layout">
+        <div class="intro-video-card">
+            <video controls width="100%"><source src="https://progfacil.fr/videos/bienvenue1.mp4"></video>
+        </div>
+        <div class="intro-text-card">
+            <p data-start="55" data-end="287">Bienvenue sur la plateforme !. Nous sommes ravis de vous accueillir dans notre communauté dédiée à la cybersécurité et à votre montée en compétences.</p>
+            <ul data-start="1201" data-end="1436">
+                <li data-start="1201" data-end="1287">Le hacking consiste à comprendre le fonctionnement, contourner les sécurités ou exploiter des vulnérabilités. </li>
+                <li data-start="1288" data-end="1371">Il existe trois principaux types de hackers : white hat, black hat et grey hat.</li>
+                <li data-start="1372" data-end="1436">Comprendre les implications &eacute;thiques du hacking est crucial.</li>
+                <li data-start="1372" data-end="1436">Pour avancer et résoudre un problème, on avance va pas à pas.</li>
+            </ul>
+            <p class="intro-cta">A vous de choisir votre camp !</p>
+        </div>
     </div>
-    <ul data-start="1201" data-end="1436">
-        <li data-start="1201" data-end="1287">
-            <p data-start="1203" data-end="1287">Le hacking implique un acc&egrave;s non autoris&eacute; &agrave; des syst&egrave;mes ou r&eacute;seaux informatiques.</p>
-        </li>
-        <li data-start="1288" data-end="1371">
-            <p data-start="1290" data-end="1371">Il existe trois principaux types de hackers : white hat, black hat et grey hat.</p>
-        </li>
-        <li data-start="1372" data-end="1436">
-            <p data-start="1374" data-end="1436">Comprendre les implications &eacute;thiques du hacking est crucial.</p>
-        </li>
-        <li data-start="1372" data-end="1436">
-            <p data-start="1374" data-end="1436">Pour avancer et résoudre un problème, on avance va pas à pas.</p>
-        </li>
-    </ul>
-    <p>A vous de choisir votre camp !</p>
 
 
 <style>
+    .welcome-title {
+        color: #1b1f3b;
+        font-weight: 700;
+        font-size: 1.9rem;
+    }
+
+    .welcome-title i {
+        color: #FF5E00;
+        margin-right: .6rem;
+    }
+
+    /* Intro : vidéo + texte en deux colonnes */
+    .intro-layout {
+        display: flex;
+        align-items: stretch;
+        gap: 1.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+
+    .intro-video-card {
+        flex: 1 1 440px;
+        background: #0b0f19;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,.15);
+        display: flex;
+        align-items: center;
+    }
+
+    .intro-video-card video {
+        display: block;
+        width: 100%;
+        border-radius: 16px;
+    }
+
+    .intro-text-card {
+        flex: 1 1 380px;
+        color: #40454f;
+    }
+
+    .intro-text-card p {
+        margin-bottom: 1rem;
+    }
+
+    .intro-text-card ul {
+        padding-left: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .intro-text-card ul li {
+        margin-bottom: .4rem;
+    }
+
+    .intro-cta {
+        font-weight: 700;
+        color: #FF5E00;
+        margin-bottom: 0 !important;
+    }
+
+    /* Carte du quiz d'orientation */
+    .quiz-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 45px rgba(0,0,0,.08);
+    }
+
+    .quiz-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .quiz-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1b1f3b;
+        margin: 0;
+    }
+
+    .quiz-subtitle {
+        color: #8a8f98;
+        margin: .3rem 0 0;
+    }
+
+    .quiz-progress {
+        background: #eef3ff;
+        color: #0d6efd;
+        font-weight: 700;
+        font-size: .9rem;
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .quiz-step {
+        display: none;
+    }
+
+    .quiz-step.active {
+        display: block;
+        animation: quizStepIn .3s ease;
+    }
+
+    .quiz-step .question-title {
+        text-align: center;
+        color: #0d6efd;
+        font-size: 1.1rem;
+    }
+
+    @@keyframes quizStepIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quiz-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .quiz-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .7rem 1.5rem;
+        border-radius: 30px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all .2s ease;
+        font-size: .95rem;
+    }
+
+    .quiz-btn-prev {
+        background: #f1f2f6;
+        color: #8a8f98;
+    }
+
+    .quiz-btn-prev:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .quiz-btn-prev:not(:disabled):hover {
+        background: #e6e8ec;
+        color: #4b4b4b;
+    }
+
+    .quiz-btn-next {
+        background: linear-gradient(135deg, #FF5E00, #ff8a3d);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(255,94,0,.35);
+        margin-left: auto;
+    }
+
+    .quiz-btn-next:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(255,94,0,.45);
+    }
+
+    .quiz-step.shake {
+        animation: quizShake .4s ease;
+    }
+
+    @@keyframes quizShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+
+    @@media (max-width: 768px) {
+        .intro-layout {
+            flex-direction: column;
+        }
+
+        .quiz-card-header {
+            flex-direction: column;
+        }
+    }
+
     .orientation-quiz-card {
         border-radius: 1rem;
     }
@@ -124,17 +303,22 @@
 </style>
     <hr class="my-4" />
 
-    <h2 class="mb-3" id="orientation1" data-onboarding-app="orientation1">Quiz d’orientation métier cyber</h2>
-    <p class="text-muted">Répondez rapidement pour découvrir le métier cyber qui vous correspond le mieux.</p>
+    <div class="quiz-card @(string.IsNullOrWhiteSpace(orientationRole) ? "" : "d-none")" style="@(string.IsNullOrWhiteSpace(orientationRole) ? "" : "display:none;")">
+        <div class="quiz-card-header">
+            <div>
+                <h2 class="quiz-title" id="orientation1" data-onboarding-app="orientation1">Quiz d’orientation métier cyber</h2>
+                <p class="quiz-subtitle">Répondez rapidement pour découvrir le métier cyber qui vous correspond le mieux.</p>
+            </div>
+            <span class="quiz-progress" id="quizProgress">Q1/5</span>
+        </div>
 
-
-<div class="quiz-wrapper @(string.IsNullOrWhiteSpace(orientationRole) ? "" : "d-none")" style="@(string.IsNullOrWhiteSpace(orientationRole) ? "" : "display:none;")">
-    <form asp-action="OrientationQuizV2" method="post">
+        <div >
+    <form asp-action="OrientationQuizV2" method="post" id="orientationQuizForm">
         @Html.AntiForgeryToken()
         <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
 
-        <div class="question-group">
-            <label class="question-title fw-bold">1️⃣ Qu’est-ce qui vous attire le plus ?</label>
+        <div class="question-group quiz-step active" data-step="1">
+            <label class="question-title fw-bold">Qu’est-ce qui vous attire le plus ?</label>
 
             <input class="option-input" type="radio" name="q1" id="q1a" value="1" required>
             <label class="option-label" for="q1a">A) Comprendre comment les systèmes peuvent être piratés</label>
@@ -146,8 +330,8 @@
             <label class="option-label" for="q1c">C) Organiser les choses pour éviter les problèmes</label>
         </div>
 
-        <div class="question-group">
-            <label class="question-title fw-bold">2️⃣ Dans un jeu vidéo ou un film, vous êtes plutôt :</label>
+        <div class="question-group quiz-step" data-step="2">
+            <label class="question-title fw-bold">Dans un jeu vidéo ou un film, vous êtes plutôt :</label>
 
             <input class="option-input" type="radio" name="q2" id="q2a" value="1" required>
             <label class="option-label" for="q2a">A) Celui qui trouve les passages secrets et teste les failles</label>
@@ -159,8 +343,8 @@
             <label class="option-label" for="q2c">C) Celui qui planifie la stratégie et coordonne l’équipe</label>
         </div>
 
-        <div class="question-group">
-            <label class="question-title fw-bold">3️⃣ Face à un problème informatique, vous préférez :</label>
+        <div class="question-group quiz-step" data-step="3">
+            <label class="question-title fw-bold">Face à un problème informatique, vous préférez :</label>
 
             <input class="option-input" type="radio" name="q3" id="q3a" value="1" required>
             <label class="option-label" for="q3a">A) Chercher d’où vient la faille</label>
@@ -172,8 +356,8 @@
             <label class="option-label" for="q3c">C) Mettre en place des règles pour que ça ne se reproduise plus</label>
         </div>
 
-        <div class="question-group">
-            <label class="question-title fw-bold">4️⃣ Ce qui vous ressemble le plus :</label>
+        <div class="question-group quiz-step" data-step="4">
+            <label class="question-title fw-bold">Ce qui vous ressemble le plus :</label>
 
             <input class="option-input" type="radio" name="q4" id="q4a" value="1" required>
             <label class="option-label" for="q4a">A) Curieux(se), aimez tester et bidouiller</label>
@@ -185,8 +369,8 @@
             <label class="option-label" for="q4c">C) Organisé(e), méthodique, aimez structurer</label>
         </div>
 
-        <div class="question-group">
-            <label class="question-title fw-bold">5️⃣ Ce qui vous motive le plus dans un futur métier :</label>
+        <div class="question-group quiz-step" data-step="5">
+            <label class="question-title fw-bold">Ce qui vous motive le plus dans un futur métier :</label>
 
             <input class="option-input" type="radio" name="q5" id="q5a" value="1" required>
             <label class="option-label" for="q5a">A) Tester la sécurité des systèmes</label>
@@ -198,11 +382,17 @@
             <label class="option-label" for="q5c">C) Améliorer l’organisation et la sécurité globale</label>
         </div>
 
-        <button type="submit" class="btn-submit shadow">
-            VOIR MON ORIENTATION
-        </button>
+        <div class="quiz-nav">
+            <button type="button" id="quizPrev" class="quiz-btn quiz-btn-prev" disabled>
+                <i class="fas fa-arrow-left"></i> Précédent
+            </button>
+            <button type="button" id="quizNext" class="quiz-btn quiz-btn-next">
+                Suivant <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
     </form>
-</div>
+        </div>
+    </div>
 
     @if (!string.IsNullOrWhiteSpace(orientationRole))
     {
@@ -225,6 +415,61 @@
 </div>
 
 @section Scripts {
+    <script>
+        (() => {
+            const steps = Array.from(document.querySelectorAll('#orientationQuizForm .quiz-step'));
+            const progressEl = document.getElementById('quizProgress');
+            const prevBtn = document.getElementById('quizPrev');
+            const nextBtn = document.getElementById('quizNext');
+            const form = document.getElementById('orientationQuizForm');
+
+            if (steps.length && progressEl && prevBtn && nextBtn && form) {
+                let current = 0;
+                const total = steps.length;
+
+                const showStep = (index) => {
+                    steps.forEach((el, i) => el.classList.toggle('active', i === index));
+                    progressEl.textContent = `Q${index + 1}/${total}`;
+                    prevBtn.disabled = index === 0;
+                    const isLast = index === total - 1;
+                    nextBtn.innerHTML = isLast
+                        ? 'Valider <i class="fas fa-check"></i>'
+                        : 'Suivant <i class="fas fa-arrow-right"></i>';
+                    nextBtn.type = isLast ? 'submit' : 'button';
+                };
+
+                prevBtn.addEventListener('click', () => {
+                    if (current > 0) {
+                        current -= 1;
+                        showStep(current);
+                    }
+                });
+
+                nextBtn.addEventListener('click', (event) => {
+                    const currentStep = steps[current];
+                    const answered = currentStep.querySelector('input[type="radio"]:checked');
+
+                    if (!answered) {
+                        event.preventDefault();
+                        currentStep.classList.remove('shake');
+                        // Force reflow to restart the animation
+                        void currentStep.offsetWidth;
+                        currentStep.classList.add('shake');
+                        return;
+                    }
+
+                    if (current < total - 1) {
+                        event.preventDefault();
+                        current += 1;
+                        showStep(current);
+                    }
+                    // On the last step, nextBtn.type is 'submit' and the form submits normally.
+                });
+
+                showStep(current);
+            }
+        })();
+    </script>
     <script>
         (() => {
             const hasResult = @(string.IsNullOrWhiteSpace(orientationRole) ? "false" : "true");

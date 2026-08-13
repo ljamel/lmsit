@@ -43,54 +43,47 @@
                 display: flex;
                 align-items: center;
                 gap: 8px;
-                background: rgba(10, 10, 20, 0.55);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid rgba(255,255,255,0.12);
+                background: linear-gradient(135deg, #434c5e 0%, #2c3142 100%);
+                border: 1px solid rgba(255, 255, 255, 0.12);
                 border-radius: 50px;
-                padding: 6px 12px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+                padding: 6px 8px 6px 6px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+                font-family: "Inter", sans-serif;
             }
             .quickbar-btn {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
-                padding: 5px 14px;
+                gap: 7px;
+                padding: 7px 16px;
                 border-radius: 50px;
-                font-size: 0.8rem;
+                font-size: 11px;
                 font-weight: 600;
                 letter-spacing: 0.02em;
                 text-decoration: none;
-                transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+                text-transform: none;
+                transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
                 white-space: nowrap;
-            }
-            .quickbar-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-                opacity: 0.92;
             }
             .quickbar-btn:active {
                 transform: translateY(0);
             }
             .quickbar-btn-profil {
-                background: rgba(255,255,255,0.08);
-                color: #e0e0e0;
-                border: 1px solid rgba(255,255,255,0.18);
+                background: rgba(255, 255, 255, 0.06);
+                color: #ffffff;
+                border: 1px solid transparent;
             }
             .quickbar-btn-profil:hover {
-                background: rgba(255,255,255,0.15);
-                color: #ffffff;
+                background: rgba(255, 122, 47, 0.12);
+                border-color: #ff7a2f;
+                color: #ff7a2f;
+                transform: translateY(-1px);
             }
-            .quickbar-btn-gains {
-                background: linear-gradient(135deg, #FF5E00 0%, #ff8c00 100%);
-                color: #ffffff;
-                border: none;
-            }
-            .quickbar-divider {
-                width: 1px;
-                height: 20px;
-                background: rgba(255,255,255,0.18);
-                flex-shrink: 0;
+            .quickbar-btn-profil i {
+                background: linear-gradient(45deg, #FF5E00, #00B2FF);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-size: 14px;
             }
         </style>
 
@@ -98,11 +91,6 @@
             <a data-onboarding-app="profil" class="quickbar-btn quickbar-btn-profil" href="/Courses/Member">
                 <i class="fa-regular fa-circle-user"></i>
                 <span>Profil</span>
-            </a>
-            <div class="quickbar-divider"></div>
-            <a class="quickbar-btn quickbar-btn-gains" href="https://discord.gg/ZJGDPfVwMt">
-                <i class="fas fa-comments"></i>
-                <span>Aide</span>
             </a>
         </div>
     }
