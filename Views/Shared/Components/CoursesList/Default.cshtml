@@ -242,6 +242,9 @@
                     }
                 }
 
+                var courseCollapseId = "course-collapse-" + course.Id;
+                var expandCourse = isLockedCourse || (hasLessonSearch && modules.Any());
+
                 <div class="ingenius-course-block">
                     @if (isLockedCourse)
                     {
@@ -252,14 +255,17 @@
                     else
                     {
                         <a
-                            class="ingenius-course-title"
-                            asp-controller="Courses"
-                            asp-action="Details"
-                            asp-route-id="@course.Id">
+                            class="ingenius-course-title ingenius-collapse-toggle"
+                            href="#@courseCollapseId"
+                            role="button"
+                            aria-expanded="@(expandCourse ? "true" : "false")"
+                            aria-controls="@courseCollapseId">
+                            <i class="fas fa-chevron-right ingenius-course-chevron"></i>
                             @course.Title
                         </a>
                     }
 
+                    <div class="ingenius-collapse @(expandCourse ? string.Empty : "d-none")" id="@courseCollapseId">
                     @foreach (var m in modules)
                     {
                         var lessons = (m.Lessons ?? new List<CrudDemo.Models.Lesson>()).OrderBy(l => l.OrderIndex).ToList();
@@ -277,8 +283,7 @@
 
                         <div class="ingenius-module">
                             <a
-                                class="ingenius-module-header @(preferredModuleIds.Contains(m.Id) ? "module-preferred-title" : string.Empty)"
-                                data-bs-toggle="collapse"
+                                class="ingenius-module-header ingenius-collapse-toggle @(preferredModuleIds.Contains(m.Id) ? "module-preferred-title" : string.Empty)"
                                 href="#@moduleCollapseId"
                                 role="button"
                                 aria-expanded="@(expandModule ? "true" : "false")"
@@ -297,7 +302,7 @@
 
                             @if (lessons.Any())
                             {
-                                <div class="collapse @(expandModule ? "show" : string.Empty)" id="@moduleCollapseId">
+                                <div class="ingenius-collapse @(expandModule ? string.Empty : "d-none")" id="@moduleCollapseId">
                                     <ul class="ingenius-lesson-list">
                                         @foreach (var lesson in lessons)
                                         {
@@ -350,6 +355,7 @@
                             }
                         </div>
                     }
+                    </div>
                 </div>
             }
         </div>
@@ -379,10 +385,42 @@
             coursToggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
         });
     })();
+
+    (function () {
+        document.addEventListener('click', function (event) {
+            var toggle = event.target.closest('.ingenius-collapse-toggle');
+            if (!toggle) {
+                return;
+            }
+
+            event.preventDefault();
+
+            var targetId = (toggle.getAttribute('href') || '').replace('#', '');
+            if (!targetId) {
+                return;
+            }
+
+            var target = document.getElementById(targetId);
+            if (!target) {
+                return;
+            }
+
+            var isHidden = target.classList.toggle('d-none');
+            toggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+        });
+    })();
 </script>
 
 <style>
     /* ===== Ingenius sidebar / panneau cours ===== */
+    .d-none {
+        display: none !important;
+    }
+
+    .ingenius-collapse {
+        display: block;
+    }
+
     .ingenius-shell {
         display: flex;
         align-items: flex-start;
@@ -496,13 +534,26 @@
     }
 
     .ingenius-course-title {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 6px;
         color: #1f9bff !important;
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.03em;
         text-transform: uppercase !important;
         margin: 10px 0 6px;
+        cursor: pointer;
+    }
+
+    .ingenius-course-chevron {
+        font-size: 9px;
+        transition: transform 0.2s ease;
+        width: 10px;
+    }
+
+    .ingenius-course-title[aria-expanded="true"] .ingenius-course-chevron {
+        transform: rotate(90deg);
     }
 
     .ingenius-module-header {
@@ -533,7 +584,7 @@
 
     .ingenius-lesson-list {
         list-style: none;
-        margin: 2px 0 8px 26px;
+        margin: -10px 0 20px 4px;
         padding: 0;
     }
 
