@@ -18,6 +18,18 @@
     var totalQuizCount = (int?)ViewBag.TotalQuizCount ?? 0;
     var certificateAction = isCertificateEligible ? "Certif1" : "Member";
     var preferredModuleIds = ViewBag.PreferredModuleIds as HashSet<int> ?? new HashSet<int>();
+
+    // Détection fiable de la page courante à partir de l'URL (plus sûr que ViewContext.RouteData
+    // dans une vue de ViewComponent, qui peut ne pas refléter l'action réellement exécutée).
+    var requestPathSegments = (Context.Request.Path.Value ?? string.Empty)
+        .Trim('/')
+        .Split('/', StringSplitOptions.RemoveEmptyEntries);
+    var isLessonPage = requestPathSegments.Length >= 2
+        && requestPathSegments[0].Equals("Courses", StringComparison.OrdinalIgnoreCase)
+        && requestPathSegments[1].Equals("Lesson", StringComparison.OrdinalIgnoreCase);
+    var currentLessonIdFromPath = requestPathSegments.Length >= 3 && int.TryParse(requestPathSegments[2], out var parsedLessonId)
+        ? parsedLessonId
+        : (int?)null;
 }
 
 <div class="ingenius-shell">
@@ -44,7 +56,7 @@
        asp-controller="Courses"
        asp-action="Index"
        class="ingenius-nav-link ingenius-nav-active"
-       aria-expanded="false"
+       aria-expanded="@(isLessonPage ? "true" : "false")"
        aria-controls="ingenius-courses-panel">
         <i class="fa-solid fa-book-open"></i> Mes cours
     </a>
@@ -168,7 +180,7 @@
     </aside>
     </div>
 
-    <section class="ingenius-courses-panel d-none" id="ingenius-courses-panel">
+    <section class="ingenius-courses-panel @(isLessonPage ? string.Empty : "d-none")" id="ingenius-courses-panel">
     <h2>Mes cours</h2>
 
     @{
@@ -190,9 +202,9 @@
             var descMatch = descPlain.Contains(lessonSearchTerm, StringComparison.OrdinalIgnoreCase);
             return titleMatch || descMatch;
         };
-        var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty).Trim();
-        var currentIdRaw = (ViewContext.RouteData.Values["id"]?.ToString() ?? string.Empty).Trim();
-        var hasCurrentId = int.TryParse(currentIdRaw, out var currentId);
+        var currentAction = isLessonPage ? "Lesson" : string.Empty;
+        var hasCurrentId = currentLessonIdFromPath.HasValue;
+        var currentId = currentLessonIdFromPath ?? 0;
     }
 
     <form method="get" asp-controller="Courses" asp-action="Index" class="mb-3">
@@ -243,7 +255,9 @@
                 }
 
                 var courseCollapseId = "course-collapse-" + course.Id;
-                var expandCourse = isLockedCourse || (hasLessonSearch && modules.Any());
+                var courseContainsSelectedLesson = isLessonPage && hasCurrentId
+                    && modules.Any(m => (m.Lessons ?? new List<CrudDemo.Models.Lesson>()).Any(l => l.Id == currentId));
+                var expandCourse = isLockedCourse || (hasLessonSearch && modules.Any()) || courseContainsSelectedLesson;
 
                 <div class="ingenius-course-block">
                     @if (isLockedCourse)
@@ -279,7 +293,9 @@
                         }
 
                         var moduleCollapseId = "module-collapse-" + m.Id;
-                        var expandModule = hasLessonSearch && lessons.Any();
+                        var moduleContainsSelectedLesson = isLessonPage && hasCurrentId
+                            && lessons.Any(l => l.Id == currentId);
+                        var expandModule = (hasLessonSearch && lessons.Any()) || moduleContainsSelectedLesson;
 
                         <div class="ingenius-module">
                             <a
@@ -384,6 +400,14 @@
             var isHidden = coursesPanel.classList.toggle('d-none');
             coursToggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
         });
+
+        // Si on est sur une page de leçon (/Courses/Lesson/xx), on simule un clic
+        // sur "Mes cours" pour ouvrir le panneau, exactement comme si l'utilisateur
+        // avait cliqué dessus (même comportement, mêmes attributs mis à jour).
+        var isLessonPage = /^\/Courses\/Lesson(\/|$)/i.test(window.location.pathname);
+        if (isLessonPage && coursesPanel.classList.contains('d-none')) {
+            coursToggle.click();
+        }
     })();
 
     (function () {
@@ -408,6 +432,37 @@
             var isHidden = target.classList.toggle('d-none');
             toggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
         });
+    })();
+
+    (function () {
+        // Sur une page de leçon, on ouvre automatiquement (comme un clic) la sous-section
+        // (cours + module) qui contient la leçon actuellement affichée, pour qu'elle
+        // reste visible dans l'arborescence sans action manuelle.
+        var isLessonPage = /^\/Courses\/Lesson(\/|$)/i.test(window.location.pathname);
+        if (!isLessonPage) {
+            return;
+        }
+
+        var activeLessonLink = document.querySelector('.ingenius-lesson-list a.menu-item-active');
+        if (!activeLessonLink) {
+            return;
+        }
+
+        var moduleCollapse = activeLessonLink.closest('.ingenius-collapse[id^="module-collapse-"]');
+        var courseCollapse = activeLessonLink.closest('.ingenius-collapse[id^="course-collapse-"]');
+
+        [moduleCollapse, courseCollapse].forEach(function (collapseEl) {
+            if (!collapseEl || !collapseEl.classList.contains('d-none')) {
+                return;
+            }
+
+            var toggle = document.querySelector('.ingenius-collapse-toggle[href="#' + collapseEl.id + '"]');
+            if (toggle) {
+                toggle.click();
+            }
+        });
+
+        activeLessonLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
     })();
 </script>
 
@@ -1250,7 +1305,7 @@ document.addEventListener('click', (e) => {
     if (btn) {
         e.preventDefault();
 
-        const url = 'http://admin:formation2026@ec2-13-38-113-143.eu-west-3.compute.amazonaws.com:88/';
+        const url = 'http://admin:formation2026@progfacil.fr:88/';
         const specs = 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no';
         window.open(url, '_blank', specs);
     }
