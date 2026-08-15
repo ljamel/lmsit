@@ -24,8 +24,8 @@
                             <span class="price-tag">Votre abonnement à expiré</span>
                         </div>
 
-                        <form asp-action="CreateSubscriptionSession" method="post">
-                            <button type="submit" class="btn btn-primary btn-lg w-100 animated-btn">
+                        <form asp-action="CreateSubscriptionSession" method="post" id="sub-checkout-form">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 animated-btn" id="sub-pay-btn">
                                 <i class="fas fa-lock"></i> Procéder au paiement
                             </button>
                         </form>
@@ -203,3 +203,45 @@
         }
     }
 </style>
+
+<script>
+    // Pré-création de la session Stripe dès l'affichage de la page pour éliminer
+    // la latence de redirection au clic. Repli automatique sur le POST synchrone
+    // habituel (CreateSubscriptionSession) si la pré-création n'est pas encore
+    // prête ou a échoué.
+    (function () {
+        var STORAGE_KEY = 'stripeWarmToken_subYearly';
+        var warmToken = sessionStorage.getItem(STORAGE_KEY);
+        if (!warmToken) {
+            warmToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+            sessionStorage.setItem(STORAGE_KEY, warmToken);
+        }
+
+        var preparedUrl = null;
+
+        fetch('@Url.Action("PrepareSubscriptionSession", "Payment")?warmToken=' + encodeURIComponent(warmToken), {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+            if (data && data.success && data.url) {
+                preparedUrl = data.url;
+            }
+        })
+        .catch(function () {
+            // Silencieux : le formulaire retombera sur le flux POST synchrone existant
+        });
+
+        var form = document.getElementById('sub-checkout-form');
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                if (preparedUrl) {
+                    event.preventDefault();
+                    window.location.href = preparedUrl;
+                }
+                // Sinon, le formulaire se soumet normalement vers CreateSubscriptionSession
+            });
+        }
+    })();
+</script>

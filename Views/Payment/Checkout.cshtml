@@ -40,10 +40,10 @@
                                         <strong>10,00 €</strong>
                                     </h2>
                                     
-                                    <form asp-action="CreateCheckoutSession" method="post">
+                                    <form asp-action="CreateCheckoutSession" method="post" id="checkout-form">
                                         <input type="hidden" name="courseId" value="@Model.Id" />
 
-                                        <button type="submit" class="btn btn-primary btn-lg w-100 animated-btn">
+                                        <button type="submit" class="btn btn-primary btn-lg w-100 animated-btn" id="checkout-pay-btn">
                                             <i class="fas fa-lock"></i> Payer maintenant
                                         </button>
                                     </form>
@@ -108,3 +108,46 @@
         }
     }
 </style>
+
+<script>
+    // Pré-création de la session Stripe dès l'affichage de la page de paiement du cours
+    // pour éliminer la latence de redirection au clic. Repli automatique sur le POST
+    // synchrone habituel (CreateCheckoutSession) si la pré-création n'est pas encore
+    // prête ou a échoué.
+    (function () {
+        var courseId = @Model.Id;
+        var STORAGE_KEY = 'stripeWarmToken_course_' + courseId;
+        var warmToken = sessionStorage.getItem(STORAGE_KEY);
+        if (!warmToken) {
+            warmToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+            sessionStorage.setItem(STORAGE_KEY, warmToken);
+        }
+
+        var preparedUrl = null;
+
+        fetch('@Url.Action("PrepareCheckoutSession", "Payment")?courseId=' + encodeURIComponent(courseId) + '&warmToken=' + encodeURIComponent(warmToken), {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+            if (data && data.success && data.url) {
+                preparedUrl = data.url;
+            }
+        })
+        .catch(function () {
+            // Silencieux : le formulaire retombera sur le flux POST synchrone existant
+        });
+
+        var form = document.getElementById('checkout-form');
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                if (preparedUrl) {
+                    event.preventDefault();
+                    window.location.href = preparedUrl;
+                }
+                // Sinon, le formulaire se soumet normalement vers CreateCheckoutSession
+            });
+        }
+    })();
+</script>

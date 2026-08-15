@@ -179,7 +179,7 @@
                 </li>
             </ul>
 
-            <form asp-action="CreatePreRegistrationSession" method="post">
+            <form asp-action="CreatePreRegistrationSession" method="post" id="prereg-checkout-form">
                 @Html.AntiForgeryToken()
                 
                 <div class="mb-4">
@@ -200,7 +200,7 @@
                     </small>
                 </div>
 
-                <button type="submit" class="payment-btn">
+                <button type="submit" class="payment-btn" id="prereg-pay-btn">
                     <i class="fas fa-credit-card me-2"></i>
                     Payer et Continuer
                 </button>
@@ -219,3 +219,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Pré-création de la session Stripe dès l'affichage de la page pour éliminer
+    // la latence de redirection au clic. Repli automatique sur le POST synchrone
+    // habituel (CreatePreRegistrationSession) si la pré-création n'est pas encore
+    // prête ou a échoué.
+    (function () {
+        var STORAGE_KEY = 'stripeWarmToken_prereg';
+        var warmToken = sessionStorage.getItem(STORAGE_KEY);
+        if (!warmToken) {
+            warmToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+            sessionStorage.setItem(STORAGE_KEY, warmToken);
+        }
+
+        var preparedUrl = null;
+
+        fetch('@Url.Action("PreparePreRegistrationSession", "Payment")?warmToken=' + encodeURIComponent(warmToken), {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+            if (data && data.success && data.url) {
+                preparedUrl = data.url;
+            }
+        })
+        .catch(function () {
+            // Silencieux : le formulaire retombera sur le flux POST synchrone existant
+        });
+
+        var form = document.getElementById('prereg-checkout-form');
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                if (preparedUrl) {
+                    event.preventDefault();
+                    window.location.href = preparedUrl;
+                }
+                // Sinon, le formulaire se soumet normalement vers CreatePreRegistrationSession
+            });
+        }
+    })();
+</script>
