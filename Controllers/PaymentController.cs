@@ -12,7 +12,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace CrudDemo.Controllers
 {
@@ -22,25 +21,17 @@ namespace CrudDemo.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly ILogger<PaymentController> _logger;
-        private readonly IMemoryCache _cache;
-
-        // Durée de vie du cache mémoire pour les sessions Stripe pré-créées (pré-chauffage).
-        // Volontairement plus courte que la durée de vie d'une Checkout Session Stripe (24h)
-        // pour éviter de resservir une URL de session trop proche de son expiration.
-        private static readonly TimeSpan PreparedSessionCacheDuration = TimeSpan.FromMinutes(20);
 
         public PaymentController(
             ApplicationDbContext context,
             IConfiguration configuration,
             IEmailService emailService,
-            ILogger<PaymentController> logger,
-            IMemoryCache cache)
+            ILogger<PaymentController> logger)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
             _logger = logger;
-            _cache = cache;
             StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
         }
 
@@ -116,108 +107,6 @@ namespace CrudDemo.Controllers
             var session = await service.CreateAsync(options);
 
             return Redirect(session.Url);
-        }
-
-        // Pré-création (AJAX) de la session de paiement de pré-inscription, appelée dès l'affichage
-        // de la page de tarification pour que le clic utilisateur redirige instantanément vers Stripe
-        // au lieu d'attendre la création synchrone de la session.
-        [AllowAnonymous]
-        [HttpPost]
-        [HttpGet]
-        public async Task<IActionResult> PreparePreRegistrationSession(string? warmToken = null)
-        {
-            var cacheKey = !string.IsNullOrEmpty(warmToken)
-                ? $"stripe_prewarm_PreRegistrationSession_{warmToken}"
-                : null;
-
-            if (cacheKey != null && _cache.TryGetValue(cacheKey, out string? cachedUrl) && !string.IsNullOrEmpty(cachedUrl))
-            {
-                return Json(new { success = true, url = cachedUrl, cached = true });
-            }
-
-            try
-            {
-                var domain = $"{Request.Scheme}://{Request.Host}";
-
-                var options = new SessionCreateOptions
-                {
-                    PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-                    {
-                        // Ligne 1 : L'abonnement mensuel de 24 euros avec essai de 3 jours
-                        new SessionLineItemOptions
-                        {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "eur",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name = "Abonnement Mensuel - Accès Illimité",
-                                    Description = "Accès complet aux formations et laboratoires. Essai de 3 jours, puis 24,00 EUR par mois. Annulable à tout moment.",
-                                },
-                                UnitAmount = 2400, // 24 EUR en centimes
-                                Recurring = new SessionLineItemPriceDataRecurringOptions
-                                {
-                                    Interval = "month",
-                                    IntervalCount = 1
-                                }
-                            },
-                            Quantity = 1,
-                        },
-                        // Ligne 2 : Le prélèvement immédiat de 1 euro pour la validation de l'essai
-                        new SessionLineItemOptions
-                        {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "eur",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name = "Frais de validation et d'ouverture de l'essai",
-                                    Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
-                                },
-                                UnitAmount = 100 // 1 EUR en centimes (paiement unique, pas de récurrence)
-                            },
-                            Quantity = 1,
-                        }
-                    },
-                    Mode = "subscription", // Obligatoire pour combiner abonnement et frais uniques
-                    SubscriptionData = new SessionSubscriptionDataOptions
-                    {
-                        TrialPeriodDays = 3 // Application des 3 jours d'essai sur la partie abonnement
-                    },
-                    BillingAddressCollection = "auto",
-                    Locale = "fr",
-                    AllowPromotionCodes = true,
-                    SuccessUrl = $"{domain}/Payment/PreRegistrationSuccess?session_id={{CHECKOUT_SESSION_ID}}",
-                    CancelUrl = $"{domain}/Payment/PreRegistrationCancel",
-                };
-
-                var requestOptions = !string.IsNullOrEmpty(warmToken)
-                    ? new RequestOptions { IdempotencyKey = $"prereg_{warmToken}" }
-                    : null;
-
-                var service = new SessionService();
-                var session = requestOptions != null
-                    ? await service.CreateAsync(options, requestOptions)
-                    : await service.CreateAsync(options);
-
-                if (cacheKey != null)
-                {
-                    _cache.Set(cacheKey, session.Url, PreparedSessionCacheDuration);
-                }
-
-                return Json(new { success = true, url = session.Url, sessionId = session.Id });
-            }
-            catch (StripeException ex)
-            {
-                _logger.LogError(ex, "Erreur Stripe lors de la pré-création de la session de pré-inscription (warmToken={WarmToken})", warmToken);
-                return Json(new { success = false, error = "Impossible de préparer le paiement pour le moment." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur inattendue lors de la pré-création de la session de pré-inscription (warmToken={WarmToken})", warmToken);
-                return Json(new { success = false, error = "Une erreur inattendue est survenue." });
-            }
         }
 
         // Succès du paiement de pré-inscription - Créer le compte automatiquement
@@ -345,105 +234,6 @@ namespace CrudDemo.Controllers
             var session = await service.CreateAsync(options);
 
             return Redirect(session.Url);
-        }
-
-        // Pré-création (AJAX) de la session de paiement d'abonnement annuel, appelée dès l'affichage
-        // de la page d'abonnement pour permettre une redirection instantanée au clic.
-        [HttpPost]
-        [HttpGet]
-        public async Task<IActionResult> PrepareSubscriptionSession(string? warmToken = null)
-        {
-            var cacheKey = !string.IsNullOrEmpty(warmToken)
-                ? $"stripe_prewarm_SubscriptionSession_{User.Identity?.Name}_{warmToken}"
-                : null;
-
-            if (cacheKey != null && _cache.TryGetValue(cacheKey, out string? cachedUrl) && !string.IsNullOrEmpty(cachedUrl))
-            {
-                return Json(new { success = true, url = cachedUrl, cached = true });
-            }
-
-            try
-            {
-                var domain = $"{Request.Scheme}://{Request.Host}";
-
-                var options = new SessionCreateOptions
-                {
-                    PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-                    {
-                        new SessionLineItemOptions
-                        {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "eur",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name = "Abonnement Mensuel - Accès Illimité avec accompagnement personnalisé via Discord",
-                                    Description = "Accès complet à tous les cours de la plateforme. pendant 3 jours, puis 24,00 EUR par mois.",
-                                },
-                                UnitAmount = 2400,
-                                Recurring = new SessionLineItemPriceDataRecurringOptions
-                                {
-                                    Interval = "month",
-                                    IntervalCount = 1
-                                }
-                            },
-                            Quantity = 1,
-                        },
-                        new SessionLineItemOptions
-                        {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "eur",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name = "Frais de validation et d'ouverture de l'essai",
-                                    Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
-                                },
-                                UnitAmount = 100
-                            },
-                            Quantity = 1,
-                        }
-                    },
-                    Mode = "subscription",
-                    SubscriptionData = new SessionSubscriptionDataOptions
-                    {
-                        TrialPeriodDays = 3
-                    },
-                    BillingAddressCollection = "auto",
-                    Locale = "fr",
-                    AllowPromotionCodes = true,
-                    SuccessUrl = $"{domain}/Payment/SubscriptionSuccess?session_id={{CHECKOUT_SESSION_ID}}",
-                    CancelUrl = $"{domain}/Payment/SubscriptionCancel",
-                    CustomerEmail = User.Identity?.Name,
-                };
-
-                var requestOptions = !string.IsNullOrEmpty(warmToken)
-                    ? new RequestOptions { IdempotencyKey = $"sub_{User.Identity?.Name}_{warmToken}" }
-                    : null;
-
-                var service = new SessionService();
-                var session = requestOptions != null
-                    ? await service.CreateAsync(options, requestOptions)
-                    : await service.CreateAsync(options);
-
-                if (cacheKey != null)
-                {
-                    _cache.Set(cacheKey, session.Url, PreparedSessionCacheDuration);
-                }
-
-                return Json(new { success = true, url = session.Url, sessionId = session.Id });
-            }
-            catch (StripeException ex)
-            {
-                _logger.LogError(ex, "Erreur Stripe lors de la pré-création de la session d'abonnement pour {UserId} (warmToken={WarmToken})", User.Identity?.Name, warmToken);
-                return Json(new { success = false, error = "Impossible de préparer le paiement pour le moment." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur inattendue lors de la pré-création de la session d'abonnement pour {UserId} (warmToken={WarmToken})", User.Identity?.Name, warmToken);
-                return Json(new { success = false, error = "Une erreur inattendue est survenue." });
-            }
         }
 
         // Page de succès abonnement
@@ -598,111 +388,6 @@ namespace CrudDemo.Controllers
             await _context.SaveChangesAsync();
 
             return Redirect(session.Url);
-        }
-
-        // Pré-création (AJAX) de la session de paiement pour un cours individuel, appelée dès
-        // l'affichage de la page de paiement du cours pour une redirection instantanée au clic.
-        [HttpPost]
-        [HttpGet]
-        public async Task<IActionResult> PrepareCheckoutSession(int courseId, string? warmToken = null)
-        {
-            var userId = User.Identity?.Name ?? "";
-            var cacheKey = !string.IsNullOrEmpty(warmToken)
-                ? $"stripe_prewarm_CheckoutSession_{courseId}_{userId}_{warmToken}"
-                : null;
-
-            if (cacheKey != null && _cache.TryGetValue(cacheKey, out string? cachedUrl) && !string.IsNullOrEmpty(cachedUrl))
-            {
-                return Json(new { success = true, url = cachedUrl, cached = true });
-            }
-
-            var course = await _context.Courses
-                .AsNoTracking()
-                .Where(c => c.Id == courseId)
-                .FirstOrDefaultAsync();
-
-            if (course == null)
-            {
-                return Json(new { success = false, error = "Cours introuvable." });
-            }
-
-            try
-            {
-                var domain = $"{Request.Scheme}://{Request.Host}";
-
-                var options = new SessionCreateOptions
-                {
-                    PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-                    {
-                        new SessionLineItemOptions
-                        {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "eur",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name = course.Title,
-                                    Description = course.Description.Length > 200
-                                        ? course.Description.Substring(0, 200) + "..."
-                                        : course.Description,
-                                },
-                                UnitAmount = 1900,
-                            },
-                            Quantity = 1,
-                        },
-                    },
-                    Mode = "payment",
-                    BillingAddressCollection = "auto",
-                    Locale = "fr",
-                    AllowPromotionCodes = true,
-                    SuccessUrl = $"{domain}/Payment/Success?session_id={{CHECKOUT_SESSION_ID}}",
-                    CancelUrl = $"{domain}/Payment/Cancel?courseId={courseId}",
-                    ClientReferenceId = courseId.ToString(),
-                    CustomerEmail = User.Identity?.Name,
-                };
-
-                var requestOptions = !string.IsNullOrEmpty(warmToken)
-                    ? new RequestOptions { IdempotencyKey = $"checkout_{courseId}_{userId}_{warmToken}" }
-                    : null;
-
-                var service = new SessionService();
-                var session = requestOptions != null
-                    ? await service.CreateAsync(options, requestOptions)
-                    : await service.CreateAsync(options);
-
-                // On ne crée l'enregistrement de paiement "pending" que lors de la véritable création
-                // de la session Stripe (pas lors d'un retour depuis le cache), pour conserver
-                // exactement la même logique de métadonnées que le flux synchrone existant.
-                var payment = new Payment
-                {
-                    UserId = userId,
-                    CourseId = courseId,
-                    Amount = 19.00m,
-                    Currency = "eur",
-                    StripePaymentIntentId = session.PaymentIntentId ?? session.Id,
-                    Status = "pending"
-                };
-                _context.Payments.Add(payment);
-                await _context.SaveChangesAsync();
-
-                if (cacheKey != null)
-                {
-                    _cache.Set(cacheKey, session.Url, PreparedSessionCacheDuration);
-                }
-
-                return Json(new { success = true, url = session.Url, sessionId = session.Id });
-            }
-            catch (StripeException ex)
-            {
-                _logger.LogError(ex, "Erreur Stripe lors de la pré-création de la session de paiement pour le cours {CourseId} (warmToken={WarmToken})", courseId, warmToken);
-                return Json(new { success = false, error = "Impossible de préparer le paiement pour le moment." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur inattendue lors de la pré-création de la session de paiement pour le cours {CourseId} (warmToken={WarmToken})", courseId, warmToken);
-                return Json(new { success = false, error = "Une erreur inattendue est survenue." });
-            }
         }
 
         // Page de succès pour un cours individuel
@@ -872,106 +557,6 @@ namespace CrudDemo.Controllers
             return Redirect(session.Url);
         }
 
-        // Pré-création (AJAX) de la session de paiement pour l'abonnement MENSUEL post-inscription,
-        // appelée dès l'affichage de la page pour permettre une redirection instantanée au clic.
-        [HttpPost]
-        [HttpGet]
-        public async Task<IActionResult> PrepareMonthlySubscriptionSession(string? warmToken = null)
-        {
-            var cacheKey = !string.IsNullOrEmpty(warmToken)
-                ? $"stripe_prewarm_MonthlySubscriptionSession_{User.Identity?.Name}_{warmToken}"
-                : null;
-
-            if (cacheKey != null && _cache.TryGetValue(cacheKey, out string? cachedUrl) && !string.IsNullOrEmpty(cachedUrl))
-            {
-                return Json(new { success = true, url = cachedUrl, cached = true });
-            }
-
-            try
-            {
-                var domain = $"{Request.Scheme}://{Request.Host}";
-
-                var options = new SessionCreateOptions
-                {
-                    PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-            {
-                new SessionLineItemOptions
-                {
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        Currency = "eur",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = "Abonnement Mensuel - Accès Illimité avec accompagnement personnalisé",
-                            Description = "Accès complet à tous les cours de la plateforme. 3 jours d'essai, puis 10,00 EUR par mois. Annulable à tout moment.",
-                        },
-                        UnitAmount = 1000, // 10,00 EUR en centimes
-                        Recurring = new SessionLineItemPriceDataRecurringOptions
-                        {
-                            Interval = "month", // <--- CONFIGURATION MENSUELLE
-                            IntervalCount = 1
-                        }
-                    },
-                    Quantity = 1,
-                },
-                new SessionLineItemOptions
-                {
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        Currency = "eur",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = "Frais de validation et d'ouverture de l'essai",
-                            Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
-                        },
-                        UnitAmount = 100 // 1,00 EUR
-                    },
-                    Quantity = 1,
-                }
-            },
-                    Mode = "subscription",
-                    SubscriptionData = new SessionSubscriptionDataOptions
-                    {
-                        TrialPeriodDays = 3
-                    },
-                    BillingAddressCollection = "auto",
-                    Locale = "fr",
-                    AllowPromotionCodes = true,
-                    // On redirige vers la même méthode de succès générique qui saura lire les détails de Stripe
-                    SuccessUrl = $"{domain}/Payment/SubscriptionSuccess?session_id={{CHECKOUT_SESSION_ID}}",
-                    CancelUrl = $"{domain}/Payment/SubscriptionCancel",
-                    CustomerEmail = User.Identity?.Name,
-                };
-
-                var requestOptions = !string.IsNullOrEmpty(warmToken)
-                    ? new RequestOptions { IdempotencyKey = $"submonthly_{User.Identity?.Name}_{warmToken}" }
-                    : null;
-
-                var service = new SessionService();
-                var session = requestOptions != null
-                    ? await service.CreateAsync(options, requestOptions)
-                    : await service.CreateAsync(options);
-
-                if (cacheKey != null)
-                {
-                    _cache.Set(cacheKey, session.Url, PreparedSessionCacheDuration);
-                }
-
-                return Json(new { success = true, url = session.Url, sessionId = session.Id });
-            }
-            catch (StripeException ex)
-            {
-                _logger.LogError(ex, "Erreur Stripe lors de la pré-création de la session d'abonnement mensuel pour {UserId} (warmToken={WarmToken})", User.Identity?.Name, warmToken);
-                return Json(new { success = false, error = "Impossible de préparer le paiement pour le moment." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur inattendue lors de la pré-création de la session d'abonnement mensuel pour {UserId} (warmToken={WarmToken})", User.Identity?.Name, warmToken);
-                return Json(new { success = false, error = "Une erreur inattendue est survenue." });
-            }
-        }
-
         // Créer une session de paiement pour l'abonnement MENSUEL AVANT l'inscription
         [AllowAnonymous]
         [HttpPost]
@@ -1034,105 +619,6 @@ namespace CrudDemo.Controllers
             var session = await service.CreateAsync(options);
 
             return Redirect(session.Url);
-        }
-
-        // Pré-création (AJAX) de la session de paiement pour l'abonnement MENSUEL AVANT l'inscription,
-        // appelée dès l'affichage de la page de tarification pour une redirection instantanée au clic.
-        [AllowAnonymous]
-        [HttpPost]
-        [HttpGet]
-        public async Task<IActionResult> PreparePreRegistrationMonthlySession(string? warmToken = null)
-        {
-            var cacheKey = !string.IsNullOrEmpty(warmToken)
-                ? $"stripe_prewarm_PreRegistrationMonthlySession_{warmToken}"
-                : null;
-
-            if (cacheKey != null && _cache.TryGetValue(cacheKey, out string? cachedUrl) && !string.IsNullOrEmpty(cachedUrl))
-            {
-                return Json(new { success = true, url = cachedUrl, cached = true });
-            }
-
-            try
-            {
-                var domain = $"{Request.Scheme}://{Request.Host}";
-
-                var options = new SessionCreateOptions
-                {
-                    PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-            {
-                new SessionLineItemOptions
-                {
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        Currency = "eur",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = "Abonnement Mensuel - Accès Illimité",
-                            Description = "Accès complet aux formations et laboratoires. Essai de 3 jours, puis 10,00 EUR par mois. Annulable à tout moment.",
-                        },
-                        UnitAmount = 1000,
-                        Recurring = new SessionLineItemPriceDataRecurringOptions
-                        {
-                            Interval = "month", // <--- CONFIGURATION MENSUELLE
-                            IntervalCount = 1
-                        }
-                    },
-                    Quantity = 1,
-                },
-                new SessionLineItemOptions
-                {
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        Currency = "eur",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = "Frais de validation et d'ouverture de l'essai",
-                            Description = "Prélèvement immédiat de 1,00 EUR pour l'activation sécurisée de vos 3 jours d'accès.",
-                        },
-                        UnitAmount = 100
-                    },
-                    Quantity = 1,
-                }
-            },
-                    Mode = "subscription",
-                    SubscriptionData = new SessionSubscriptionDataOptions
-                    {
-                        TrialPeriodDays = 3
-                    },
-                    BillingAddressCollection = "auto",
-                    Locale = "fr",
-                    AllowPromotionCodes = true,
-                    SuccessUrl = $"{domain}/Payment/PreRegistrationSuccess?session_id={{CHECKOUT_SESSION_ID}}",
-                    CancelUrl = $"{domain}/Payment/PreRegistrationCancel",
-                };
-
-                var requestOptions = !string.IsNullOrEmpty(warmToken)
-                    ? new RequestOptions { IdempotencyKey = $"preregmonthly_{warmToken}" }
-                    : null;
-
-                var service = new SessionService();
-                var session = requestOptions != null
-                    ? await service.CreateAsync(options, requestOptions)
-                    : await service.CreateAsync(options);
-
-                if (cacheKey != null)
-                {
-                    _cache.Set(cacheKey, session.Url, PreparedSessionCacheDuration);
-                }
-
-                return Json(new { success = true, url = session.Url, sessionId = session.Id });
-            }
-            catch (StripeException ex)
-            {
-                _logger.LogError(ex, "Erreur Stripe lors de la pré-création de la session de pré-inscription mensuelle (warmToken={WarmToken})", warmToken);
-                return Json(new { success = false, error = "Impossible de préparer le paiement pour le moment." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur inattendue lors de la pré-création de la session de pré-inscription mensuelle (warmToken={WarmToken})", warmToken);
-                return Json(new { success = false, error = "Une erreur inattendue est survenue." });
-            }
         }
     }
 }
